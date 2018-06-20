@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model
+namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
     /// Protocol definition file

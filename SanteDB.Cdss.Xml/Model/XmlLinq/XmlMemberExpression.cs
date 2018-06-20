@@ -26,7 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model.XmlLinq
+namespace SanteDB.Cdss.Xml.Model.XmlLinq
 {
     /// <summary>
     /// Represents a expression that access an expression

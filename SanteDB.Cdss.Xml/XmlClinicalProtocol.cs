@@ -25,7 +25,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Protocol.Xml.Model;
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Diagnostics;
 using System.IO;
 using SanteDB.Core.Model.Constants;
@@ -36,7 +36,7 @@ using System.Diagnostics;
 using SanteDB.Core.Applets.ViewModel.Null;
 using SanteDB.Core.Applets.ViewModel.Description;
 
-namespace SanteDB.Protocol.Xml
+namespace SanteDB.Cdss.Xml
 {
 
     /// <summary>

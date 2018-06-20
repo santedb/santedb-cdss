@@ -20,13 +20,13 @@
 using ExpressionEvaluator;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Query;
-using SanteDB.Protocol.Xml.Model.XmlLinq;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model
+namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
     /// Represents a when clause

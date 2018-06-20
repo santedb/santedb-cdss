@@ -24,11 +24,11 @@ using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Entities;
 using System.Collections.Generic;
 using SanteDB.Core.Model.DataTypes;
-using SanteDB.Protocol.Xml.Model;
+using SanteDB.Cdss.Xml.Model;
 using System.Linq.Expressions;
-using SanteDB.Protocol.Xml.Model.XmlLinq;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
 
-namespace SanteDB.Protocol.Xml.Test
+namespace SanteDB.Cdss.Xml.Test
 {
     [TestClass]
     public class TestWhereClauseExecution

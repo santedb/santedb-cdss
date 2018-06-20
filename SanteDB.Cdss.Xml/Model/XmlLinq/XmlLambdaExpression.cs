@@ -24,7 +24,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model.XmlLinq
+namespace SanteDB.Cdss.Xml.Model.XmlLinq
 {
     /// <summary>
     /// Represents a lambda expression

@@ -22,7 +22,7 @@ using System.Linq.Expressions;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model.XmlLinq
+namespace SanteDB.Cdss.Xml.Model.XmlLinq
 {
 
     /// <summary>

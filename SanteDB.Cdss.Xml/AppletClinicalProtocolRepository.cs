@@ -21,7 +21,7 @@ using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Services;
-using SanteDB.Protocol.Xml.Model;
+using SanteDB.Cdss.Xml.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml
+namespace SanteDB.Cdss.Xml
 {
     /// <summary>
     /// Applet clinical protocol repository

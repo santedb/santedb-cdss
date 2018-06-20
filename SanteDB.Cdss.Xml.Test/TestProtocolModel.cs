@@ -21,7 +21,7 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Protocol.Xml.Model.XmlLinq;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
 using System.Xml.Serialization;
 using System.IO;
 using System.Diagnostics;
@@ -30,7 +30,7 @@ using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Acts;
 using System.Collections.Generic;
 
-namespace SanteDB.Protocol.Xml.Test
+namespace SanteDB.Cdss.Xml.Test
 {
     /// <summary>
     /// Tests which ensure the protocol model can be loaded and serialized properly

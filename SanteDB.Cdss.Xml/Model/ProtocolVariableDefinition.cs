@@ -19,7 +19,7 @@
  */
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model
+namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
     /// Protocol rule definition

@@ -19,7 +19,7 @@
  */
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SanteDB.Protocol.Xml.Model;
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
@@ -34,7 +34,7 @@ using System.Linq.Expressions;
 using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
 
-namespace SanteDB.Protocol.Xml.Test
+namespace SanteDB.Cdss.Xml.Test
 {
     /// <summary>
     /// Tests the application of protocol
@@ -50,7 +50,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldScheduleOPV()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.OralPolioVaccine.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -77,7 +77,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldScheduleBCG()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.BcgVaccine.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -102,7 +102,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldRepeatWeight()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.Weight.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -127,7 +127,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldSkipWeight()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.Weight.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -176,7 +176,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldScheduleMR()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -201,7 +201,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldSchedulePCV()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.PCV13Vaccine.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -226,7 +226,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldScheduleDTP()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV
@@ -251,7 +251,7 @@ namespace SanteDB.Protocol.Xml.Test
         public void TestShouldScheduleRota()
         {
 
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Protocol.Xml.Test.Protocols.RotaVaccine.xml"));
+            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
             // Patient that is just born = Schedule OPV

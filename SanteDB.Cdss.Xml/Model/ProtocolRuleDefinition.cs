@@ -20,7 +20,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model
+namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
     /// Represents a single rule definition

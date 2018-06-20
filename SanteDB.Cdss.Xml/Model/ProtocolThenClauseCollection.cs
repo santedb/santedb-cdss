@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Xml.Serialization;
 
-namespace SanteDB.Protocol.Xml.Model
+namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
     /// Reperesents a then condition clause
