@@ -24,7 +24,7 @@
     </references>
   </metadata>
   <files>
-    <file src="..\Solution Items\Antlr3.Runtime.dll" target="lib\portable45-net45+win8"/>
-    <file src="..\Solution Items\ExpressionEvaluator.dll" target="lib\portable45-net45+win8"/>
+    <file src="..\Solution Items\Antlr3.Runtime.dll" target="lib"/>
+    <file src="..\Solution Items\ExpressionEvaluator.dll" target="lib"/>
   </files>
 </package>
