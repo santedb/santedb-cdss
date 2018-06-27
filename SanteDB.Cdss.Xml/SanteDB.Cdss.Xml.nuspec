@@ -18,7 +18,9 @@
       <dependency id="SanteDB.Core.Api" version="1.1.0.0"/>
     </dependencies>
     <references>
-      <reference file="jint.dll"/>
+	  <reference file="SanteDB.Cdss.Xml.dll"/>
+      <reference file="Antlr3.Runtime.dll"/>
+      <reference file="ExpressionEvaluator.dll"/>
     </references>
   </metadata>
   <files>
