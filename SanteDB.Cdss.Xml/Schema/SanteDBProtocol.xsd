@@ -22,7 +22,7 @@
 <!-- edited with XMLSpy v2015 rel. 4 (http://www.altova.com) by Justin Fyfe (Mohawk College) -->
 <xs:schema xmlns:tns="http://santedb.org/cdss" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:q1="http://microsoft.com/wsdl/types/" xmlns:q2="http://santedb.org/model/view" xmlns:q3="http://santedb.org/model" xmlns:q4="http://santedb.org/model" xmlns:q5="http://santedb.org/model" xmlns:q6="http://santedb.org/model" xmlns:q7="http://santedb.org/model" xmlns:q8="http://santedb.org/model" xmlns:q9="http://santedb.org/model/view" targetNamespace="http://santedb.org/cdss" elementFormDefault="qualified">
 	<xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="BaseTypes.xsd"/>
-	<xs:import namespace="http://santedb.org/model" schemaLocation="OpenIZModel.xsd"/>
+	<xs:import namespace="http://santedb.org/model" schemaLocation="SanteDBModel.xsd"/>
 	<xs:import namespace="http://santedb.org/model/view" schemaLocation="ViewModelDescription.xsd"/>
 	<xs:complexType name="DecisionSupportBaseElement" abstract="true">
 		<xs:attribute name="uuid" type="q1:guid" use="optional"/>
