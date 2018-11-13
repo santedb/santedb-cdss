@@ -41,14 +41,17 @@ namespace SanteDB.Cdss.Xml.Test
             Key = Guid.NewGuid(),
             VersionKey = Guid.NewGuid(),
             VersionSequence = 1,
-            CreatedBy = new Core.Model.Security.SecurityUser()
+            CreatedBy = new Core.Model.Security.SecurityProvenance()
             {
-                Key = Guid.NewGuid(),
-                UserName = "bob",
-                SecurityHash = Guid.NewGuid().ToString(),
-                Email = "bob@bob.com",
-                InvalidLoginAttempts = 2,
-                UserClass = UserClassKeys.HumanUser
+                User = new Core.Model.Security.SecurityUser()
+                {
+                    Key = Guid.NewGuid(),
+                    UserName = "bob",
+                    SecurityHash = Guid.NewGuid().ToString(),
+                    Email = "bob@bob.com",
+                    InvalidLoginAttempts = 2,
+                    UserClass = UserClassKeys.HumanUser
+                }
             },
             StatusConceptKey = StatusKeys.Active,
             Names = new List<EntityName>()
