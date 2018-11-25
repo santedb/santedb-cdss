@@ -19,10 +19,7 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.XmlLinq
@@ -86,7 +83,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Creates an XmlBinaryExpression from the specified binary expression
         /// </summary>
-        public XmlBinaryExpression(BinaryExpression expr) 
+        public XmlBinaryExpression(BinaryExpression expr)
         {
             BinaryOperatorType opType = BinaryOperatorType.AndAlso;
             if (!Enum.TryParse<BinaryOperatorType>(expr.NodeType.ToString(), out opType))
@@ -124,7 +121,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             get
             {
-                switch(this.Operator)
+                switch (this.Operator)
                 {
                     case BinaryOperatorType.Add:
                     case BinaryOperatorType.Subtract:

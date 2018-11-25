@@ -18,11 +18,7 @@
  * Date: 2018-6-21
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.XmlLinq
@@ -60,7 +56,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
 
         }
-        
+
         /// <summary>
         /// Represents this xml expression as an expression
         /// </summary>
@@ -73,7 +69,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             if (expr == null) return null;
 
-            switch(expr.NodeType)
+            switch (expr.NodeType)
             {
                 case ExpressionType.AndAlso:
                 case ExpressionType.Equal:

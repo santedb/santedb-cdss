@@ -17,9 +17,7 @@
  * User: justin
  * Date: 2018-6-21
  */
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
@@ -54,7 +52,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// </summary>
         public XmlExpressionList(IEnumerable<Expression> expr)
         {
-            this.Item = new List<XmlExpression>(expr.Select(o=>XmlExpression.FromExpression(o)));
+            this.Item = new List<XmlExpression>(expr.Select(o => XmlExpression.FromExpression(o)));
         }
 
         /// <summary>
@@ -70,6 +68,6 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         [XmlElement("typeBinaryExpression", typeof(XmlTypeBinaryExpression))]
         public List<XmlExpression> Item { get; set; }
 
- 
+
     }
 }

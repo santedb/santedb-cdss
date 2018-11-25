@@ -49,7 +49,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Creates the bound expression
         /// </summary>
-        public XmlBoundExpression(Expression expr) 
+        public XmlBoundExpression(Expression expr)
         {
             this.Object = XmlExpression.FromExpression(expr);
         }
@@ -66,7 +66,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Creates the bound expression
         /// </summary>
-        public XmlBoundExpression(MemberExpression expr) 
+        public XmlBoundExpression(MemberExpression expr)
         {
             this.Object = XmlExpression.FromExpression(expr.Expression);
         }
@@ -74,7 +74,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Creates the bound expression
         /// </summary>
-        public XmlBoundExpression(MethodCallExpression expr) 
+        public XmlBoundExpression(MethodCallExpression expr)
         {
             this.Object = XmlExpression.FromExpression(expr.Object);
         }
@@ -82,7 +82,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Creates the bound expression
         /// </summary>
-        public XmlBoundExpression(UnaryExpression expr) 
+        public XmlBoundExpression(UnaryExpression expr)
         {
             this.Object = XmlExpression.FromExpression(expr.Operand);
         }

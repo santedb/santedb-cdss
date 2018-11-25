@@ -19,7 +19,6 @@
  */
 using System;
 using System.Linq.Expressions;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.XmlLinq

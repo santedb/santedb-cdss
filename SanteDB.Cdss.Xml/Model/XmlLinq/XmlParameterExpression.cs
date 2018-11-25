@@ -43,7 +43,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Represents a parameter expression
         /// </summary>
-        public XmlParameterExpression(ParameterExpression expr) 
+        public XmlParameterExpression(ParameterExpression expr)
         {
             this.m_expression = expr;
             this.ParameterName = expr.Name;
@@ -92,7 +92,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
                 xe = xe.Parent;
             }
 
-            if(this.m_expression == null)
+            if (this.m_expression == null)
                 this.m_expression = Expression.Parameter(this.Type, this.ParameterName);
             return this.m_expression;
         }

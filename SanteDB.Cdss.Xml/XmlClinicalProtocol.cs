@@ -17,24 +17,21 @@
  * User: justin
  * Date: 2018-6-21
  */
+using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core.Applets.ViewModel.Description;
+using SanteDB.Core.Applets.ViewModel.Null;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Protocol;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SanteDB.Core.Model.Acts;
-using SanteDB.Core.Model.Roles;
-using SanteDB.Cdss.Xml.Model;
-using SanteDB.Core.Diagnostics;
+using System.Diagnostics;
 using System.IO;
-using SanteDB.Core.Model.Constants;
-using System.Threading;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Diagnostics;
-using SanteDB.Core.Applets.ViewModel.Null;
-using SanteDB.Core.Applets.ViewModel.Description;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -214,7 +211,7 @@ namespace SanteDB.Cdss.Xml
             }
             catch (Exception e)
             {
-                this.m_tracer.TraceError("Error applying protocol {0}: {1}", this.Name, e);
+                this.m_tracer.TraceError("Ich bin der roboter: Error applying protocol {0}: {1}", this.Name, e);
                 return new List<Act>();
             }
         }
@@ -293,7 +290,8 @@ namespace SanteDB.Cdss.Xml
             // Merge the view models
             NullViewModelSerializer serializer = new NullViewModelSerializer();
 
-            if(parameters["runProtocols"] == null) { 
+            if (parameters["runProtocols"] == null)
+            {
                 serializer.ViewModel = this.Definition.Initialize;
                 serializer.ViewModel?.Initialize();
             }
@@ -308,7 +306,7 @@ namespace SanteDB.Cdss.Xml
 
             parameters.Add("xml.initialized", true);
 
-            
+
         }
     }
 }

@@ -17,18 +17,16 @@
  * User: justin
  * Date: 2018-6-21
  */
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Services;
-using SanteDB.Cdss.Xml.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -100,7 +98,7 @@ namespace SanteDB.Cdss.Xml
             }
             catch (Exception e)
             {
-                this.m_tracer.TraceError("Error loading protocols: {0}", e);
+                this.m_tracer.TraceError("Ich bin der roboter: Error loading protocols: {0}", e);
             }
         }
 

@@ -18,12 +18,10 @@
  * Date: 2018-6-21
  */
 using ExpressionEvaluator;
-using SanteDB.Core.Applets.ViewModel;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
-using SanteDB.Core.Model.Map;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
 using System;
@@ -32,8 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
@@ -76,7 +72,7 @@ namespace SanteDB.Cdss.Xml.Model
                     // Load all concepts for the specified objects 
                 }
                 act = (itm.Element as Act).Clone() as Act;
-                act.Participations = new List<ActParticipation>((itm.Element as Act).Participations.Select(o=>o.Clone() as ActParticipation));
+                act.Participations = new List<ActParticipation>((itm.Element as Act).Participations.Select(o => o.Clone() as ActParticipation));
                 act.Relationships = new List<ActRelationship>((itm.Element as Act).Relationships.Select(o => o.Clone() as ActRelationship));
                 act.Protocols = new List<ActProtocol>();// (itm.Element as Act).Protocols);
                 // Now do the actions to the properties as stated
@@ -268,7 +264,7 @@ namespace SanteDB.Cdss.Xml.Model
                     if (!String.IsNullOrEmpty(this.WhereFilter))
                         scope = this.m_scopeSelectMethod.Invoke(null, new Object[] { scopeValue, this.m_compiledExpression });
                     lock (scopes)
-                        if(!scopes.ContainsKey(scopeKey))
+                        if (!scopes.ContainsKey(scopeKey))
                             scopes.Add(scopeKey, scope);
                 }
                 setValue = this.m_setter.DynamicInvoke(scope);

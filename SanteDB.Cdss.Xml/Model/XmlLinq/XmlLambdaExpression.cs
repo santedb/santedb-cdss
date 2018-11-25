@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.XmlLinq
@@ -49,7 +48,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// </summary>
         public XmlLambdaExpression()
         {
-            
+
         }
 
         /// <summary>

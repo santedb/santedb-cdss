@@ -25,7 +25,7 @@ namespace SanteDB.Cdss.Xml.Model
     /// Protocol rule definition
     /// </summary>
     [XmlType(nameof(ProtocolVariableDefinition), Namespace = "http://santedb.org/cdss")]
-    public class ProtocolVariableDefinition : PropertyAssignAction 
+    public class ProtocolVariableDefinition : PropertyAssignAction
     {
 
         /// <summary>

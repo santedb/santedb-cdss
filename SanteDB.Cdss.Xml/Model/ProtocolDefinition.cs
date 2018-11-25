@@ -18,7 +18,6 @@
  * Date: 2018-6-21
  */
 using SanteDB.Core.Applets.ViewModel.Description;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;

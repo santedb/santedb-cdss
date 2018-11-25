@@ -18,9 +18,9 @@
  * Date: 2018-6-21
  */
 using ExpressionEvaluator;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Query;
-using SanteDB.Cdss.Xml.Model.XmlLinq;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -68,7 +68,7 @@ namespace SanteDB.Cdss.Xml.Model
             {
 
                 Expression clauseExpr = null;
-                if(itm is ProtocolWhenClauseCollection)
+                if (itm is ProtocolWhenClauseCollection)
                 {
                     clauseExpr = Expression.Invoke((itm as ProtocolWhenClauseCollection).Compile<TData>(variableFunc), expressionParm);
                 }
@@ -95,13 +95,13 @@ namespace SanteDB.Cdss.Xml.Model
                     exp.TypeRegistry.RegisterType<TData>();
                     exp.TypeRegistry.RegisterType<Guid>();
                     exp.TypeRegistry.RegisterType<TimeSpan>();
-                    exp.TypeRegistry.RegisterParameter("now", ()=>DateTime.Now); // because MONO is scumbag
+                    exp.TypeRegistry.RegisterParameter("now", () => DateTime.Now); // because MONO is scumbag
                     foreach (var fn in variableFunc)
                         exp.TypeRegistry.RegisterParameter(fn.Key, fn.Value);
                     //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                     exp.ScopeCompile<TData>();
                     //Func<TData, bool> d = exp.ScopeCompile<TData>();
-                    var linqAction = exp.GenerateLambda<Func<TData,bool>, TData>(true, false);
+                    var linqAction = exp.GenerateLambda<Func<TData, bool>, TData>(true, false);
                     clauseExpr = Expression.Invoke(linqAction, expressionParm);
                     //clauseExpr = Expression.Invoke(d, expressionParm);
                 }
@@ -137,7 +137,7 @@ namespace SanteDB.Cdss.Xml.Model
             if (this.m_compiledExpression == null)
                 this.Compile<TData>(variableFunc);
 
-            lock(m_lockObject)
+            lock (m_lockObject)
                 return this.m_compiledExpression.Invoke(parm);
         }
     }

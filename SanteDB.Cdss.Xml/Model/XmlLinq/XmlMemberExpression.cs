@@ -18,12 +18,8 @@
  * Date: 2018-6-21
  */
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.XmlLinq
@@ -67,7 +63,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             get
             {
-                return (this.StaticClass ?? this.Object?.Type).GetRuntimeProperty(this.MemberName)?.PropertyType ?? this.Object.Type.GetRuntimeField(this.MemberName)?.FieldType; 
+                return (this.StaticClass ?? this.Object?.Type).GetRuntimeProperty(this.MemberName)?.PropertyType ?? this.Object.Type.GetRuntimeField(this.MemberName)?.FieldType;
             }
         }
 

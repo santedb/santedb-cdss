@@ -94,7 +94,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
             get
             {
                 // Can we just go?
-                if(this.MethodTypeArgumentXml == null)
+                if (this.MethodTypeArgumentXml == null)
                     return (this.StaticClass ?? this.Object?.Type)?.GetRuntimeMethod(this.MethodName, this.Parameters.Item.Select(o => o.Type).ToArray())?.ReturnType;
                 else
                 {
@@ -117,7 +117,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
                 throw new InvalidOperationException("Missing method name");
 
             var parameters = this.Parameters.Item.Select(o => o.ToExpression());
-            var methodInfo = (this.StaticClass ?? this.Object?.Type).GetRuntimeMethod(this.MethodName, parameters.Select(o=>o.Type).ToArray());
+            var methodInfo = (this.StaticClass ?? this.Object?.Type).GetRuntimeMethod(this.MethodName, parameters.Select(o => o.Type).ToArray());
             if (methodInfo == null && this.MethodTypeArgumentXml != null)
             {
                 var mi = this.StaticClass.GetRuntimeMethods().FirstOrDefault(o => o.Name == this.MethodName && o.GetParameters().Length == this.Parameters.Item.Count);

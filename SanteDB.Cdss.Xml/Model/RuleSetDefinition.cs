@@ -17,14 +17,10 @@
  * User: justin
  * Date: 2018-6-21
  */
-using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.ViewModel.Description;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
