@@ -40,8 +40,14 @@ namespace SanteDB.Cdss.Xml.Test
     /// Tests the application of protocol
     /// </summary>
     [TestClass]
-    public class TestProtocolApply : IServiceProvider
+    public class TestProtocolApply : IServiceProvider, IApplicationServiceContext
     {
+        public bool IsRunning => true;
+
+        public event EventHandler Starting;
+        public event EventHandler Started;
+        public event EventHandler Stopping;
+        public event EventHandler Stopped;
 
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
