@@ -35,8 +35,14 @@ namespace SanteDB.Cdss.Xml
     /// <summary>
     /// Applet clinical protocol repository
     /// </summary>
+    [ServiceProvider("Applet Based Clinical Protocol Repository")]
     public class AppletClinicalProtocolRepository : IClinicalProtocolRepositoryService
     {
+
+        /// <summary>
+        /// Gets the service name
+        /// </summary>
+        public string ServiceName => "Applet Based Clinical Protocol Repository";
 
         // Tracer
         private Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolRepository));
