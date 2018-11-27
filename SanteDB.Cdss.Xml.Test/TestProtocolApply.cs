@@ -400,6 +400,8 @@ namespace SanteDB.Cdss.Xml.Test
     /// </summary>
     internal class DummyProtocolRepository : IClinicalProtocolRepositoryService
     {
+
+        public String ServiceName => "Fake Repository";
         public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
         {
             List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
