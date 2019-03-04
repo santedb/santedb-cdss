@@ -44,6 +44,10 @@ namespace SanteDB.Cdss.Xml.Test
     {
         public bool IsRunning => true;
 
+        public OperatingSystemID OperatingSystem => OperatingSystemID.Win32;
+
+        public SanteDBHostType HostType => SanteDBHostType.Other;
+
         public event EventHandler Starting;
         public event EventHandler Started;
         public event EventHandler Stopping;
