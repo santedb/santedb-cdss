@@ -26,10 +26,10 @@
   <rule id="Weight" repeat="60">
     <variable name="minDate">DateOfBirth.Value.Date.AddMonths(index).AddDays(-DateOfBirth.Value.Day + 1)</variable>
     <variable name="maxDate">DateOfBirth.Value.Date.AddMonths(index + 1).AddDays(-DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
+    <variable name="age">DateTime.Now.Subtract(DateOfBirth.Value).TotalDays / 7</variable>
     <when evaluation="and">
       <!-- Patient does not have Weights taken or proposed-->
       <hdsiExpression negationIndicator="true">participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$minDate&amp;participation[RecordTarget].source.actTime=&lt;$maxDate</hdsiExpression>
-
     </when>
     <then>
       <action>
@@ -54,7 +54,91 @@
         <assign propertyName="StartTime">minDate</assign>
         <assign propertyName="StopTime">maxDate</assign>
       </action>
-
+      <!-- Insights for Weight -->
+      <insights>
+        <!-- Represents any reference sets -->
+        <refSets>
+          <!-- Weight references for MALES -->
+          <refSet>
+            <when>
+              <hdsiExpression>genderConcept.mnemonic=MALE</hdsiExpression>
+            </when>
+            <data format="csv">
+              <![CDATA[
+              age,low,nominal,high
+              1,3,5,7
+              ]]>
+            </data>
+          </refSet>
+          <!-- Weight references for FEMALES -->
+          <refSet>
+            <when>
+              <hdsiExpression>genderConcept.mnemonic=FEMALE</hdsiExpression>
+            </when>
+            <data format="csv">
+              <![CDATA[
+              age,low,nominal,high
+              1,3,5,7
+              ]]>
+            </data>
+          </refSet>
+        </refSets>
+        <!-- Transform weight if recorded in LBS -->
+        <transforms>
+          <transform>
+            <when>
+              <hdsiExpression>
+                unitOfMeasure=<!-- uuid for lbs -->
+              </hdsiExpression>
+            </when>
+            <then>
+              <assign property="value">value * 0.4535</assign>
+            </then>
+          </transform>
+        </transforms>
+        <!-- When the value is less than the underweight threshold -->
+        <case>
+          <when>
+            <hdsiExpression>value=&lt;$refSet[$age].low</hdsiExpression>
+          </when>
+          <then>
+            <assign propertyName="interpretationConcept">
+              <!-- code for low -->
+            </assign>
+          </then>
+          <then>
+            <action>
+              <jsonModel>
+                <![CDATA[
+                  {
+                    "$type" : "Alert",
+                    "message" : "ui.user.underweight",
+                    "asDialog" : true
+                  }
+                ]]>
+              </jsonModel>
+            </action>
+          </then>
+        </case>
+        <!-- When the weight is above the high threshold -->
+        <case>
+          <when>
+            <hdsiExpression>value=&gt;$refSet[$age].high</hdsiExpression>
+          </when>
+          <then>
+            <assign propertyName="interpretationConcept">
+              <!-- code for high -->
+            </assign>
+          </then>
+        </case>
+        <otherwise>
+          <then>
+            <assign propertyName="interpretationConcept">
+              <!-- code for normal -->
+            </assign>
+          </then>
+        </otherwise>
+      </insights>
     </then>
   </rule>
 </ProtocolDefinition>
