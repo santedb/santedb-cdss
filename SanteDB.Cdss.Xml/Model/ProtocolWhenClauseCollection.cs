@@ -53,6 +53,12 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("linqExpression", typeof(String))]
         public List<object> Clause { get; set; }
 
+        /// <summary>
+        /// Gets the debugging view of this protocol
+        /// </summary>
+        [XmlIgnore]
+        public String DebugView { get; private set; }
+
         // Lock
         private Object m_lockObject = new object();
 
@@ -121,6 +127,7 @@ namespace SanteDB.Cdss.Xml.Model
                 Expression.Convert(objParm, typeof(TData))
             );
             var uncompiledExpression = Expression.Lambda<Func<Object, bool>>(invoke, objParm);
+            this.DebugView = uncompiledExpression.ToString();
             this.m_compiledExpression = uncompiledExpression.Compile();
             return uncompiledExpression;
         }
