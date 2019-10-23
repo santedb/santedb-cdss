@@ -19,6 +19,7 @@
  */
 using ExpressionEvaluator;
 using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
@@ -119,6 +120,7 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("QuantityObservation", typeof(QuantityObservation), Namespace = "http://santedb.org/model")]
         [XmlElement("CodedObservation", typeof(CodedObservation), Namespace = "http://santedb.org/model")]
         [XmlElement("PatientEncounter", typeof(PatientEncounter), Namespace = "http://santedb.org/model")]
+        [XmlElement("DetectedIssue", typeof(DetectedIssue), Namespace = "http://santedb.org/issue")]
         [XmlElement("jsonModel", typeof(String))]
         public Object Element { get; set; }
 
