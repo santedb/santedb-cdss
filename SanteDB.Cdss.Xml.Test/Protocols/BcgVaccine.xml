@@ -16,8 +16,8 @@
  - License for the specific language governing permissions and limitations under 
  - the License.
  - 
- - User: justi
- - Date: 2019-1-12
+ - User: Justin Fyfe
+ - Date: 2019-8-8
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="BCG" name="BCG Vaccine Schedule">
   <when evaluation="and">
