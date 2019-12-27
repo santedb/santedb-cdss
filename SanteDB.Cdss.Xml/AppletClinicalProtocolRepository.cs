@@ -39,6 +39,7 @@ namespace SanteDB.Cdss.Xml
     public class AppletClinicalProtocolRepository : IClinicalProtocolRepositoryService
     {
 
+        private XmlSerializer m_xsz = new XmlSerializer(typeof(ProtocolDefinition));
         /// <summary>
         /// Gets the service name
         /// </summary>
@@ -85,12 +86,11 @@ namespace SanteDB.Cdss.Xml
                 foreach (var f in protocols)
                 {
 
-                    XmlSerializer xsz = new XmlSerializer(typeof(ProtocolDefinition));
                     var content = f.Content ?? appletManager.Applets.Resolver(f);
                     if (content is String)
                         using (var rStream = new StringReader(content as String))
                             this.m_protocols.Add(
-                                new XmlClinicalProtocol(xsz.Deserialize(rStream) as ProtocolDefinition).GetProtocolData()
+                                new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition).GetProtocolData()
                             );
                     else if (content is byte[])
                         using (var rStream = new MemoryStream(content as byte[]))
@@ -98,7 +98,7 @@ namespace SanteDB.Cdss.Xml
                     else if (content is XElement)
                         using (var rStream = (content as XElement).CreateReader())
                             this.m_protocols.Add(
-                                new XmlClinicalProtocol(xsz.Deserialize(rStream) as ProtocolDefinition).GetProtocolData()
+                                new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition).GetProtocolData()
                                 );
                 }
             }
