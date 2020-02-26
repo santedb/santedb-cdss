@@ -18,6 +18,7 @@
  * Date: 2019-8-8
  */
 using SanteDB.Core.Applets.ViewModel.Description;
+using SanteDB.Core.Model.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -32,7 +33,7 @@ namespace SanteDB.Cdss.Xml.Model
     public class ProtocolDefinition : DecisionSupportBaseElement
     {
 
-        private static XmlSerializer s_xsz = new XmlSerializer(typeof(ProtocolDefinition));
+        private static XmlSerializer s_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
 
         /// <summary>
         /// When clause for the entire protocol

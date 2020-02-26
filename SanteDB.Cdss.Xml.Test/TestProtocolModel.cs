@@ -45,7 +45,7 @@ namespace SanteDB.Cdss.Xml.Test
         private String ToXmlString(XmlExpression expr)
         {
 
-            XmlSerializer xsz = new XmlSerializer(expr.GetType());
+            XmlSerializer xsz = XmlModelSerializerFactory.Current.CreateSerializer(expr.GetType());
             using (StringWriter sw = new StringWriter())
             {
                 xsz.Serialize(sw, expr);
@@ -59,7 +59,7 @@ namespace SanteDB.Cdss.Xml.Test
         private XmlExpression FromXmlString(String xml, Type deserType)
         {
 
-            XmlSerializer xsz = new XmlSerializer(deserType);
+            XmlSerializer xsz = XmlModelSerializationFactory.Current.CreateSerializer(deserType);
             using (StringReader sr = new StringReader(xml))
             {
                 return xsz.Deserialize(sr) as XmlExpression;

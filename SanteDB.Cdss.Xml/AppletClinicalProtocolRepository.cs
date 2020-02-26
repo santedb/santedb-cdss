@@ -21,6 +21,7 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace SanteDB.Cdss.Xml
     public class AppletClinicalProtocolRepository : IClinicalProtocolRepositoryService
     {
 
-        private XmlSerializer m_xsz = new XmlSerializer(typeof(ProtocolDefinition));
+        private XmlSerializer m_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
         /// <summary>
         /// Gets the service name
         /// </summary>

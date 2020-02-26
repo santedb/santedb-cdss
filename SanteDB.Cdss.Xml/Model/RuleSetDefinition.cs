@@ -18,6 +18,7 @@
  * Date: 2019-8-8
  */
 using SanteDB.Core.Applets.ViewModel.Description;
+using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,7 +52,7 @@ namespace SanteDB.Cdss.Xml.Model
     public class RuleSetDefinition : DecisionSupportBaseElement
     {
 
-        private static XmlSerializer s_xsz = new XmlSerializer(typeof(RuleSetDefinition));
+        private static XmlSerializer s_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(RuleSetDefinition));
 
         /// <summary>
         /// Triggers for the ruleset

@@ -17,6 +17,7 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
+using SanteDB.Core.Model.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -29,7 +30,7 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(ProtocolCollection), Namespace = "http://santedb.org/cdss")]
     public class ProtocolCollection : DecisionSupportBaseElement
     {
-        private static XmlSerializer s_xsz = new XmlSerializer(typeof(ProtocolCollection));
+        private static XmlSerializer s_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolCollection));
 
         /// <summary>
         /// Loads the protocol collection from a stream
