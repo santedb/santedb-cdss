@@ -29,6 +29,7 @@ using System.Linq;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Acts;
 using System.Collections.Generic;
+using SanteDB.Core.Model.Serialization;
 
 namespace SanteDB.Cdss.Xml.Test
 {
@@ -59,7 +60,7 @@ namespace SanteDB.Cdss.Xml.Test
         private XmlExpression FromXmlString(String xml, Type deserType)
         {
 
-            XmlSerializer xsz = XmlModelSerializationFactory.Current.CreateSerializer(deserType);
+            XmlSerializer xsz = XmlModelSerializerFactory.Current.CreateSerializer(deserType);
             using (StringReader sr = new StringReader(xml))
             {
                 return xsz.Deserialize(sr) as XmlExpression;
