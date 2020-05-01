@@ -215,7 +215,7 @@ namespace SanteDB.Cdss.Xml.Model
                 exp.TypeRegistry.RegisterType<TimeSpan>();
                 exp.TypeRegistry.RegisterParameter("now", () => DateTime.Now);
                 foreach (var itm in variableFunc)
-                    exp.TypeRegistry.RegisterParameter(itm.Key, itm.Value);
+                    exp.TypeRegistry.RegisterParameter(itm.Key, ()=>itm.Value);
 
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)

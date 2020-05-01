@@ -103,7 +103,7 @@ namespace SanteDB.Cdss.Xml.Model
                     exp.TypeRegistry.RegisterType<TimeSpan>();
                     exp.TypeRegistry.RegisterParameter("now", () => DateTime.Now); // because MONO is scumbag
                     foreach (var fn in variableFunc)
-                        exp.TypeRegistry.RegisterParameter(fn.Key, fn.Value);
+                        exp.TypeRegistry.RegisterParameter(fn.Key, ()=>fn.Value);
                     //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                     exp.ScopeCompile<TData>();
                     //Func<TData, bool> d = exp.ScopeCompile<TData>();
