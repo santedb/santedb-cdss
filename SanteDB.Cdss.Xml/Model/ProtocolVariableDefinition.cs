@@ -17,6 +17,7 @@
  * User: fyfej
  * Date: 2019-11-27
  */
+using System;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
@@ -38,6 +39,16 @@ namespace SanteDB.Cdss.Xml.Model
         /// Gets or sets the type
         /// </summary>
         [XmlAttribute("type")]
-        public string VariableType { get; set; }
+        public string VariableTypeXml { get; set; }
+
+        /// <summary>
+        /// Variable type
+        /// </summary>
+        [XmlIgnore]
+        public Type VariableType
+        {
+            get => Type.GetType(this.VariableTypeXml);
+            set => this.VariableTypeXml = value.FullName;
+        }
     }
 }

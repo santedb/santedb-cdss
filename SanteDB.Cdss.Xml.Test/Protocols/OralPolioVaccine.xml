@@ -1,4 +1,4 @@
-﻿<?xml version="1.9.11.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
  - Copyright 2015-2019 Mohawk College of Applied Arts and Technology
  - Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
@@ -21,7 +21,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" name="Oral Polio Vaccine" protocolVersion="1" uuid="C2A628F3-DB52-45ED-B863-0FB4B1B8E77C">
   <when evaluation="and">
-    <linqExpression>now.Subtract(DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="OPV0">
     <!-- When the patient has not received any, -->
@@ -78,9 +78,9 @@
             ]]>
         </jsonModel>
         <!-- Set the dynamic properties to 0..5 days after birth - Recommend 1 day after birth-->
-        <assign propertyName="StartTime">DateOfBirth.Value</assign>
-        <assign propertyName="StopTime">DateOfBirth.Value + new TimeSpan(5,0,0,0)</assign>
-        <assign propertyName="ActTime">DateOfBirth.Value</assign>
+        <assign propertyName="StartTime">Target.DateOfBirth.Value</assign>
+        <assign propertyName="StopTime">Target.DateOfBirth.Value + new TimeSpan(5,0,0,0)</assign>
+        <assign propertyName="ActTime">Target.DateOfBirth.Value</assign>
       </action>
     </then>
   </rule>
@@ -138,8 +138,8 @@
 			      }
             ]]>
         </jsonModel>
-        <assign propertyName="StartTime">DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
-        <assign propertyName="ActTime">DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
+        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
+        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.9.11.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
  - Copyright 2015-2019 Mohawk College of Applied Arts and Technology
  - Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
@@ -21,7 +21,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="5DDA76D6-C192-4260-90CC-BBD96B790656" id="PCV13" name="PCV13 Immunization Schedule">
   <when evaluation="and">
-    <linqExpression>now.Subtract(DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="PCV1">
     <when evaluation="and">
@@ -76,9 +76,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
-        <assign propertyName="StopTime">DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
+        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
+        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
+        <assign propertyName="StopTime">Target.DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
       </action>
     </then>
   </rule>

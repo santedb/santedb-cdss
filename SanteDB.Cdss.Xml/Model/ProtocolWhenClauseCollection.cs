@@ -21,6 +21,7 @@ using ExpressionEvaluator;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Query;
+using SanteDB.Core.Model.Roles;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -63,11 +64,17 @@ namespace SanteDB.Cdss.Xml.Model
         private Object m_lockObject = new object();
 
         /// <summary>
+        /// Gets the current context reference value 
+        /// </summary>
+        [ThreadStatic]
+        private static ICdssContext st_contextReference;
+
+        /// <summary>
         /// Compile the expression
         /// </summary>
-        public Expression Compile<TData>(Dictionary<String, Delegate> variableFunc)
+        public Expression Compile<TData>(CdssContext<TData> context)
         {
-            ParameterExpression expressionParm = Expression.Parameter(typeof(TData), "_scope");
+            ParameterExpression expressionParm = Expression.Parameter(typeof(CdssContext<TData>), "_scope");
             Expression body = null;
             // Iterate and perform binary operations
             foreach (var itm in this.Clause)
@@ -76,12 +83,17 @@ namespace SanteDB.Cdss.Xml.Model
                 Expression clauseExpr = null;
                 if (itm is ProtocolWhenClauseCollection)
                 {
-                    clauseExpr = Expression.Invoke((itm as ProtocolWhenClauseCollection).Compile<TData>(variableFunc), expressionParm);
+                    clauseExpr = Expression.Invoke((itm as ProtocolWhenClauseCollection).Compile<TData>(context), expressionParm);
                 }
                 else if (itm is WhenClauseHdsiExpression)
                 {
+                    var varDict = new Dictionary<String, Func<Object>>();
+                    foreach (var varRef in context.Variables)
+                        varDict.Add(varRef, () => st_contextReference.Var(varRef));
+
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
-                    clauseExpr = Expression.Invoke(QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), variableFunc), expressionParm);
+                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), varDict);
+                    clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
                     if (hdsiExpr.NegationIndicator)
                         clauseExpr = Expression.Not(clauseExpr);
                     this.m_tracer.TraceVerbose("Converted WHEN {0} > {1}", hdsiExpr.Expression, clauseExpr);
@@ -101,13 +113,11 @@ namespace SanteDB.Cdss.Xml.Model
                     exp.TypeRegistry.RegisterType<TData>();
                     exp.TypeRegistry.RegisterType<Guid>();
                     exp.TypeRegistry.RegisterType<TimeSpan>();
-                    exp.TypeRegistry.RegisterParameter("now", () => DateTime.Now); // because MONO is scumbag
-                    foreach (var fn in variableFunc)
-                        exp.TypeRegistry.RegisterParameter(fn.Key, ()=>fn.Value);
+
                     //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
-                    exp.ScopeCompile<TData>();
+                    exp.ScopeCompile<CdssContext<TData>>();
                     //Func<TData, bool> d = exp.ScopeCompile<TData>();
-                    var linqAction = exp.GenerateLambda<Func<TData, bool>, TData>(true, false);
+                    var linqAction = exp.GenerateLambda<Func<CdssContext<TData>, bool>, CdssContext<TData>>(true, false);
                     clauseExpr = Expression.Invoke(linqAction, expressionParm);
                     //clauseExpr = Expression.Invoke(d, expressionParm);
                 }
@@ -121,10 +131,10 @@ namespace SanteDB.Cdss.Xml.Model
 
             // Wrap and compile
             var objParm = Expression.Parameter(typeof(Object));
-            var bodyCondition = Expression.Lambda<Func<TData, bool>>(body, expressionParm);
+            var bodyCondition = Expression.Lambda<Func<CdssContext<TData>, bool>>(body, expressionParm);
             var invoke = Expression.Invoke(
                 bodyCondition,
-                Expression.Convert(objParm, typeof(TData))
+                Expression.Convert(objParm, typeof(CdssContext<TData>))
             );
             var uncompiledExpression = Expression.Lambda<Func<Object, bool>>(invoke, objParm);
             this.DebugView = uncompiledExpression.ToString();
@@ -138,14 +148,17 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Evaluate the "when" clause
         /// </summary>
-        public bool Evaluate<TData>(TData parm, Dictionary<String, Delegate> variableFunc)
+        public bool Evaluate<TData>(CdssContext<TData> context)
         {
 
             if (this.m_compiledExpression == null)
-                this.Compile<TData>(variableFunc);
+                this.Compile<TData>(context);
 
             lock (m_lockObject)
-                return this.m_compiledExpression.Invoke(parm);
+            {
+                st_contextReference = context;
+                return this.m_compiledExpression.Invoke(context);
+            }
         }
     }
 

@@ -21,6 +21,7 @@ using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Model.Serialization;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
@@ -72,7 +73,11 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public static ProtocolDefinition Load(Stream ms)
         {
-            return s_xsz.Deserialize(ms) as ProtocolDefinition;
+            using(var xr = XmlReader.Create(ms, new XmlReaderSettings()
+            {
+                IgnoreWhitespace = true
+            }))
+                return s_xsz.Deserialize(xr) as ProtocolDefinition;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.9.11.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
  - Copyright 2015-2019 Mohawk College of Applied Arts and Technology
  - Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
@@ -21,7 +21,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="D48FF086-702E-4F46-A8DE-C3FFBD02FD7C" id="MR" name="Measles Rubella Vaccine">
   <when evaluation="and">
-    <linqExpression>now.Subtract(DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="MR1">
     <when evaluation="and">
@@ -76,8 +76,8 @@
 			      }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">DateOfBirth.Value + new TimeSpan(274, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">DateOfBirth.Value + new TimeSpan(274,0,0,0)</assign>
+        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(274, 0, 0, 0)</assign>
+        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(274,0,0,0)</assign>
       </action>
     </then>
   </rule>

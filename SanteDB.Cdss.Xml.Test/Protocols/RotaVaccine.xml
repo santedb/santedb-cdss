@@ -20,7 +20,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="D4DFD6C2-2A83-4A4E-BBFE-7D607604A60C" name="Rota Virus Vaccine">
   <when evaluation="and">
-    <linqExpression>now.Subtract(DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
 
   <rule id="ROTA1">
@@ -76,9 +76,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
-        <assign propertyName="StopTime">DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
+        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
+        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
+        <assign propertyName="StopTime">Target.DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
       </action>
     </then>
   </rule>

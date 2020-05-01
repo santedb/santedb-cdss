@@ -93,24 +93,10 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <summary>
-        /// XmlClinicalProtocol
-        /// </summary>
-        static XmlClinicalProtocol()
-        {
-            Func<Int32> expr = () => { return (int)s_variables["index"]; };
-            Func<IDictionary<String, Object>> parms = () => { return (IDictionary<String, Object>)s_variables["parameters"]; };
-            s_callbacks.Add("index", expr);
-            s_callbacks.Add("parameters", parms);
-        }
-
-        /// <summary>
         /// Local index
         /// </summary>
         [ThreadStatic]
         private static Dictionary<String, Object> s_variables = null;
-
-        // Callbacks
-        private static Dictionary<String, Delegate> s_callbacks = new Dictionary<string, Delegate>();
 
         /// <summary>
         /// Calculate the protocol against a atient
@@ -124,6 +110,8 @@ namespace SanteDB.Cdss.Xml
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 #endif
+                if (parameters == null)
+                    parameters = new Dictionary<String, Object>();
 
                 // Get a clone to make decisions on
                 Patient patient = null;
@@ -135,11 +123,12 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, patient);
 
-                s_variables = new Dictionary<string, object>() { { "index", 0 }, { "parameters", parameters } };
-
+                var context = new CdssContext<Patient>(patient);
+                context.Var("index", 0);
+                context.Var("parameters", parameters);
 
                 // Evaluate eligibility
-                if (this.Definition.When?.Evaluate(patient, s_callbacks) == false &&
+                if (this.Definition.When?.Evaluate(context) == false &&
                     !parameters.ContainsKey("ignoreEntry"))
                 {
                     this.m_tracer.TraceInfo("{0} does not meet criteria for {1}", patient, this.Id);
@@ -155,30 +144,18 @@ namespace SanteDB.Cdss.Xml
                     for (var index = 0; index < rule.Repeat; index++)
                     {
 
-                        s_variables["index"] = index;
+                        context.Var("index", index);
                         foreach (var itm in rule.Variables)
                         {
-                            if (!s_variables.ContainsKey(itm.VariableName))
-                                s_variables.Add(itm.VariableName, itm.GetValue(null, patient, s_callbacks, new Dictionary<String, Object>()));
-                            else
-                                s_variables[itm.VariableName] = itm.GetValue(null, patient, s_callbacks, new Dictionary<String, Object>());
-                            if (!s_callbacks.ContainsKey(itm.VariableName))
-                            {
-                                Func<Object> funcBody = () =>
-                                {
-                                    return s_variables[itm.VariableName];
-                                };
-
-                                var varType = s_variables[itm.VariableName].GetType();
-                                Delegate func = Expression.Lambda(typeof(Func<>).MakeGenericType(varType), Expression.Convert(Expression.Call(funcBody.Target == null ? null : Expression.Constant(funcBody.Target), funcBody.GetMethodInfo()), varType)).Compile();
-                                s_callbacks.Add(itm.VariableName, func);
-                            }
+                            var value = itm.GetValue(null, context, new Dictionary<String, Object>());
+                            context.Declare(itm.VariableName, itm.VariableType);
+                            context.Var(itm.VariableName, value);
                         }
 
                         // TODO: Variable initialization 
-                        if (rule.When.Evaluate(patient, s_callbacks) && !parameters.ContainsKey("ignoreWhen"))
+                        if (rule.When.Evaluate(context) && !parameters.ContainsKey("ignoreWhen"))
                         {
-                            var acts = rule.Then.Evaluate(patient, s_callbacks);
+                            var acts = rule.Then.Evaluate(context);
                             retVal.AddRange(acts);
 
                             // Assign protocol
@@ -246,29 +223,22 @@ namespace SanteDB.Cdss.Xml
             using (MemoryStream ms = new MemoryStream(protocolData.Definition))
                 this.Definition = ProtocolDefinition.Load(ms);
 
+            var context = new CdssContext<Patient>();
+            context.Declare("index", typeof(Int32));
+
             // Add callback rules
             foreach (var rule in this.Definition.Rules)
                 for (var index = 0; index < rule.Repeat; index++)
                 {
                     foreach (var itm in rule.Variables)
                     {
-                        if (!s_callbacks.ContainsKey(itm.VariableName))
-                        {
-                            Func<Object> funcBody = () =>
-                            {
-                                return s_variables[itm.VariableName];
-                            };
-
-                            var varType = Type.GetType(itm.VariableType);
-                            Delegate func = Expression.Lambda(typeof(Func<>).MakeGenericType(varType), Expression.Convert(Expression.Call(funcBody.Target == null ? null : Expression.Constant(funcBody.Target), funcBody.GetMethodInfo()), varType)).Compile();
-                            s_callbacks.Add(itm.VariableName, func);
-                        }
+                        context.Declare(itm.VariableName, itm.VariableType);
                     }
                 }
 
-            this.Definition.When?.Compile<Patient>(s_callbacks);
+            this.Definition.When?.Compile<Patient>(context);
             foreach (var wc in this.Definition.Rules)
-                wc.When.Compile<Patient>(s_callbacks);
+                wc.When.Compile<Patient>(context);
 
         }
 

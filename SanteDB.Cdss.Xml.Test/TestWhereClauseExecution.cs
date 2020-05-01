@@ -100,7 +100,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Clause = new List<object>() { "!DeceasedDate.HasValue" }
             };
-            Assert.IsFalse(when.Evaluate(this.m_patientUnderTest, new Dictionary<string, Delegate>()));
+            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace SanteDB.Cdss.Xml.Test
                     }
                 }
             };
-            Assert.IsFalse(when.Evaluate(this.m_patientUnderTest, new Dictionary<string, Delegate>()));
+            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace SanteDB.Cdss.Xml.Test
                     XmlExpression.FromExpression(filterCondition)
                 }
             };
-            Assert.IsFalse(when.Evaluate(this.m_patientUnderTest, new Dictionary<string, Delegate>()));
+            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
 
         /// <summary>
@@ -154,11 +154,11 @@ namespace SanteDB.Cdss.Xml.Test
                     "StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
                 }
             };
-            Assert.IsTrue(when.Evaluate(this.m_patientUnderTest, new Dictionary<string, Delegate>()));
+            Assert.IsTrue(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
 
             when.Clause.Add("Tags.Count == 0");
-            when.Compile<Patient>(new Dictionary<string, Delegate>());
-            Assert.IsFalse(when.Evaluate(this.m_patientUnderTest, new Dictionary<string, Delegate>()));
+            when.Compile(new CdssContext<Patient>(this.m_patientUnderTest));
+            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
 
     }

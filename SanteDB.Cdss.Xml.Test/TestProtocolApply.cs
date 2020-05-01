@@ -73,7 +73,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.Calculate(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -307,11 +307,11 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.IsFalse(acts.Action.Any(o => o.Protocols.Count() > 1));
             acts = scp.CreateCarePlan(newborn);
             //Assert.AreEqual(60, acts.Action.Count());
-            newborn.Participations.RemoveAll(o => o.Act is QuantityObservation);
-            Assert.AreEqual(23, newborn.Participations.Count);
+            acts.Action.RemoveAll(o => o is QuantityObservation);
+            Assert.AreEqual(23, acts.Action.Count);
             acts = scp.CreateCarePlan(newborn);
             //Assert.AreEqual(60, acts.Action.Count());
-            Assert.AreEqual(83, newborn.Participations.Count());
+            Assert.AreEqual(83, acts.Action.Count());
             Assert.IsFalse(acts.Action.Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKey.RecordTarget)));
         }
 
@@ -387,7 +387,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn, true);
             var jsonSerializer = new JsonViewModelSerializer();
 			string json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(61, acts.Action.Count());
+            Assert.AreEqual(60, acts.Action.Count());
             Assert.IsFalse(acts.Action.Any(o => o.Protocols.Count() > 1));
 
         }

@@ -55,12 +55,12 @@ namespace SanteDB.Cdss.Xml.Model
         /// Evaluate the actions
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Act> Evaluate(Patient p, Dictionary<String, Delegate> variableFunc)
+        public IEnumerable<Act> Evaluate(CdssContext<Patient> context)
         {
             List<Act> retVal = new List<Act>();
             Dictionary<String, Object> calculatedScopes = new Dictionary<string, object>()
             {
-                { ".", p }
+                { ".", context.Target }
             };
 
             foreach (var itm in this.Action)
@@ -79,15 +79,15 @@ namespace SanteDB.Cdss.Xml.Model
                 // Now do the actions to the properties as stated
                 foreach (var instr in itm.Do)
                 {
-                    instr.Evaluate(act, p, variableFunc, calculatedScopes);
+                    instr.Evaluate(act, context, calculatedScopes);
                 }
 
                 // Assign this patient as the record target
                 act.Key = act.Key ?? Guid.NewGuid();
                 Guid pkey = Guid.NewGuid();
-                act.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, p.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+                act.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 // Add record target to the source for forward rules
-                p.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, p) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+                context.Target.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 act.CreationTime = DateTime.Now;
                 // The act to the return value
                 retVal.Add(act);
@@ -153,7 +153,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// Evaluate the expression
         /// </summary>
         /// <returns></returns>
-        public abstract object Evaluate(Act act, Patient recordTarget, Dictionary<String, Delegate> variableFunc, IDictionary<String, Object> scopes);
+        public abstract object Evaluate(Act act, CdssContext<Patient> context, IDictionary<String, Object> scopes);
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Get the specified value
         /// </summary>
-        public object GetValue(Act act, Patient recordTarget, Dictionary<String, Delegate> variableFunc, IDictionary<String, Object> scopes)
+        public object GetValue(Act act, CdssContext<Patient> context, IDictionary<String, Object> scopes)
         {
             if (this.m_setter == null)
             {
@@ -213,15 +213,12 @@ namespace SanteDB.Cdss.Xml.Model
                 exp.TypeRegistry.RegisterType<Guid>();
                 exp.TypeRegistry.RegisterType<DateTimeOffset>();
                 exp.TypeRegistry.RegisterType<TimeSpan>();
-                exp.TypeRegistry.RegisterParameter("now", () => DateTime.Now);
-                foreach (var itm in variableFunc)
-                    exp.TypeRegistry.RegisterParameter(itm.Key, ()=>itm.Value);
 
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)
                 {
 
-                    var scopeProperty = recordTarget.GetType().GetRuntimeProperty(this.ScopeSelector);
+                    var scopeProperty = context.Target.GetType().GetRuntimeProperty(this.ScopeSelector);
 
                     if (scopeProperty == null) return null; // no scope
 
@@ -248,7 +245,7 @@ namespace SanteDB.Cdss.Xml.Model
                     this.m_setter = (compileMethod.Invoke(exp, null) as Delegate);
                 }
                 else
-                    this.m_setter = exp.ScopeCompile<Patient>();
+                    this.m_setter = exp.ScopeCompile<CdssContext<Patient>>();
             }
 
             Object setValue = null;
@@ -260,8 +257,8 @@ namespace SanteDB.Cdss.Xml.Model
                 object scope = null;
                 if (!scopes.TryGetValue(scopeKey, out scope))
                 {
-                    var scopeProperty = recordTarget.GetType().GetRuntimeProperty(this.ScopeSelector);
-                    var scopeValue = scopeProperty.GetValue(recordTarget);
+                    var scopeProperty = context.Target.GetType().GetRuntimeProperty(this.ScopeSelector);
+                    var scopeValue = scopeProperty.GetValue(context.Target);
                     scope = scopeValue;
                     if (!String.IsNullOrEmpty(this.WhereFilter))
                         scope = this.m_scopeSelectMethod.Invoke(null, new Object[] { scopeValue, this.m_compiledExpression });
@@ -272,7 +269,7 @@ namespace SanteDB.Cdss.Xml.Model
                 setValue = this.m_setter.DynamicInvoke(scope);
             }
             else
-                setValue = this.m_setter.DynamicInvoke(recordTarget);
+                setValue = this.m_setter.DynamicInvoke(context);
 
             return setValue;
         }
@@ -280,7 +277,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Evaluate the specified action on the object
         /// </summary>
-        public override object Evaluate(Act act, Patient recordTarget, Dictionary<String, Delegate> variableFunc, IDictionary<String, Object> scopes)
+        public override object Evaluate(Act act, CdssContext<Patient> context, IDictionary<String, Object> scopes)
         {
 
             var propertyInfo = act.GetType().GetRuntimeProperty(this.PropertyName);
@@ -289,7 +286,7 @@ namespace SanteDB.Cdss.Xml.Model
                 propertyInfo.SetValue(act, this.Element);
             else
             {
-                var setValue = this.GetValue(act, recordTarget, variableFunc, scopes);
+                var setValue = this.GetValue(act, context, scopes);
 
                 //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                 if (Core.Model.Map.MapUtil.TryConvert(setValue, propertyInfo.PropertyType, out setValue))
@@ -312,7 +309,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Evaluate
         /// </summary>
-        public override object Evaluate(Act act, Patient recordTarget, Dictionary<String, Delegate> variableFunc, IDictionary<String, Object> scopes)
+        public override object Evaluate(Act act, CdssContext<Patient> context, IDictionary<String, Object> scopes)
         {
             var value = act.GetType().GetRuntimeProperty(this.PropertyName) as IList;
             value?.Add(this.Element);
