@@ -42,8 +42,8 @@
     <Reference Include="ExpressionEvaluator, Version=2.0.25.0, Culture=neutral, PublicKeyToken=90d9f15d622e2348, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ExpressionEvaluator.2.0.25.0\lib\net40\ExpressionEvaluator.dll</HintPath>
 =======
-    <Reference Include="ExpressionEvaluator, Version=2.0.24.0, Culture=neutral, PublicKeyToken=90d9f15d622e2348, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ExpressionEvaluator.2.0.24.0\lib\net40\ExpressionEvaluator.dll</HintPath>
+    <Reference Include="ExpressionEvaluator, Version=2.0.25.0, Culture=neutral, PublicKeyToken=90d9f15d622e2348, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ExpressionEvaluator.2.0.25.0\lib\net40\ExpressionEvaluator.dll</HintPath>
 >>>>>>> 445f2f4e1efc7e22a85c6ac4ef10192df04e7c7a
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -96,9 +96,9 @@
         <PackageReference Include="SanteDB.Core.Applets" Version="2.0.25.0" />
         <PackageReference Include="SanteDB.Core.Model" Version="2.0.25.0" />
 =======
-        <PackageReference Include="SanteDB.Core.Api" Version="2.0.24.0" />
-        <PackageReference Include="SanteDB.Core.Applets" Version="2.0.24.0" />
-        <PackageReference Include="SanteDB.Core.Model" Version="2.0.24.0" />
+        <PackageReference Include="SanteDB.Core.Api" Version="2.0.25.0" />
+        <PackageReference Include="SanteDB.Core.Applets" Version="2.0.25.0" />
+        <PackageReference Include="SanteDB.Core.Model" Version="2.0.25.0" />
 >>>>>>> 445f2f4e1efc7e22a85c6ac4ef10192df04e7c7a
       </ItemGroup>
     </Otherwise>
