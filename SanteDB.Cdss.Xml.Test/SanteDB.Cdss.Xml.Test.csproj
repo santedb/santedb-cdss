@@ -86,15 +86,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-<<<<<<< HEAD
         <PackageReference Include="SanteDB.Core.Api" Version="2.0.26.0" />
         <PackageReference Include="SanteDB.Core.Applets" Version="2.0.26.0" />
         <PackageReference Include="SanteDB.Core.Model" Version="2.0.26.0" />
-=======
-        <PackageReference Include="SanteDB.Core.Api" Version="2.0.26.0" />
-        <PackageReference Include="SanteDB.Core.Applets" Version="2.0.26.0" />
-        <PackageReference Include="SanteDB.Core.Model" Version="2.0.26.0" />
->>>>>>> 445f2f4e1efc7e22a85c6ac4ef10192df04e7c7a
       </ItemGroup>
     </Otherwise>
   </Choose>
