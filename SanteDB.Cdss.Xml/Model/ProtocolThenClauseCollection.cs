@@ -224,7 +224,7 @@ namespace SanteDB.Cdss.Xml.Model
                     // Where clause?
                     if (!String.IsNullOrEmpty(this.WhereFilter) && this.m_scopeSelectMethod == null)
                     {
-                        var itemType = scopeProperty.PropertyType.GetTypeInfo().GenericTypeArguments[0];
+                        var itemType = scopeProperty.PropertyType.GenericTypeArguments[0];
                         var predicateType = typeof(Func<,>).MakeGenericType(new Type[] { itemType, typeof(bool) });
                         var builderMethod = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression), new Type[] { itemType }, new Type[] { typeof(NameValueCollection) });
                         this.m_linqExpression = builderMethod.Invoke(null, new Object[] { NameValueCollection.ParseQueryString(this.WhereFilter) }) as Expression;
