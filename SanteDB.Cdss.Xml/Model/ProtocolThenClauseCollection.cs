@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2019 - 2020, Fyfe Software Inc. and the SanteSuite Contributors (See NOTICE.md)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors (See NOTICE.md)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -14,7 +14,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2019-11-27
+ * Date: 2021-2-9
  */
 using ExpressionEvaluator;
 using SanteDB.Core.Applets.ViewModel.Json;
@@ -224,7 +224,7 @@ namespace SanteDB.Cdss.Xml.Model
                     // Where clause?
                     if (!String.IsNullOrEmpty(this.WhereFilter) && this.m_scopeSelectMethod == null)
                     {
-                        var itemType = scopeProperty.PropertyType.GetTypeInfo().GenericTypeArguments[0];
+                        var itemType = scopeProperty.PropertyType.GenericTypeArguments[0];
                         var predicateType = typeof(Func<,>).MakeGenericType(new Type[] { itemType, typeof(bool) });
                         var builderMethod = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression), new Type[] { itemType }, new Type[] { typeof(NameValueCollection) });
                         this.m_linqExpression = builderMethod.Invoke(null, new Object[] { NameValueCollection.ParseQueryString(this.WhereFilter) }) as Expression;
