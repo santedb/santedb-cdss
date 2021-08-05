@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
+using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Model
 {
@@ -88,10 +89,10 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var varDict = new Dictionary<String, Func<Object>>();
                     foreach (var varRef in context.Variables)
-                        varDict.Add(varRef, () => st_contextReference.Var(varRef));
+                        varDict.Add(varRef, () => st_contextReference?.Var(varRef));
 
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
-                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), varDict);
+                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
                     clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
                     if (hdsiExpr.NegationIndicator)
                         clauseExpr = Expression.Not(clauseExpr);

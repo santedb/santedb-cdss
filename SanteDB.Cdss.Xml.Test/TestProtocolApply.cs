@@ -17,7 +17,6 @@
  * Date: 2019-11-27
  */
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Model.Acts;
@@ -30,6 +29,7 @@ using SanteDB.Core.Protocol;
 using SanteDB.Core.Services;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using NUnit.Framework;
 using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
 
@@ -38,7 +38,7 @@ namespace SanteDB.Cdss.Xml.Test
     /// <summary>
     /// Tests the application of protocol
     /// </summary>
-    [TestClass]
+    [TestFixture(Category = "CDSS")]
     public class TestProtocolApply : IServiceProvider, IApplicationServiceContext
     {
         public bool IsRunning => true;
@@ -57,7 +57,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldScheduleOPV()
         {
 
@@ -84,7 +84,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldScheduleBCG()
         {
 
@@ -109,7 +109,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldRepeatWeight()
         {
 
@@ -134,7 +134,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules weight at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldSkipWeight()
         {
 
@@ -183,7 +183,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldScheduleMR()
         {
 
@@ -208,7 +208,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldSchedulePCV()
         {
 
@@ -233,7 +233,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldScheduleDTP()
         {
 
@@ -258,7 +258,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldScheduleRota()
         {
 
@@ -284,7 +284,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShouldHandlePartials()
         {
 
@@ -319,7 +319,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShouldExcludeAdults()
         {
 
@@ -344,7 +344,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShouldScheduleAll()
         {
 
@@ -369,7 +369,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Should group into appointments
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShouldScheduleAppointments()
         {
             SimpleCarePlanService scp = new SimpleCarePlanService();
