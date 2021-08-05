@@ -17,7 +17,6 @@
  * Date: 2019-11-27
  */
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
@@ -28,6 +27,7 @@ using System.Linq;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Acts;
 using System.Collections.Generic;
+using NUnit.Framework;
 using SanteDB.Core.Model.Serialization;
 
 namespace SanteDB.Cdss.Xml.Test
@@ -35,7 +35,7 @@ namespace SanteDB.Cdss.Xml.Test
     /// <summary>
     /// Tests which ensure the protocol model can be loaded and serialized properly
     /// </summary>
-    [TestClass]
+    [TestFixture(Category = "CDSS")]
     public class TestProtocolModel
     {
 
@@ -68,13 +68,14 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeLambda()
         {
 
             Expression<Func<Patient, bool>> filterGender = (o) => o.GenderConcept.Mnemonic == "Male";
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterGender);
-            Assert.IsInstanceOfType(xmlExpr, typeof(XmlLambdaExpression));
+            Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
+
             Assert.AreEqual(typeof(bool), xmlExpr.Type);
             Assert.AreEqual("o", (xmlExpr as XmlLambdaExpression).Parameters[0].ParameterName);
             // Serialize
@@ -88,13 +89,14 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeWhereCondition()
         {
 
             Expression<Func<Patient, bool>> filterGender = (o) => o.Names.Where(g => g.NameUseKey == NameUseKeys.OfficialRecord).Any(n => n.Component.Where(g => g.ComponentTypeKey == NameComponentKeys.Family).Any(c => c.Value == "Smith"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterGender);
-            Assert.IsInstanceOfType(xmlExpr, typeof(XmlLambdaExpression));
+            Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
+
             Assert.AreEqual(typeof(bool), xmlExpr.Type);
             Assert.AreEqual("o", (xmlExpr as XmlLambdaExpression).Parameters[0].ParameterName);
             // Serialize
@@ -108,13 +110,13 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGuardMinimumAgeCondition()
         {
 
             Expression<Func<Patient, bool>> filterAge = (data) => DateTime.Now.Subtract(data.DateOfBirth.Value).TotalDays >= 42;
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterAge);
-            Assert.IsInstanceOfType(xmlExpr, typeof(XmlLambdaExpression));
+            Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
             Assert.AreEqual(typeof(bool), xmlExpr.Type);
             Assert.AreEqual("data", (xmlExpr as XmlLambdaExpression).Parameters[0].ParameterName);
             // Serialize
@@ -128,7 +130,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Test guard condition generation for polio 0
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGuardNoPolioDose0()
         {
             Expression<Func<Patient, bool>> filterCondition = (data) => !data.Participations.Where(guard => guard.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is SubstanceAdministration && (o.SourceEntity as SubstanceAdministration).SequenceId == 0 && o.SourceEntity.Participations.Any(p => p.PlayerEntity.TypeConcept.Mnemonic == "VaccineType-OralPolioVaccine"));
@@ -145,13 +147,14 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGuardNotImmunoSuppressed()
         {
 
             Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
-            Assert.IsInstanceOfType(xmlExpr, typeof(XmlLambdaExpression));
+            Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
+
             Assert.AreEqual(typeof(bool), xmlExpr.Type);
             Assert.AreEqual("data", (xmlExpr as XmlLambdaExpression).Parameters[0].ParameterName);
             // Serialize
@@ -169,7 +172,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestPropertySelector()
         {
 
@@ -190,7 +193,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestPropertyAddDays()
         {
 
@@ -211,7 +214,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests that the model can serialize a simple lambda expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAgeSelector()
         {
 

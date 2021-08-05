@@ -17,7 +17,6 @@
  * Date: 2020-5-1
  */
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Entities;
@@ -26,10 +25,11 @@ using SanteDB.Core.Model.DataTypes;
 using SanteDB.Cdss.Xml.Model;
 using System.Linq.Expressions;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
+using NUnit.Framework;
 
 namespace SanteDB.Cdss.Xml.Test
 {
-    [TestClass]
+    [TestFixture(Category = "CDSS")]
     public class TestWhereClauseExecution
     {
         /// <summary>
@@ -92,12 +92,12 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests the where clause matches LINQ
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldMatchLinq()
         {
             ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
             {
-                Clause = new List<object>() { "!DeceasedDate.HasValue" }
+                Clause = new List<object>() { "!Target.DeceasedDate.HasValue" }
             };
             Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
@@ -105,7 +105,7 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests the where clause matches LINQ
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldMatchSimpleHdsi()
         {
             ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
@@ -122,10 +122,10 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests the where clause matches LINQ
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldMatchSimpleXmlLinq()
         {
-            Expression<Func<Patient, bool>> filterCondition = (data) => data.DeceasedDate == null;
+            Expression<Func<CdssContext<Patient>, bool>> filterCondition = (data) => data.Target.DeceasedDate == null;
 
             ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
             {
@@ -139,10 +139,10 @@ namespace SanteDB.Cdss.Xml.Test
         /// <summary>
         /// Tests the where clause matches LINQ
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShouldMatchAllCondition()
         {
-            Expression<Func<Patient, bool>> filterCondition = (data) => data.DateOfBirth <= DateTime.Now;
+            Expression<Func<CdssContext<Patient>, bool>> filterCondition = (data) => data.Target.DateOfBirth <= DateTime.Now;
 
             ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
             {
@@ -150,12 +150,12 @@ namespace SanteDB.Cdss.Xml.Test
                 Clause = new List<Object>() {
                     XmlExpression.FromExpression(filterCondition),
                     new WhenClauseHdsiExpression() { Expression = "tag[hasBirthCertificate].value=true" },
-                    "StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
+                    "Target.StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
                 }
             };
             Assert.IsTrue(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
 
-            when.Clause.Add("Tags.Count == 0");
+            when.Clause.Add("Target.Tags.Count == 0");
             when.Compile(new CdssContext<Patient>(this.m_patientUnderTest));
             Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
