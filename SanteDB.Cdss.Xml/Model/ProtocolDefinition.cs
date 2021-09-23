@@ -74,7 +74,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public static ProtocolDefinition Load(Stream ms)
         {
-            using(var xr = XmlReader.Create(ms, new XmlReaderSettings()
+            using (var xr = XmlReader.Create(ms, new XmlReaderSettings()
             {
                 IgnoreWhitespace = true
             }))
