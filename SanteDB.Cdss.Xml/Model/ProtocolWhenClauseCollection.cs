@@ -22,12 +22,10 @@ using ExpressionEvaluator;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Query;
-using SanteDB.Core.Model.Roles;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
-using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Model
 {

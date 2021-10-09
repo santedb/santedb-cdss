@@ -21,7 +21,6 @@
 using SanteDB.Core.Model.Map;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -123,7 +122,7 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public void Declare(string variableName, Type variableType)
         {
-            if(!this.m_parameters.ContainsKey(variableName))
+            if (!this.m_parameters.ContainsKey(variableName))
                 this.m_parameters.Add(variableName, new ParameterRegistration()
                 {
                     Type = variableType,
