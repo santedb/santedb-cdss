@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Applets.ViewModel.Null;
@@ -34,25 +35,22 @@ using System.Linq;
 
 namespace SanteDB.Cdss.Xml
 {
-
     /// <summary>
     /// Clinicl protocol that is stored/loaded via XML
     /// </summary>
     public class XmlClinicalProtocol : IClinicalProtocol
     {
-
         // Protocol definition
         private Core.Model.Acts.Protocol m_protocolDefinition = null;
 
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
 
         /// <summary>
         /// Default ctor
         /// </summary>
         public XmlClinicalProtocol()
         {
-
         }
 
         /// <summary>
@@ -102,7 +100,6 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public List<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
         {
-
             try
             {
 #if DEBUG
@@ -142,7 +139,6 @@ namespace SanteDB.Cdss.Xml
                 {
                     for (var index = 0; index < rule.Repeat; index++)
                     {
-
                         context.Var("index", index);
                         foreach (var itm in rule.Variables)
                         {
@@ -151,7 +147,7 @@ namespace SanteDB.Cdss.Xml
                             context.Var(itm.VariableName, value);
                         }
 
-                        // TODO: Variable initialization 
+                        // TODO: Variable initialization
                         if (rule.When.Evaluate(context) && !parameters.ContainsKey("ignoreWhen"))
                         {
                             var acts = rule.Then.Evaluate(context);
@@ -165,13 +161,11 @@ namespace SanteDB.Cdss.Xml
                                     Protocol = this.GetProtocolData(),
                                     Sequence = step
                                 });
-
                         }
                         else
                             this.m_tracer.TraceInfo("{0} does not meet criteria for rule {1}.{2}", patient, this.Name, rule.Name ?? rule.Id);
 
                         step++;
-
                     }
                 }
 
@@ -238,7 +232,6 @@ namespace SanteDB.Cdss.Xml
             this.Definition.When?.Compile<Patient>(context);
             foreach (var wc in this.Definition.Rules)
                 wc.When.Compile<Patient>(context);
-
         }
 
         /// <summary>
@@ -274,8 +267,6 @@ namespace SanteDB.Cdss.Xml
             serializer.Serialize(p);
 
             parameters.Add("xml.initialized", true);
-
-
         }
     }
 }

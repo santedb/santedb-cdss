@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using ExpressionEvaluator;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
@@ -35,12 +36,11 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(ProtocolWhenClauseCollection), Namespace = "http://santedb.org/cdss")]
     public class ProtocolWhenClauseCollection
     {
-
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
 
         /// <summary>
-        /// Operator 
+        /// Operator
         /// </summary>
         [XmlAttribute("evaluation")]
         public BinaryOperatorType Operator { get; set; }
@@ -64,7 +64,7 @@ namespace SanteDB.Cdss.Xml.Model
         private Object m_lockObject = new object();
 
         /// <summary>
-        /// Gets the current context reference value 
+        /// Gets the current context reference value
         /// </summary>
         [ThreadStatic]
         private static ICdssContext st_contextReference;
@@ -79,7 +79,6 @@ namespace SanteDB.Cdss.Xml.Model
             // Iterate and perform binary operations
             foreach (var itm in this.Clause)
             {
-
                 Expression clauseExpr = null;
                 if (itm is ProtocolWhenClauseCollection)
                 {
@@ -150,7 +149,6 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public bool Evaluate<TData>(CdssContext<TData> context)
         {
-
             if (this.m_compiledExpression == null)
                 this.Compile<TData>(context);
 
@@ -168,9 +166,8 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(WhenClauseHdsiExpression), Namespace = "http://santedb.org/cdss")]
     public class WhenClauseHdsiExpression
     {
-
         /// <summary>
-        /// Only when the data element DOES NOT match 
+        /// Only when the data element DOES NOT match
         /// </summary>
         [XmlAttribute("negationIndicator")]
         public bool NegationIndicator { get; set; }
@@ -180,6 +177,5 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         [XmlText]
         public String Expression { get; set; }
-
     }
 }
