@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using System;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Model.Roles;
@@ -52,8 +53,11 @@ namespace SanteDB.Cdss.Xml.Test
         public DateTime StartTime => DateTime.Now;
 
         public event EventHandler Starting;
+
         public event EventHandler Started;
+
         public event EventHandler Stopping;
+
         public event EventHandler Stopped;
 
         /// <summary>
@@ -62,7 +66,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleOPV()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -79,8 +82,6 @@ namespace SanteDB.Cdss.Xml.Test
             String json = jsonSerializer.Serialize(newborn);
 
             Assert.AreEqual(4, acts.Count);
-
-
         }
 
         /// <summary>
@@ -89,7 +90,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleBCG()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -114,7 +114,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldRepeatWeight()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -139,7 +138,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSkipWeight()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -169,7 +167,6 @@ namespace SanteDB.Cdss.Xml.Test
                             ActTime = DateTime.Now
                         }
                     }
-
                 }
             };
 
@@ -180,15 +177,12 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.AreEqual(59, acts.Count);
         }
 
-
-
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
         [Test]
         public void TestShouldScheduleMR()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -213,7 +207,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSchedulePCV()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -238,7 +231,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleDTP()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -263,7 +255,6 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleRota()
         {
-
             ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
             XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
 
@@ -282,14 +273,12 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.AreEqual(2, acts.Count);
         }
 
-
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
         [Test]
         public void ShouldHandlePartials()
         {
-
             SimpleCarePlanService scp = new SimpleCarePlanService();
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
@@ -315,15 +304,12 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.IsFalse(acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKey.RecordTarget)));
         }
 
-
-
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
         [Test]
         public void ShouldExcludeAdults()
         {
-
             SimpleCarePlanService scp = new SimpleCarePlanService();
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
@@ -333,7 +319,7 @@ namespace SanteDB.Cdss.Xml.Test
                 DateOfBirth = DateTime.Now.AddMonths(-240),
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
-            
+
             // Now apply the protocol
             var acts = scp.CreateCarePlan(adult);
             var jsonSerializer = new JsonViewModelSerializer();
@@ -341,14 +327,12 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.AreEqual(0, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
         }
 
-
         /// <summary>
         /// Should schedule all vaccines
         /// </summary>
         [Test]
         public void ShouldScheduleAll()
         {
-
             SimpleCarePlanService scp = new SimpleCarePlanService();
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
@@ -399,6 +383,16 @@ namespace SanteDB.Cdss.Xml.Test
         {
             return new DummyProtocolRepository();
         }
+
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Stop()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>
@@ -406,14 +400,14 @@ namespace SanteDB.Cdss.Xml.Test
     /// </summary>
     internal class DummyProtocolRepository : IClinicalProtocolRepositoryService
     {
-
         public String ServiceName => "Fake Repository";
+
         public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
         {
             List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
 
-            foreach(var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
-                if(i.EndsWith(".xml"))
+            foreach (var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
+                if (i.EndsWith(".xml"))
                 {
                     ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
                     retVal.Add(new XmlClinicalProtocol(definition).GetProtocolData());
