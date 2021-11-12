@@ -18,19 +18,21 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System;
-using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Model.Constants;
-using SanteDB.Core.Model.Entities;
-using System.Collections.Generic;
-using SanteDB.Core.Model.DataTypes;
-using SanteDB.Cdss.Xml.Model;
-using System.Linq.Expressions;
-using SanteDB.Cdss.Xml.Model.XmlLinq;
 using NUnit.Framework;
+using SanteDB.Cdss.Xml.Model;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
+using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.DataTypes;
+using SanteDB.Core.Model.Entities;
+using SanteDB.Core.Model.Roles;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace SanteDB.Cdss.Xml.Test
 {
+    [ExcludeFromCodeCoverage]
     [TestFixture(Category = "CDSS")]
     public class TestWhereClauseExecution
     {

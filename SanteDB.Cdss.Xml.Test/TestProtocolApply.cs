@@ -19,28 +19,27 @@
  * Date: 2021-8-5
  */
 
-using System;
-using SanteDB.Cdss.Xml.Model;
-using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Model.Acts;
-using SanteDB.Core.Model.Constants;
-using System.Linq;
-using SanteDB.Core.Applets.ViewModel;
-using SanteDB.Core.Model.Collection;
-using SanteDB.Core.Model;
-using SanteDB.Core.Protocol;
-using SanteDB.Core.Services;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using NUnit.Framework;
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.Roles;
+using SanteDB.Core.Protocol;
+using SanteDB.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace SanteDB.Cdss.Xml.Test
 {
     /// <summary>
     /// Tests the application of protocol
     /// </summary>
+    [ExcludeFromCodeCoverage]
     [TestFixture(Category = "CDSS")]
     public class TestProtocolApply : IServiceProvider, IApplicationServiceContext
     {
