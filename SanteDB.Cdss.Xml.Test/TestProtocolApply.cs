@@ -22,6 +22,7 @@
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
+using SanteDB.Core.Model;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
@@ -292,15 +293,15 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(83, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.IsFalse(acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Any(o => o.Protocols.Count() > 1));
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
             acts = scp.CreateCarePlan(newborn);
             //Assert.AreEqual(60, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.AreEqual(23, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o=>!(o.LoadProperty(r=>r.TargetAct) is QuantityObservation)).Count());
+            Assert.AreEqual(23, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
             acts = scp.CreateCarePlan(newborn);
             //Assert.AreEqual(60, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.AreEqual(83, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.IsFalse(acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKey.RecordTarget)));
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKey.RecordTarget)));
         }
 
         /// <summary>
@@ -323,7 +324,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(adult);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(adult);
-            Assert.AreEqual(0, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
+            Assert.AreEqual(0, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
         }
 
         /// <summary>
@@ -346,8 +347,8 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(83, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.IsFalse(acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Any(o => o.Protocols.Count() > 1));
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
         /// <summary>
@@ -369,10 +370,9 @@ namespace SanteDB.Cdss.Xml.Test
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn, true);
             var jsonSerializer = new JsonViewModelSerializer();
-			string json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
-            Assert.IsFalse(acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Any(o => o.Protocols.Count() > 1));
-
+            string json = jsonSerializer.Serialize(newborn);
+            Assert.AreEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
         /// <summary>
