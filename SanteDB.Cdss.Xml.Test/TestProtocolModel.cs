@@ -18,25 +18,26 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System;
-using System.Linq.Expressions;
-using SanteDB.Core.Model.Roles;
-using SanteDB.Cdss.Xml.Model.XmlLinq;
-using System.Xml.Serialization;
-using System.IO;
-using System.Diagnostics;
-using System.Linq;
-using SanteDB.Core.Model.Constants;
-using SanteDB.Core.Model.Acts;
-using System.Collections.Generic;
 using NUnit.Framework;
+using SanteDB.Cdss.Xml.Model.XmlLinq;
+using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Model.Serialization;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Test
 {
     /// <summary>
     /// Tests which ensure the protocol model can be loaded and serialized properly
     /// </summary>
+    [ExcludeFromCodeCoverage]
     [TestFixture(Category = "CDSS")]
     public class TestProtocolModel
     {
