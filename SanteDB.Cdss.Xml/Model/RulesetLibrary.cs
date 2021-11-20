@@ -19,48 +19,50 @@
  * Date: 2021-8-5
  */
 
+using SanteDB.Core.Applets.ViewModel.Description;
+using SanteDB.Core.Model.Serialization;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
 {
     /// <summary>
-    /// Represents a single rule definition
+    /// Represents a collection of common rules or then conditions which can be included in other contexts
     /// </summary>
-    [XmlType(nameof(ProtocolRuleDefinition), Namespace = "http://santedb.org/cdss")]
-    public class ProtocolRuleDefinition : DecisionSupportBaseElement
+    [XmlType(nameof(RulesetLibrary), Namespace = "http://santedb.org/cdss")]
+    [XmlRoot(nameof(RulesetLibrary), Namespace = "http://santedb.org/cdss")]
+    public class RulesetLibrary : DecisionSupportBaseElement
     {
+        private static XmlSerializer s_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(RulesetLibrary));
+
         /// <summary>
-        /// Creates a new protocol rule definition
+        /// When clause for the entire ruleset
         /// </summary>
-        public ProtocolRuleDefinition()
+        [XmlElement("clause")]
+        public List<ProtocolWhenClauseCollection> When { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rules
+        /// </summary>
+        [XmlElement("rule")]
+        public List<ProtocolRuleDefinition> Rules { get; set; }
+
+        /// <summary>
+        /// Save the rules definition to the specified stream
+        /// </summary>
+        public void Save(Stream ms)
         {
-            this.Repeat = 1;
-            this.Variables = new List<ProtocolVariableDefinition>();
+            s_xsz.Serialize(ms, this);
         }
 
         /// <summary>
-        /// Repeat?
+        /// Load the rules from the stream
         /// </summary>
-        [XmlAttribute("repeat")]
-        public int Repeat { get; set; }
-
-        /// <summary>
-        /// Variables
-        /// </summary>
-        [XmlElement("variable")]
-        public List<ProtocolVariableDefinition> Variables { get; set; }
-
-        /// <summary>
-        /// Represents a WHEN condition
-        /// </summary>
-        [XmlElement("when")]
-        public ProtocolWhenClauseCollection When { get; set; }
-
-        /// <summary>
-        /// Represents the THEN conditions
-        /// </summary>
-        [XmlElement("then")]
-        public ProtocolThenClauseCollection Then { get; set; }
+        public static RulesetLibrary Load(Stream ms)
+        {
+            return s_xsz.Deserialize(ms) as RulesetLibrary;
+        }
     }
 }

@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using ExpressionEvaluator;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
@@ -42,7 +43,6 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(ProtocolThenClauseCollection), Namespace = "http://santedb.org/cdss")]
     public class ProtocolThenClauseCollection : DecisionSupportBaseElement
     {
-
         // JSON Serializer
         private static JsonViewModelSerializer s_serializer = new JsonViewModelSerializer();
 
@@ -66,12 +66,11 @@ namespace SanteDB.Cdss.Xml.Model
 
             foreach (var itm in this.Action)
             {
-
                 Act act = null;
                 if (itm.Element is String) // JSON
                 {
                     itm.Element = s_serializer.DeSerialize<Act>(itm.Element as String);
-                    // Load all concepts for the specified objects 
+                    // Load all concepts for the specified objects
                 }
                 act = (itm.Element as Act).Clone() as Act;
                 act.Participations = new List<ActParticipation>((itm.Element as Act).Participations.Select(o => o.Clone() as ActParticipation));
@@ -92,7 +91,6 @@ namespace SanteDB.Cdss.Xml.Model
                 act.CreationTime = DateTime.Now;
                 // The act to the return value
                 retVal.Add(act);
-
             }
 
             return retVal;
@@ -115,13 +113,15 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Gets the elements to be performed
         /// </summary>
-        [XmlElement("Act", typeof(Act), Namespace = "http://santedb.org/model")]
-        [XmlElement("TextObservation", typeof(TextObservation), Namespace = "http://santedb.org/model")]
-        [XmlElement("SubstanceAdministration", typeof(SubstanceAdministration), Namespace = "http://santedb.org/model")]
-        [XmlElement("QuantityObservation", typeof(QuantityObservation), Namespace = "http://santedb.org/model")]
-        [XmlElement("CodedObservation", typeof(CodedObservation), Namespace = "http://santedb.org/model")]
-        [XmlElement("PatientEncounter", typeof(PatientEncounter), Namespace = "http://santedb.org/model")]
-        [XmlElement("DetectedIssue", typeof(DetectedIssue), Namespace = "http://santedb.org/issue")]
+        [XmlElement(nameof(Act), typeof(Act), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(TextObservation), typeof(TextObservation), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(SubstanceAdministration), typeof(SubstanceAdministration), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(QuantityObservation), typeof(QuantityObservation), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(CodedObservation), typeof(CodedObservation), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(PatientEncounter), typeof(PatientEncounter), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(Procedure), typeof(Procedure), Namespace = "http://santedb.org/model")]
+        [XmlElement(nameof(DetectedIssue), typeof(DetectedIssue), Namespace = "http://santedb.org/issue")]
+        [XmlElement("reference", typeof(CdssObjectReference))]
         [XmlElement("jsonModel", typeof(String))]
         public Object Element { get; set; }
 
@@ -165,12 +165,16 @@ namespace SanteDB.Cdss.Xml.Model
     {
         // The setter action
         private Delegate m_setter;
+
         // Select method
         private MethodInfo m_scopeSelectMethod;
+
         // Linq expression to select scope
         private Expression m_linqExpression;
+
         // Compiled expression
         private Delegate m_compiledExpression;
+
         /// <summary>
         /// Action name
         /// </summary>
@@ -207,7 +211,6 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_setter == null)
             {
-
                 CompiledExpression exp = new CompiledExpression(this.ValueExpression);
                 exp.TypeRegistry = new TypeRegistry();
                 exp.TypeRegistry.RegisterDefaultTypes();
@@ -218,7 +221,6 @@ namespace SanteDB.Cdss.Xml.Model
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)
                 {
-
                     var scopeProperty = context.Target.GetType().GetRuntimeProperty(this.ScopeSelector);
 
                     if (scopeProperty == null) return null; // no scope
@@ -238,7 +240,6 @@ namespace SanteDB.Cdss.Xml.Model
                                new Type[] { scopeProperty.PropertyType, predicateType });
 
                         this.m_scopeSelectMethod = (MethodInfo)firstMethod;
-
                     }
                     exp.TypeRegistry.RegisterType(this.m_scopeSelectMethod.ReturnType.Name, this.m_scopeSelectMethod.ReturnType);
 
@@ -280,7 +281,6 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public override object Evaluate(Act act, CdssContext<Patient> context, IDictionary<String, Object> scopes)
         {
-
             var propertyInfo = act.GetType().GetRuntimeProperty(this.PropertyName);
 
             if (this.Element != null)
@@ -292,12 +292,10 @@ namespace SanteDB.Cdss.Xml.Model
                 //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                 if (Core.Model.Map.MapUtil.TryConvert(setValue, propertyInfo.PropertyType, out setValue))
                     propertyInfo.SetValue(act, setValue);
-
             }
 
             return propertyInfo.GetValue(act);
         }
-
     }
 
     /// <summary>
@@ -306,7 +304,6 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(PropertyAddAction), Namespace = "http://santedb.org/cdss")]
     public class PropertyAddAction : PropertyAction
     {
-
         /// <summary>
         /// Evaluate
         /// </summary>
@@ -328,5 +325,4 @@ namespace SanteDB.Cdss.Xml.Model
             }
         }
     }
-
 }
