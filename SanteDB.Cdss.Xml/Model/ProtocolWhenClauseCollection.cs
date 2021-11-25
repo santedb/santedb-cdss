@@ -34,7 +34,7 @@ namespace SanteDB.Cdss.Xml.Model
     /// Represents a when clause
     /// </summary>
     [XmlType(nameof(ProtocolWhenClauseCollection), Namespace = "http://santedb.org/cdss")]
-    public class ProtocolWhenClauseCollection
+    public class ProtocolWhenClauseCollection : DecisionSupportBaseElement
     {
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
@@ -52,6 +52,7 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("expressionGrouping", typeof(ProtocolWhenClauseCollection))]
         [XmlElement("linqXmlExpression", typeof(XmlLambdaExpression))]
         [XmlElement("linqExpression", typeof(String))]
+        [XmlElement("reference", typeof(CdssObjectReference))]
         public List<object> Clause { get; set; }
 
         /// <summary>
@@ -177,5 +178,24 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         [XmlText]
         public String Expression { get; set; }
+    }
+
+    /// <summary>
+    /// References another when-clause
+    /// </summary>
+    [XmlType(nameof(CdssObjectReference), Namespace = "http://santedb.org/cdss")]
+    public class CdssObjectReference
+    {
+        /// <summary>
+        /// Only when the data element DOES NOT match
+        /// </summary>
+        [XmlAttribute("negationIndicator")]
+        public bool NegationIndicator { get; set; }
+
+        /// <summary>
+        /// The reference to the other clause
+        /// </summary>
+        [XmlText]
+        public string Reference { get; set; }
     }
 }
