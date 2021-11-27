@@ -114,8 +114,8 @@
     <PackageReference Include="Antlr">
       <Version>3.5.0.2</Version>
     </PackageReference>
-    <PackageReference Include="ExpressionEvaluator">
-      <Version>2.0.4</Version>
+    <PackageReference Include="DynamicExpresso.Core">
+      <Version>2.9.5</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
