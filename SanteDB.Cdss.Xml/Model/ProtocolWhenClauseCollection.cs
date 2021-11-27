@@ -19,7 +19,7 @@
  * Date: 2021-8-5
  */
 
-using ExpressionEvaluator;
+using DynamicExpresso;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Query;
@@ -107,17 +107,12 @@ namespace SanteDB.Cdss.Xml.Model
                 }
                 else
                 {
-                    CompiledExpression<bool> exp = new CompiledExpression<bool>(itm as String);
-                    exp.TypeRegistry = new TypeRegistry();
-                    exp.TypeRegistry.RegisterDefaultTypes();
-                    exp.TypeRegistry.RegisterType<TData>();
-                    exp.TypeRegistry.RegisterType<Guid>();
-                    exp.TypeRegistry.RegisterType<TimeSpan>();
+                    var interpreter = new Interpreter(InterpreterOptions.Default)
+                        .Reference(typeof(TData))
+                        .Reference(typeof(Guid))
+                        .Reference(typeof(TimeSpan));
 
-                    //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
-                    exp.ScopeCompile<CdssContext<TData>>();
-                    //Func<TData, bool> d = exp.ScopeCompile<TData>();
-                    var linqAction = exp.GenerateLambda<Func<CdssContext<TData>, bool>, CdssContext<TData>>(true, false);
+                    var linqAction = interpreter.ParseAsExpression<Func<CdssContext<TData>, bool>>(itm.ToString(), "_");
                     clauseExpr = Expression.Invoke(linqAction, expressionParm);
                     //clauseExpr = Expression.Invoke(d, expressionParm);
                 }

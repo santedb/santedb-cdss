@@ -19,7 +19,7 @@
  * Date: 2021-8-5
  */
 
-using ExpressionEvaluator;
+using DynamicExpresso;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
@@ -164,7 +164,7 @@ namespace SanteDB.Cdss.Xml.Model
     public class PropertyAssignAction : PropertyAction
     {
         // The setter action
-        private Delegate m_setter;
+        private Lambda m_setter;
 
         // Select method
         private MethodInfo m_scopeSelectMethod;
@@ -211,12 +211,12 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_setter == null)
             {
-                CompiledExpression exp = new CompiledExpression(this.ValueExpression);
-                exp.TypeRegistry = new TypeRegistry();
-                exp.TypeRegistry.RegisterDefaultTypes();
-                exp.TypeRegistry.RegisterType<Guid>();
-                exp.TypeRegistry.RegisterType<DateTimeOffset>();
-                exp.TypeRegistry.RegisterType<TimeSpan>();
+                Func<String, Object> varFetch = (a) => context.Var(a);
+
+                var interpretor = new Interpreter(InterpreterOptions.Default)
+                    .Reference(typeof(TimeSpan))
+                    .Reference(typeof(Guid))
+                    .Reference(typeof(DateTimeOffset));
 
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)
@@ -241,13 +241,11 @@ namespace SanteDB.Cdss.Xml.Model
 
                         this.m_scopeSelectMethod = (MethodInfo)firstMethod;
                     }
-                    exp.TypeRegistry.RegisterType(this.m_scopeSelectMethod.ReturnType.Name, this.m_scopeSelectMethod.ReturnType);
-
-                    var compileMethod = typeof(CompiledExpression).GetGenericMethod(nameof(CompiledExpression.ScopeCompile), new Type[] { this.m_scopeSelectMethod.ReturnType }, new Type[] { });
-                    this.m_setter = (compileMethod.Invoke(exp, null) as Delegate);
+                    interpretor = interpretor.Reference(this.m_scopeSelectMethod.ReturnType);
+                    this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", this.m_scopeSelectMethod.ReturnType));
                 }
                 else
-                    this.m_setter = exp.ScopeCompile<CdssContext<Patient>>();
+                    this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", typeof(CdssContext<Patient>)));
             }
 
             Object setValue = null;
@@ -268,10 +266,10 @@ namespace SanteDB.Cdss.Xml.Model
                         if (!scopes.ContainsKey(scopeKey))
                             scopes.Add(scopeKey, scope);
                 }
-                setValue = this.m_setter.DynamicInvoke(scope);
+                setValue = this.m_setter.Invoke(scope);
             }
             else
-                setValue = this.m_setter.DynamicInvoke(context);
+                setValue = this.m_setter.Invoke(context);
 
             return setValue;
         }
