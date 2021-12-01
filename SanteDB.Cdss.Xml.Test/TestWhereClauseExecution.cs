@@ -154,12 +154,12 @@ namespace SanteDB.Cdss.Xml.Test
                 Clause = new List<Object>() {
                     XmlExpression.FromExpression(filterCondition),
                     new WhenClauseHdsiExpression() { Expression = "tag[hasBirthCertificate].value=true" },
-                    "Target.StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
+                    "_.Target.StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
                 }
             };
             Assert.IsTrue(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
 
-            when.Clause.Add("Target.Tags.Count == 0");
+            when.Clause.Add("_.Target.Tags.Count == 0");
             when.Compile(new CdssContext<Patient>(this.m_patientUnderTest));
             Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
