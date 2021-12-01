@@ -101,7 +101,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
             ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
             {
-                Clause = new List<object>() { "!Target.DeceasedDate.HasValue" }
+                Clause = new List<object>() { "!_.Target.DeceasedDate.HasValue" }
             };
             Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
         }
