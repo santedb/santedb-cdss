@@ -21,7 +21,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" name="Oral Polio Vaccine" protocolVersion="1" uuid="C2A628F3-DB52-45ED-B863-0FB4B1B8E77C">
   <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="OPV0">
     <!-- When the patient has not received any, -->
@@ -48,7 +48,7 @@
               },
               "routeModel" : {
                 "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
-                "mnemonic": "RouteOffAdministration-PO"
+                "mnemonic": "RouteOfAdministration-PO"
               },
 				      "participation": {
 					      "Product": [{
@@ -78,9 +78,9 @@
             ]]>
         </jsonModel>
         <!-- Set the dynamic properties to 0..5 days after birth - Recommend 1 day after birth-->
-        <assign propertyName="StartTime">Target.DateOfBirth.Value</assign>
-        <assign propertyName="StopTime">Target.DateOfBirth.Value + new TimeSpan(5,0,0,0)</assign>
-        <assign propertyName="ActTime">Target.DateOfBirth.Value</assign>
+        <assign propertyName="StartTime">_.Target.DateOfBirth.Value</assign>
+        <assign propertyName="StopTime">_.Target.DateOfBirth.Value + new TimeSpan(5,0,0,0)</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value</assign>
       </action>
     </then>
   </rule>
@@ -109,7 +109,7 @@
               },
               "routeModel" : {
                 "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
-                "mnemonic": "RouteOffAdministration-PO"
+                "mnemonic": "RouteOfAdministration-PO"
               },
 				      "participation": {
 					      "Product": [{
@@ -138,8 +138,8 @@
 			      }
             ]]>
         </jsonModel>
-        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
-        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
+        <assign propertyName="StartTime">_.Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value + new TimeSpan(6 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>
@@ -173,7 +173,7 @@
               },
               "routeModel" : {
                 "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
-                "mnemonic": "RouteOffAdministration-PO"
+                "mnemonic": "RouteOfAdministration-PO"
               },
 				      "participation": {
 					      "Product": [{
@@ -202,9 +202,9 @@
 			      }
             ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StartTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="ActTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StopTime">Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>
@@ -238,7 +238,7 @@
               },
               "routeModel" : {
                 "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
-                "mnemonic": "RouteOffAdministration-PO"
+                "mnemonic": "RouteOfAdministration-PO"
               },
 				      "participation": {
 					      "Product": [{
@@ -267,9 +267,9 @@
 			      }
             ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StartTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="ActTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StopTime">Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-OPV" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>

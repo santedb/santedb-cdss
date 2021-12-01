@@ -21,7 +21,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="D48FF086-702E-4F46-A8DE-C3FFBD02FD7C" id="MR" name="Measles Rubella Vaccine">
   <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="MR1">
     <when evaluation="and">
@@ -76,8 +76,8 @@
 			      }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(274, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(274,0,0,0)</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value + new TimeSpan(274, 0, 0, 0)</assign>
+        <assign propertyName="StartTime">_.Target.DateOfBirth.Value + new TimeSpan(274,0,0,0)</assign>
       </action>
     </then>
   </rule>
@@ -139,9 +139,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="StartTime">Act.ActTime + new TimeSpan(274,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="ActTime">Act.ActTime + new TimeSpan(274,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="StopTime">Act.ActTime + new TimeSpan(281,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="StartTime">_.Act.ActTime + new TimeSpan(274,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="ActTime">_.Act.ActTime + new TimeSpan(274,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-MR" propertyName="StopTime">_.Act.ActTime + new TimeSpan(281,0,0,0)</assign>
       </action>
     </then>
   </rule>
