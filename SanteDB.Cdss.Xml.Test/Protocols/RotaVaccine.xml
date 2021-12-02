@@ -20,7 +20,7 @@
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="D4DFD6C2-2A83-4A4E-BBFE-7D607604A60C" name="Rota Virus Vaccine">
   <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
 
   <rule id="ROTA1">
@@ -76,9 +76,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">Target.DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">Target.DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
-        <assign propertyName="StopTime">Target.DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
+        <assign propertyName="StartTime">_.Target.DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
+        <assign propertyName="StopTime">_.Target.DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
       </action>
     </then>
   </rule>
@@ -140,9 +140,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StartTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="ActTime">Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StopTime">Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>
