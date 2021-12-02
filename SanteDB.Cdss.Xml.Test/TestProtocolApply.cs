@@ -397,6 +397,7 @@ namespace SanteDB.Cdss.Xml.Test
     /// <summary>
     /// Dummy clinical repository
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal class DummyProtocolRepository : IClinicalProtocolRepositoryService
     {
         public String ServiceName => "Fake Repository";
