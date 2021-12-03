@@ -20,6 +20,7 @@
  */
 
 using SanteDB.Core.Applets.ViewModel.Description;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Serialization;
 using System.Collections.Generic;
 using System.IO;
@@ -36,6 +37,12 @@ namespace SanteDB.Cdss.Xml.Model
     public class ProtocolDefinition : DecisionSupportBaseElement
     {
         private static XmlSerializer s_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
+
+        /// <summary>
+        /// Includes documentation about the protocol definition
+        /// </summary>
+        [XmlElement("documentation")]
+        public Narrative Documentation { get; set; }
 
         /// <summary>
         /// Includes a ruleset definition file
