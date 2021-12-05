@@ -50,7 +50,7 @@
             }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)Var("index"))</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index"))</assign>
         <assign propertyName="StartTime">_.Var("minDate")</assign>
         <assign propertyName="StopTime">_.Var("maxDate")</assign>
       </action>
