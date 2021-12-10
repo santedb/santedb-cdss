@@ -3,30 +3,30 @@
  - Copyright 2021-2021 SanteSuite Contributors (See NOTICE.md for full copyright notices)
  - Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  - Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- - 
- - Licensed under the Apache License, Version 2.0 (the "License"); you 
- - may not use this file except in compliance with the License. You may 
- - obtain a copy of the License at 
- - 
- - http://www.apache.org/licenses/LICENSE-2.0 
- - 
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License"); you
+ - may not use this file except in compliance with the License. You may
+ - obtain a copy of the License at
+ -
+ - http://www.apache.org/licenses/LICENSE-2.0
+ -
  - Unless required by applicable law or agreed to in writing, software
  - distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- - License for the specific language governing permissions and limitations under 
+ - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ - License for the specific language governing permissions and limitations under
  - the License.
- - 
+ -
  - User: fyfej
  - Date: 2021-8-5
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="Weight" name="Weigh Schedule">
   <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
+    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="Weight" repeat="60">
-    <variable name="minDate" type="System.DateTimeOffset">Target.DateOfBirth.Value.Date.AddMonths((int)Var("index")).AddDays(-Target.DateOfBirth.Value.Day + 1)</variable>
-    <variable name="maxDate" type="System.DateTimeOffset">Target.DateOfBirth.Value.Date.AddMonths((int)Var("index") + 1).AddDays(-Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
-    <variable name="age"  type="System.Int32">DateTime.Now.Subtract(Target.DateOfBirth.Value).TotalDays / 7</variable>
+    <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index")).AddDays(_.-Target.DateOfBirth.Value.Day + 1)</variable>
+    <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index") + 1).AddDays(_.-Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
+    <variable name="age"  type="System.Int32">DateTime.Now.Subtract(_.Target.DateOfBirth.Value).TotalDays / 7</variable>
     <when evaluation="and">
       <!-- Patient does not have Weights taken or proposed-->
       <hdsiExpression negationIndicator="true">participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$minDate&amp;participation[RecordTarget].source.actTime=&lt;$maxDate</hdsiExpression>
@@ -36,7 +36,7 @@
         <jsonModel>
           <![CDATA[
             {
-              "$type": "QuantityObservation",              
+              "$type": "QuantityObservation",
               "template": {
                 "mnemonic": "Act.Observation.Weight"
               },
@@ -50,9 +50,9 @@
             }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">Target.DateOfBirth.Value.Date.AddMonths((int)Var("index"))</assign>
-        <assign propertyName="StartTime">Var("minDate")</assign>
-        <assign propertyName="StopTime">Var("maxDate")</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index"))</assign>
+        <assign propertyName="StartTime">_.Var("minDate")</assign>
+        <assign propertyName="StopTime">_.Var("maxDate")</assign>
       </action>
       <!-- Insights for Weight -->
       <insights>
