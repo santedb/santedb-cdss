@@ -136,7 +136,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestGuardNoPolioDose0()
         {
-            Expression<Func<Patient, bool>> filterCondition = (data) => !data.Participations.Where(guard => guard.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is SubstanceAdministration && (o.SourceEntity as SubstanceAdministration).SequenceId == 0 && o.SourceEntity.Participations.Any(p => p.PlayerEntity.TypeConcept.Mnemonic == "VaccineType-OralPolioVaccine"));
+            Expression<Func<Patient, bool>> filterCondition = (data) => !data.Participations.Where(guard => guard.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is SubstanceAdministration && (o.SourceEntity as SubstanceAdministration).SequenceId == 0 && o.SourceEntity.Participations.Any(p => p.PlayerEntity.TypeConcept.Mnemonic == "VaccineType-OralPolioVaccine"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             var xml = this.ToXmlString(xmlExpr);
             Trace.TraceInformation(xml);
@@ -154,7 +154,7 @@ namespace SanteDB.Cdss.Xml.Test
         public void TestGuardNotImmunoSuppressed()
         {
 
-            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
+            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
 

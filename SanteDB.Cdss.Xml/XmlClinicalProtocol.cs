@@ -171,7 +171,7 @@ namespace SanteDB.Cdss.Xml
 
                 // Now we want to add the stuff to the patient
                 lock (triggerPatient)
-                    triggerPatient.Participations.AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKey.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                    triggerPatient.Participations.AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
 #if DEBUG
                 sw.Stop();
                 this.m_tracer.TraceVerbose("Protocol {0} took {1} ms", this.Name, sw.ElapsedMilliseconds);
