@@ -22,6 +22,7 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Services;
 using System;
@@ -37,6 +38,13 @@ namespace SanteDB.Cdss.Xml
     /// <summary>
     /// Applet clinical protocol repository
     /// </summary>
+    /// <remarks>
+    /// <para>This implementation of the <see cref="IClinicalProtocolRepositoryService"/> is responsible for loading 
+    /// clinical protocols defined in <see href="https://help.santesuite.org/developers/applets/cdss-protocols">SanteDB's CDSS XML</see> format and 
+    /// translating them into <see cref="Protocol"/> instances which can then, in-turn, be linked with instances of <see cref="Act"/>
+    /// which are also stored in the CDR.
+    /// </para>
+    /// </remarks>
     [ServiceProvider("Applet Based Clinical Protocol Repository")]
     public class AppletClinicalProtocolRepository : IClinicalProtocolRepositoryService
     {
