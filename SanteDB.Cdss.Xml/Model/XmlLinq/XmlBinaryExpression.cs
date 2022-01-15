@@ -32,26 +32,59 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
     [XmlType(nameof(BinaryOperatorType), Namespace = "http://santedb.org/cdss")]
     public enum BinaryOperatorType
     {
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is equal to <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("eq")]
         Equal,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is less than <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("lt")]
         LessThan,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is less than or equal to <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("lte")]
         LessThanOrEqual,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is greater than <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("gt")]
         GreaterThan,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is greater than or equal to <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("gte")]
         GreaterThanOrEqual,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is not equal to <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("ne")]
         NotEqual,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> must evaluate to true and the <see cref="BinaryExpression.Right"/> must evaluate to true
+        /// </summary>
         [XmlEnum("and")]
         AndAlso,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> must evaluate to true or the <see cref="BinaryExpression.Right"/> must evaluate to true
+        /// </summary>
         [XmlEnum("or")]
         OrElse,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is to be added to the <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("add")]
         Add,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is to be subtracted from the <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("sub")]
         Subtract,
+        /// <summary>
+        /// The <see cref="BinaryExpression.Left"/> is an instance of <see cref="BinaryExpression.Right"/>
+        /// </summary>
         [XmlEnum("is")]
         TypeIs
     }
