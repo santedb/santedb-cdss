@@ -45,7 +45,7 @@
     <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
   </PropertyGroup>  
   <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.9.5" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.10.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>    
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -131,7 +131,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="SharpCompress" Version="0.30.0" />
+    <PackageReference Include="SharpCompress" Version="0.30.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
