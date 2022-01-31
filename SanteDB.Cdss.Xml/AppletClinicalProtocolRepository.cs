@@ -127,7 +127,7 @@ namespace SanteDB.Cdss.Xml
 
             // Generate key
             if (data.Key == null) data.Key = Guid.NewGuid();
-            data.CreationTime = DateTime.Now;
+            data.CreationTime = DateTimeOffset.Now;
 
             if (!this.m_protocols.Any(o => o.Key == data.Key))
                 this.m_protocols.Add(data);

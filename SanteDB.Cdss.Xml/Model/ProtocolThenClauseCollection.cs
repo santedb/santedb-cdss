@@ -88,7 +88,7 @@ namespace SanteDB.Cdss.Xml.Model
                 act.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 // Add record target to the source for forward rules
                 context.Target.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
-                act.CreationTime = DateTime.Now;
+                act.CreationTime = DateTimeOffset.Now;
                 // The act to the return value
                 retVal.Add(act);
             }
