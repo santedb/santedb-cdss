@@ -35,6 +35,8 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(ProtocolWhenClauseCollection), Namespace = "http://santedb.org/cdss")]
     public class ProtocolWhenClauseCollection : DecisionSupportBaseElement
     {
+
+       
         // Tracer
         private Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
 
@@ -88,7 +90,7 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var varDict = new Dictionary<String, Func<Object>>();
                     foreach (var varRef in context.Variables)
-                        varDict.Add(varRef, () => st_contextReference?.Var(varRef));
+                        varDict.Add(varRef, () => st_contextReference?.Get(varRef));
 
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
                     clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
@@ -109,8 +111,9 @@ namespace SanteDB.Cdss.Xml.Model
                     var interpreter = new Interpreter(InterpreterOptions.Default)
                         .Reference(typeof(TData))
                         .Reference(typeof(Guid))
-                        .Reference(typeof(TimeSpan));
-
+                        .Reference(typeof(TimeSpan))
+                        .Reference(typeof(Types))
+                        .EnableReflection();
                     var linqAction = interpreter.ParseAsExpression<Func<CdssContext<TData>, bool>>(itm.ToString(), "_");
                     clauseExpr = Expression.Invoke(linqAction, expressionParm);
                     //clauseExpr = Expression.Invoke(d, expressionParm);

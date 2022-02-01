@@ -210,12 +210,13 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_setter == null)
             {
-                Func<String, Object> varFetch = (a) => context.Var(a);
+                Func<String, Object> varFetch = (a) => context.Get(a);
 
                 var interpretor = new Interpreter(InterpreterOptions.Default)
                     .Reference(typeof(TimeSpan))
                     .Reference(typeof(Guid))
-                    .Reference(typeof(DateTimeOffset));
+                    .Reference(typeof(DateTimeOffset))
+                    .Reference(typeof(Types));
 
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)

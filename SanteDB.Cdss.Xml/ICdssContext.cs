@@ -31,11 +31,11 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Sets the variable value
         /// </summary>
-        void Var(String varName, Object value);
+        void Set(String varName, Object value);
 
         /// <summary>
         /// Gets the variable name
         /// </summary>
-        Object Var(String varName);
+        Object Get(String varName);
     }
 }

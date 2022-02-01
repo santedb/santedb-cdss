@@ -76,7 +76,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Sets the specified variable name
         /// </summary>
-        public void Var(String parameterName, object value)
+        public void Set(String parameterName, object value)
         {
             if (!this.m_parameters.TryGetValue(parameterName, out ParameterRegistration registration))
             {
@@ -94,7 +94,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the parameter name
         /// </summary>
-        public object Var(String parameterName)
+        public object Get(String parameterName)
         {
             if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration registration) &&
                 MapUtil.TryConvert(registration.Value, registration.Type, out object retVal))
@@ -106,11 +106,22 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get strongly type parameter
         /// </summary>
-        public TValue Var<TValue>(String parameterName)
+        public TValue Get<TValue>(String parameterName)
         {
             if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
                 return (TValue)retVal.Value;
             return default(TValue);
+        }
+
+
+        /// <summary>
+        /// Get strongly type parameter
+        /// </summary>
+        public TValue Get<TValue>(String parameterName, TValue defaultValue)
+        {
+            if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
+                return (TValue)retVal.Value;
+            return defaultValue;
         }
 
         /// <summary>
