@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,8 +16,9 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Applets.ViewModel.Null;
@@ -123,8 +124,8 @@ namespace SanteDB.Cdss.Xml
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, patient);
 
                 var context = new CdssContext<Patient>(patient);
-                context.Var("index", 0);
-                context.Var("parameters", parameters);
+                context.Set("index", 0);
+                context.Set("parameters", parameters);
 
                 // Evaluate eligibility
                 if (this.Definition.When?.Evaluate(context) == false &&
@@ -143,12 +144,12 @@ namespace SanteDB.Cdss.Xml
                     for (var index = 0; index < rule.Repeat; index++)
                     {
 
-                        context.Var("index", index);
+                        context.Set("index", index);
                         foreach (var itm in rule.Variables)
                         {
                             var value = itm.GetValue(null, context, new Dictionary<String, Object>());
                             context.Declare(itm.VariableName, itm.VariableType);
-                            context.Var(itm.VariableName, value);
+                            context.Set(itm.VariableName, value);
                         }
 
                         // TODO: Variable initialization 
@@ -187,8 +188,7 @@ namespace SanteDB.Cdss.Xml
             }
             catch (Exception e)
             {
-                this.m_tracer.TraceError("Ich bin der roboter: Error applying protocol {0}: {1}", this.Name, e);
-                return new List<Act>();
+                throw new CdssEvaluationException($"Error applying protocol {this.Definition.Id}", this.Definition, e);
             }
         }
 

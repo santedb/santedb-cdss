@@ -1,24 +1,23 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
  * the License.
- *
+ * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
-
 using DynamicExpresso;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
 using SanteDB.Core.Diagnostics;
@@ -36,6 +35,8 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(ProtocolWhenClauseCollection), Namespace = "http://santedb.org/cdss")]
     public class ProtocolWhenClauseCollection : DecisionSupportBaseElement
     {
+
+       
         // Tracer
         private Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
 
@@ -89,7 +90,7 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var varDict = new Dictionary<String, Func<Object>>();
                     foreach (var varRef in context.Variables)
-                        varDict.Add(varRef, () => st_contextReference?.Var(varRef));
+                        varDict.Add(varRef, () => st_contextReference?.Get(varRef));
 
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
                     clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
@@ -110,8 +111,9 @@ namespace SanteDB.Cdss.Xml.Model
                     var interpreter = new Interpreter(InterpreterOptions.Default)
                         .Reference(typeof(TData))
                         .Reference(typeof(Guid))
-                        .Reference(typeof(TimeSpan));
-
+                        .Reference(typeof(TimeSpan))
+                        .Reference(typeof(Types))
+                        .EnableReflection();
                     var linqAction = interpreter.ParseAsExpression<Func<CdssContext<TData>, bool>>(itm.ToString(), "_");
                     clauseExpr = Expression.Invoke(linqAction, expressionParm);
                     //clauseExpr = Expression.Invoke(d, expressionParm);
