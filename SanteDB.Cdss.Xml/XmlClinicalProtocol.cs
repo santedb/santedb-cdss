@@ -126,6 +126,10 @@ namespace SanteDB.Cdss.Xml
                 var context = new CdssContext<Patient>(patient);
                 context.Set("index", 0);
                 context.Set("parameters", parameters);
+                foreach(var itm in parameters)
+                {
+                    context.Set(itm.Key, itm.Value);
+                }
 
                 // Evaluate eligibility
                 if (this.Definition.When?.Evaluate(context) == false &&
