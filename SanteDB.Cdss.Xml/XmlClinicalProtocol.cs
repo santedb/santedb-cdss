@@ -90,6 +90,11 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <summary>
+        /// Gets the versionof this protocol
+        /// </summary>
+        public string Version => this.Definition?.Version;
+
+        /// <summary>
         /// Local index
         /// </summary>
         [ThreadStatic]
@@ -159,7 +164,8 @@ namespace SanteDB.Cdss.Xml
                                 {
                                     ProtocolKey = this.Id,
                                     Protocol = this.GetProtocolData(),
-                                    Sequence = step
+                                    Sequence = step,
+                                    Version = this.Version
                                 });
                         }
                         else
