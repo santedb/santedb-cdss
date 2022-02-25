@@ -24,8 +24,8 @@
     <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="Weight" repeat="60">
-    <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index")).AddDays(_.-Target.DateOfBirth.Value.Day + 1)</variable>
-    <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index") + 1).AddDays(_.-Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
+    <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer)).AddDays(-_.Target.DateOfBirth.Value.Day + 1)</variable>
+    <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer) + 1).AddDays(-_.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
     <variable name="age"  type="System.Int32">DateTime.Now.Subtract(_.Target.DateOfBirth.Value).TotalDays / 7</variable>
     <when evaluation="and">
       <!-- Patient does not have Weights taken or proposed-->
@@ -50,9 +50,9 @@
             }
           ]]>
         </jsonModel>
-        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index"))</assign>
-        <assign propertyName="StartTime">_.Var("minDate")</assign>
-        <assign propertyName="StopTime">_.Var("maxDate")</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Get("index", Types.Integer))</assign>
+        <assign propertyName="StartTime">_.Get("minDate", Types.DateTime)</assign>
+        <assign propertyName="StopTime">_.Get("maxDate", Types.DateTime)</assign>
       </action>
       <!-- Insights for Weight -->
       <insights>
@@ -111,9 +111,9 @@
               <jsonModel>
                 <![CDATA[
                   {
-                    "$type" : "Alert",
-                    "message" : "ui.user.underweight",
-                    "asDialog" : true
+                    "$type" : "DetectedIssue",
+                    "text" : "ui.user.underweight",
+                    "priority" : "Warning"
                   }
                 ]]>
               </jsonModel>

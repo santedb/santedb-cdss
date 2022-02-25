@@ -1,24 +1,23 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
  * the License.
- *
+ * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
-
 using DynamicExpresso;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
@@ -87,8 +86,8 @@ namespace SanteDB.Cdss.Xml.Model
                 Guid pkey = Guid.NewGuid();
                 act.Participations.Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 // Add record target to the source for forward rules
-                context.Target.Participations.Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
-                act.CreationTime = DateTime.Now;
+                context.Target.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+                act.CreationTime = DateTimeOffset.Now;
                 // The act to the return value
                 retVal.Add(act);
             }
@@ -211,12 +210,13 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_setter == null)
             {
-                Func<String, Object> varFetch = (a) => context.Var(a);
+                Func<String, Object> varFetch = (a) => context.Get(a);
 
                 var interpretor = new Interpreter(InterpreterOptions.Default)
                     .Reference(typeof(TimeSpan))
                     .Reference(typeof(Guid))
-                    .Reference(typeof(DateTimeOffset));
+                    .Reference(typeof(DateTimeOffset))
+                    .Reference(typeof(Types));
 
                 // Scope
                 if (!String.IsNullOrEmpty(this.ScopeSelector) && this.m_setter == null)

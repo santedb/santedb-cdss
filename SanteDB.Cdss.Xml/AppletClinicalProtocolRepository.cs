@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  *
@@ -16,7 +16,7 @@
  * the License.
  *
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
 
 using SanteDB.Cdss.Xml.Model;
@@ -126,7 +126,7 @@ namespace SanteDB.Cdss.Xml
 
             // Generate key
             if (data.Key == null) data.Key = Guid.NewGuid();
-            data.CreationTime = DateTime.Now;
+            data.CreationTime = DateTimeOffset.Now;
 
             if (!this.m_protocols.Any(o => o.Key == data.Key))
                 this.m_protocols.Add(data);

@@ -30,7 +30,7 @@
         participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=Supplement-VitaminA&amp;
         participation[RecordTarget].source@SubstanceAdministration.doseSequence=$index
       </hdsiExpression>
-      <linqExpression>(int)_.Var("index") > 0</linqExpression>
+      <linqExpression>_.Get("index", Types.Integer) > 0</linqExpression>
     </when>
     <then>
       <action>
@@ -85,10 +85,10 @@
 			      }
         ]]>
         </jsonModel>
-        <assign propertyName="SequenceId">(int)_.Var("index")</assign>
-        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index") * 6)</assign>
-        <assign propertyName="StartTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Var("index") * 6).AddDays(-_.Target.DateOfBirth.Value.Day + 1)</assign>
-        <assign propertyName="StopTime">_.Target.DateOfBirth.Value.Date.AddMonths(((int)_.Var("index")+1) * 6).AddDays(-_.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</assign>
+        <assign propertyName="SequenceId">(int)_.Get("index", Types.Integer)</assign>
+        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Get("index", Types.Integer) * 6)</assign>
+        <assign propertyName="StartTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Get("index", Types.Integer) * 6).AddDays(-_.Target.DateOfBirth.Value.Day + 1)</assign>
+        <assign propertyName="StopTime">_.Target.DateOfBirth.Value.Date.AddMonths(((int)_.Get("index", Types.Integer)+1) * 6).AddDays(-_.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</assign>
       </action>
     </then>
   </rule>
