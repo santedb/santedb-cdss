@@ -220,7 +220,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Create the protocol data from the protocol instance
         /// </summary>
-        public void Load(Core.Model.Acts.Protocol protocolData)
+        public IClinicalProtocol Load(Core.Model.Acts.Protocol protocolData)
         {
             if (protocolData == null) throw new ArgumentNullException(nameof(protocolData));
             using (MemoryStream ms = new MemoryStream(protocolData.Definition))
@@ -242,6 +242,8 @@ namespace SanteDB.Cdss.Xml
             this.Definition.When?.Compile<Patient>(context);
             foreach (var wc in this.Definition.Rules)
                 wc.When.Compile<Patient>(context);
+
+            return this;
         }
 
         /// <summary>
@@ -255,7 +257,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Initialize the patient
         /// </summary>
-        public void Initialize(Patient p, IDictionary<String, Object> parameters)
+        public void Prepare(Patient p, IDictionary<String, Object> parameters)
         {
             if (parameters.ContainsKey("xml.initialized")) return;
 

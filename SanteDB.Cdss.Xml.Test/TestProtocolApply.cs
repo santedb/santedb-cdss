@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using SanteDB.Core.Model.Query;
 
 namespace SanteDB.Cdss.Xml.Test
 {
@@ -279,7 +280,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldHandlePartials()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -310,7 +311,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldExcludeAdults()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient adult = new Patient()
@@ -333,7 +334,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAll()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -357,7 +358,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAppointments()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -402,6 +403,7 @@ namespace SanteDB.Cdss.Xml.Test
     {
         public String ServiceName => "Fake Repository";
 
+        [Obsolete("Use FindProtocol()", true)]
         public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
         {
             List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
@@ -416,7 +418,28 @@ namespace SanteDB.Cdss.Xml.Test
             return retVal;
         }
 
+        public IQueryResultSet<IClinicalProtocol> FindProtocol(Expression<Func<IClinicalProtocol, bool>> predicate)
+        {
+            return new MemoryQueryResultSet<IClinicalProtocol>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Select(i =>
+            {
+                if (i.EndsWith(".xml"))
+                {
+                    ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
+                    return new XmlClinicalProtocol(definition);
+                }
+                else
+                    return null;
+            })).Where(predicate);
+        }
+
+        public IClinicalProtocol GetProtocol(Guid protocolUuid) => this.FindProtocol(o => o.Id == protocolUuid).First();
+
         public Core.Model.Acts.Protocol InsertProtocol(Core.Model.Acts.Protocol data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IClinicalProtocol InsertProtocol(IClinicalProtocol data)
         {
             throw new NotImplementedException();
         }
