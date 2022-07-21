@@ -103,7 +103,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Calculate the protocol against a atient
         /// </summary>
-        public List<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
+        public IEnumerable<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
         {
             try
             {
@@ -249,7 +249,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Updates an existing plan
         /// </summary>
-        public List<Act> Update(Patient p, List<Act> existingPlan)
+        public IEnumerable<Act> Update(Patient p, IEnumerable<Act> existingPlan)
         {
             throw new NotImplementedException();
         }
