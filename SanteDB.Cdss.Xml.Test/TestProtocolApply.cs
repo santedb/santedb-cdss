@@ -82,7 +82,7 @@ namespace SanteDB.Cdss.Xml.Test
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
-            Assert.AreEqual(4, acts.Count);
+            Assert.AreEqual(4, acts.Count());
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(1, acts.Count);
+            Assert.AreEqual(1, acts.Count());
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.Count);
+            Assert.AreEqual(60, acts.Count());
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(59, acts.Count);
+            Assert.AreEqual(59, acts.Count());
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(2, acts.Count);
+            Assert.AreEqual(2, acts.Count());
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(3, acts.Count);
+            Assert.AreEqual(3, acts.Count());
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(3, acts.Count);
+            Assert.AreEqual(3, acts.Count());
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(2, acts.Count);
+            Assert.AreEqual(2, acts.Count());
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace SanteDB.Cdss.Xml.Test
             return retVal;
         }
 
-        public IQueryResultSet<IClinicalProtocol> FindProtocol(Expression<Func<IClinicalProtocol, bool>> predicate)
+        public IQueryResultSet<IClinicalProtocol> FindProtocol(String name = null, String oid = null)
         {
             return new MemoryQueryResultSet<IClinicalProtocol>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Select(i =>
             {
