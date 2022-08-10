@@ -293,7 +293,7 @@ namespace SanteDB.Cdss.Xml.Test
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(newborn);
+            String json = jsonSerializer.Serialize(acts);
             Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
             acts = scp.CreateCarePlan(newborn);
@@ -373,7 +373,7 @@ namespace SanteDB.Cdss.Xml.Test
             var jsonSerializer = new JsonViewModelSerializer();
             string json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
-            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Protocols.IsNullOrEmpty()));
         }
 
         /// <summary>
@@ -429,10 +429,13 @@ namespace SanteDB.Cdss.Xml.Test
                 }
                 else
                     return null;
-            })).Where(predicate);
+            })).Where(o=>o.Name == (name ?? o.Name));
         }
 
-        public IClinicalProtocol GetProtocol(Guid protocolUuid) => this.FindProtocol(o => o.Id == protocolUuid).First();
+        public IClinicalProtocol GetProtocol(Guid protocolUuid)
+        {
+            throw new NotImplementedException();
+        }
 
         public Core.Model.Acts.Protocol InsertProtocol(Core.Model.Acts.Protocol data)
         {

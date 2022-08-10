@@ -23,6 +23,7 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Applets.ViewModel.Null;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Roles;
@@ -119,7 +120,7 @@ namespace SanteDB.Cdss.Xml
                 lock (triggerPatient)
                 {
                     patient = triggerPatient.Clone() as Patient;
-                    patient.Participations = new List<ActParticipation>(triggerPatient.Participations);
+                    patient.Participations = triggerPatient.Participations?.ToList();
                 }
 
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, patient);
@@ -182,7 +183,7 @@ namespace SanteDB.Cdss.Xml
 
                 // Now we want to add the stuff to the patient
                 lock (triggerPatient)
-                    triggerPatient.Participations.AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                    triggerPatient.LoadProperty(o=>o.Participations).AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
 #if DEBUG
                 sw.Stop();
                 this.m_tracer.TraceVerbose("Protocol {0} took {1} ms", this.Name, sw.ElapsedMilliseconds);

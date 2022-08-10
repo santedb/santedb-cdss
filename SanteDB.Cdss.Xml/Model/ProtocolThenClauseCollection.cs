@@ -72,8 +72,8 @@ namespace SanteDB.Cdss.Xml.Model
                     // Load all concepts for the specified objects
                 }
                 act = (itm.Element as Act).Clone() as Act;
-                act.Participations = new List<ActParticipation>((itm.Element as Act).Participations.Select(o => o.Clone() as ActParticipation));
-                act.Relationships = new List<ActRelationship>((itm.Element as Act).Relationships.Select(o => o.Clone() as ActRelationship));
+                act.Participations = (itm.Element as Act).Participations?.Select(o => o.Clone() as ActParticipation).ToList();
+                act.Relationships = (itm.Element as Act).Relationships?.Select(o => o.Clone() as ActRelationship).ToList();
                 act.Protocols = new List<ActProtocol>();// (itm.Element as Act).Protocols);
                 // Now do the actions to the properties as stated
                 foreach (var instr in itm.Do)
@@ -84,9 +84,10 @@ namespace SanteDB.Cdss.Xml.Model
                 // Assign this patient as the record target
                 act.Key = act.Key ?? Guid.NewGuid();
                 Guid pkey = Guid.NewGuid();
-                act.Participations.Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+
+                act.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 // Add record target to the source for forward rules
-                context.Target.Participations.Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+                context.Target.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 act.CreationTime = DateTimeOffset.Now;
                 // The act to the return value
                 retVal.Add(act);
