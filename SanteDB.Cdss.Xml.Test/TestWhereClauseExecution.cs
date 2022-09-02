@@ -67,7 +67,7 @@ namespace SanteDB.Cdss.Xml.Test
                 },
             Identifiers = new List<EntityIdentifier>()
                 {
-                    new EntityIdentifier(new AssigningAuthority() { Name = "OHIPCARD", DomainName = "OHIPCARD", Oid = "1.2.3.4.5.6" }, "12343120423")
+                    new EntityIdentifier(new IdentityDomain() { Name = "OHIPCARD", DomainName = "OHIPCARD", Oid = "1.2.3.4.5.6" }, "12343120423")
                 },
             Telecoms = new List<EntityTelecomAddress>()
                 {

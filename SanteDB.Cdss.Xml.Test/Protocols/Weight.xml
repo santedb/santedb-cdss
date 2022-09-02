@@ -24,8 +24,8 @@
     <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
   <rule id="Weight" repeat="60">
-    <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer)).AddDays(-_.Target.DateOfBirth.Value.Day + 1)</variable>
-    <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer) + 1).AddDays(-_.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</variable>
+    <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer))</variable>
+    <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer) + 1).AddDays(-1).AddHours(23).AddMinutes(59)</variable>
     <variable name="age"  type="System.Int32">DateTime.Now.Subtract(_.Target.DateOfBirth.Value).TotalDays / 7</variable>
     <when evaluation="and">
       <!-- Patient does not have Weights taken or proposed-->
