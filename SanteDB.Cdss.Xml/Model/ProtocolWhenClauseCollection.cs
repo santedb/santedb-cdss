@@ -93,7 +93,7 @@ namespace SanteDB.Cdss.Xml.Model
                         varDict.Add(varRef, () => st_contextReference?.Get(varRef));
 
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
-                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
+                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(hdsiExpr.Expression.ParseQueryString(), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
                     clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
                     if (hdsiExpr.NegationIndicator)
                         clauseExpr = Expression.Not(clauseExpr);

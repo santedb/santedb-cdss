@@ -21,7 +21,7 @@
 using DynamicExpresso;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
-using SanteDB.Core.Model;
+using SanteDB;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Query;
@@ -29,6 +29,7 @@ using SanteDB.Core.Model.Roles;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -230,9 +231,9 @@ namespace SanteDB.Cdss.Xml.Model
                     if (!String.IsNullOrEmpty(this.WhereFilter) && this.m_scopeSelectMethod == null)
                     {
                         var itemType = scopeProperty.PropertyType.GenericTypeArguments[0];
+                        this.m_linqExpression = QueryExpressionParser.BuildLinqExpression(itemType, this.WhereFilter.ParseQueryString()); 
                         var predicateType = typeof(Func<,>).MakeGenericType(new Type[] { itemType, typeof(bool) });
                         var builderMethod = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression), new Type[] { itemType }, new Type[] { typeof(NameValueCollection) });
-                        this.m_linqExpression = builderMethod.Invoke(null, new Object[] { NameValueCollection.ParseQueryString(this.WhereFilter) }) as Expression;
                         this.m_compiledExpression = (this.m_linqExpression as LambdaExpression).Compile();
                         // Call where clause
                         builderMethod = typeof(Expression).GetGenericMethod(nameof(Expression.Lambda), new Type[] { predicateType }, new Type[] { typeof(Expression), typeof(ParameterExpression[]) });
