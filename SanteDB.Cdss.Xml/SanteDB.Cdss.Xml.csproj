@@ -18,7 +18,7 @@
   <!-- </PropertyGroup> -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Condition="'$(VersionNumber)' == ''">
-    <VersionNumber>2.4.0-debug</VersionNumber>
+    <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>

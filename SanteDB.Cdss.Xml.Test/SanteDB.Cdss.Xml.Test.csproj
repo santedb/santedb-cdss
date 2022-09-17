@@ -52,7 +52,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestProtocolModel.cs" />
     <Compile Include="TestWhereClauseExecution.cs" />
-    <Compile Include="TestProtocolApply.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(SolutionName.Contains('-ext'))">
