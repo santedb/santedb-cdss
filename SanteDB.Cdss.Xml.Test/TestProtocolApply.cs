@@ -60,6 +60,11 @@ namespace SanteDB.Cdss.Xml.Test
 
         public event EventHandler Stopped;
 
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            ServiceUtil.Start(Guid.Empty, this);
+        }
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
@@ -280,7 +285,6 @@ namespace SanteDB.Cdss.Xml.Test
         public void ShouldHandlePartials()
         {
             SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
-            ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -311,7 +315,6 @@ namespace SanteDB.Cdss.Xml.Test
         public void ShouldExcludeAdults()
         {
             SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
-            ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient adult = new Patient()
             {
@@ -334,7 +337,6 @@ namespace SanteDB.Cdss.Xml.Test
         public void ShouldScheduleAll()
         {
             SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
-            ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -358,7 +360,6 @@ namespace SanteDB.Cdss.Xml.Test
         public void ShouldScheduleAppointments()
         {
             SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
-            ApplicationServiceContext.Current = this;
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -385,12 +386,10 @@ namespace SanteDB.Cdss.Xml.Test
 
         public void Start()
         {
-            throw new NotImplementedException();
         }
 
         public void Stop()
         {
-            throw new NotImplementedException();
         }
     }
 
