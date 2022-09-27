@@ -50,6 +50,8 @@ namespace SanteDB.Cdss.Xml.Test
 
         public SanteDBHostType HostType => SanteDBHostType.Other;
 
+        public String ApplicationName => "Test";
+
         public DateTime StartTime => DateTime.Now;
 
         public event EventHandler Starting;
