@@ -53,7 +53,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Create call expression from .net call expression
         /// </summary>
-        /// <param name="methodCallExpression"></param>
+        /// <param name="expr">The method call expression to represent in XML</param>
         public XmlMethodCallExpression(MethodCallExpression expr) : base(expr)
         {
             this.MethodName = expr.Method.Name;
@@ -64,7 +64,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
             {
                 this.StaticClassXml = expr.Method.DeclaringType.AssemblyQualifiedName;
                 if (expr.Method.IsGenericMethod)
+                {
                     this.MethodTypeArgumentXml = expr.Method.GetGenericArguments().Select(o => o.AssemblyQualifiedName).ToArray();
+                }
             }
         }
 
@@ -96,7 +98,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
             {
                 // Can we just go?
                 if (this.MethodTypeArgumentXml == null)
+                {
                     return (this.StaticClass ?? this.Object?.Type)?.GetRuntimeMethod(this.MethodName, this.Parameters.Item.Select(o => o.Type).ToArray())?.ReturnType;
+                }
                 else
                 {
                     var mi = this.StaticClass.GetRuntimeMethods().FirstOrDefault(o => o.Name == this.MethodName && o.GetParameters().Length == this.Parameters.Item.Count);
@@ -113,9 +117,13 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             // validate
             if (this.Object == null && this.StaticClass == null)
+            {
                 throw new InvalidOperationException("Bound object is required");
+            }
             else if (String.IsNullOrEmpty(this.MethodName))
+            {
                 throw new InvalidOperationException("Missing method name");
+            }
 
             var parameters = this.Parameters.Item.Select(o => o.ToExpression());
             var methodInfo = (this.StaticClass ?? this.Object?.Type).GetRuntimeMethod(this.MethodName, parameters.Select(o => o.Type).ToArray());
@@ -125,7 +133,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
                 methodInfo = mi.MakeGenericMethod(this.MethodTypeArgumentXml.Select(o => Type.GetType(o)).ToArray());
             }
             if (methodInfo == null)
+            {
                 throw new InvalidOperationException(String.Format("Could not find method {0} in type {1}", this.MethodName, this.Object.Type));
+            }
 
             return Expression.Call(this.Object?.ToExpression(), methodInfo, parameters.ToArray());
         }

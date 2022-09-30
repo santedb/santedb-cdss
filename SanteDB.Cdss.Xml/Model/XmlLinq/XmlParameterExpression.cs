@@ -80,10 +80,14 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         public override Expression ToExpression()
         {
             if (this.m_expression != null)
+            {
                 return this.m_expression;
+            }
 
             if (this.Type == null)
+            {
                 throw new InvalidOperationException("Type not set");
+            }
 
             // Is there some parameter in the parent context?
             XmlExpression xe = this.Parent;
@@ -94,7 +98,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
             }
 
             if (this.m_expression == null)
+            {
                 this.m_expression = Expression.Parameter(this.Type, this.ParameterName);
+            }
+
             return this.m_expression;
         }
     }

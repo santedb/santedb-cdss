@@ -180,7 +180,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
 
             Expression<Func<Patient, DateTime?>> filterCondition = (data) => data.DateOfBirth;
-            
+
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             // Serialize
             var xml = this.ToXmlString(xmlExpr);
@@ -189,7 +189,7 @@ namespace SanteDB.Cdss.Xml.Test
             var parsed = this.FromXmlString(xml, typeof(XmlLambdaExpression));
             parsed.InitializeContext(null);
             var expression = parsed.ToExpression();
-            
+
             var compile = (expression as LambdaExpression).Compile();
         }
 

@@ -48,7 +48,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             this.MemberName = expr.Member.Name;
             if (expr.Expression == null)
+            {
                 this.StaticClassXml = expr.Member.DeclaringType.AssemblyQualifiedName;
+            }
         }
 
         /// <summary>
@@ -75,14 +77,20 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             // validate
             if (this.Object == null && this.StaticClass == null)
+            {
                 throw new InvalidOperationException("Bound object is required");
+            }
             else if (String.IsNullOrEmpty(this.MemberName))
+            {
                 throw new InvalidOperationException("Missing method name");
+            }
 
             MemberInfo memberInfo = (MemberInfo)(this.StaticClass ?? this.Object?.Type).GetRuntimeProperty(this.MemberName) ??
                 (this.StaticClass ?? this.Object?.Type).GetRuntimeField(this.MemberName);
             if (memberInfo == null)
+            {
                 throw new InvalidOperationException(String.Format("Could not find member {0} in type {1}", this.MemberName, this.Object.Type));
+            }
 
             return Expression.MakeMemberAccess(this.Object?.ToExpression(), memberInfo);
         }

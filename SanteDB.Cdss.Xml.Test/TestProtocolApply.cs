@@ -21,10 +21,10 @@
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
-using SanteDB.Core.Model;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Protocol;
 using SanteDB.Core.Services;
@@ -33,7 +33,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
-using SanteDB.Core.Model.Query;
 
 namespace SanteDB.Cdss.Xml.Test
 {
@@ -409,11 +408,14 @@ namespace SanteDB.Cdss.Xml.Test
             List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
 
             foreach (var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
+            {
                 if (i.EndsWith(".xml"))
                 {
                     ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
                     retVal.Add(new XmlClinicalProtocol(definition).GetProtocolData());
                 }
+            }
+
             totalResults = retVal.Count;
             return retVal;
         }
@@ -428,8 +430,10 @@ namespace SanteDB.Cdss.Xml.Test
                     return new XmlClinicalProtocol(definition);
                 }
                 else
+                {
                     return null;
-            })).Where(o=>o.Name == (name ?? o.Name));
+                }
+            })).Where(o => o.Name == (name ?? o.Name));
         }
 
         public IClinicalProtocol GetProtocol(Guid protocolUuid)

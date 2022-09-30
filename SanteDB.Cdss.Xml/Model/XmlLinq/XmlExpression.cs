@@ -68,7 +68,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// </summary>
         public static XmlExpression FromExpression(Expression expr)
         {
-            if (expr == null) return null;
+            if (expr == null)
+            {
+                return null;
+            }
 
             switch (expr.NodeType)
             {

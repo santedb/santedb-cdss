@@ -104,7 +104,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
             get
             {
                 if (this.StaticClassXml == null)
+                {
                     return null;
+                }
+
                 return Type.GetType(this.StaticClassXml);
             }
         }

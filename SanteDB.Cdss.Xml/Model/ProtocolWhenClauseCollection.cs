@@ -36,7 +36,7 @@ namespace SanteDB.Cdss.Xml.Model
     public class ProtocolWhenClauseCollection : DecisionSupportBaseElement
     {
 
-       
+
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
 
@@ -90,13 +90,18 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var varDict = new Dictionary<String, Func<Object>>();
                     foreach (var varRef in context.Variables)
+                    {
                         varDict.Add(varRef, () => st_contextReference?.Get(varRef));
+                    }
 
                     var hdsiExpr = itm as WhenClauseHdsiExpression;
                     clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(hdsiExpr.Expression.ParseQueryString(), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
                     clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
                     if (hdsiExpr.NegationIndicator)
+                    {
                         clauseExpr = Expression.Not(clauseExpr);
+                    }
+
                     this.m_tracer.TraceVerbose("Converted WHEN {0} > {1}", hdsiExpr.Expression, clauseExpr);
                 }
                 else if (itm is XmlLambdaExpression)
@@ -121,9 +126,13 @@ namespace SanteDB.Cdss.Xml.Model
 
                 // Append to master expression
                 if (body == null)
+                {
                     body = clauseExpr;
+                }
                 else
+                {
                     body = Expression.MakeBinary((ExpressionType)Enum.Parse(typeof(ExpressionType), this.Operator.ToString()), body, clauseExpr);
+                }
             }
 
             // Wrap and compile
@@ -148,7 +157,9 @@ namespace SanteDB.Cdss.Xml.Model
         public bool Evaluate<TData>(CdssContext<TData> context)
         {
             if (this.m_compiledExpression == null)
+            {
                 this.Compile<TData>(context);
+            }
 
             lock (m_lockObject)
             {

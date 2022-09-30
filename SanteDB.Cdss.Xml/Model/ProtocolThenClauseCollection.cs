@@ -19,9 +19,9 @@
  * Date: 2022-5-30
  */
 using DynamicExpresso;
+using SanteDB;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
-using SanteDB;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Query;
@@ -225,13 +225,16 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var scopeProperty = context.Target.GetType().GetRuntimeProperty(this.ScopeSelector);
 
-                    if (scopeProperty == null) return null; // no scope
+                    if (scopeProperty == null)
+                    {
+                        return null; // no scope
+                    }
 
                     // Where clause?
                     if (!String.IsNullOrEmpty(this.WhereFilter) && this.m_scopeSelectMethod == null)
                     {
                         var itemType = scopeProperty.PropertyType.GenericTypeArguments[0];
-                        this.m_linqExpression = QueryExpressionParser.BuildLinqExpression(itemType, this.WhereFilter.ParseQueryString()); 
+                        this.m_linqExpression = QueryExpressionParser.BuildLinqExpression(itemType, this.WhereFilter.ParseQueryString());
                         var predicateType = typeof(Func<,>).MakeGenericType(new Type[] { itemType, typeof(bool) });
                         var builderMethod = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression), new Type[] { itemType }, new Type[] { typeof(NameValueCollection) });
                         this.m_compiledExpression = (this.m_linqExpression as LambdaExpression).Compile();
@@ -247,7 +250,9 @@ namespace SanteDB.Cdss.Xml.Model
                     this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", this.m_scopeSelectMethod.ReturnType));
                 }
                 else
+                {
                     this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", typeof(CdssContext<Patient>)));
+                }
             }
 
             Object setValue = null;
@@ -263,15 +268,24 @@ namespace SanteDB.Cdss.Xml.Model
                     var scopeValue = scopeProperty.GetValue(context.Target);
                     scope = scopeValue;
                     if (!String.IsNullOrEmpty(this.WhereFilter))
+                    {
                         scope = this.m_scopeSelectMethod.Invoke(null, new Object[] { scopeValue, this.m_compiledExpression });
+                    }
+
                     lock (scopes)
+                    {
                         if (!scopes.ContainsKey(scopeKey))
+                        {
                             scopes.Add(scopeKey, scope);
+                        }
+                    }
                 }
                 setValue = this.m_setter.Invoke(scope);
             }
             else
+            {
                 setValue = this.m_setter.Invoke(context);
+            }
 
             return setValue;
         }
@@ -284,14 +298,18 @@ namespace SanteDB.Cdss.Xml.Model
             var propertyInfo = act.GetType().GetRuntimeProperty(this.PropertyName);
 
             if (this.Element != null)
+            {
                 propertyInfo.SetValue(act, this.Element);
+            }
             else
             {
                 var setValue = this.GetValue(act, context, scopes);
 
                 //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                 if (Core.Model.Map.MapUtil.TryConvert(setValue, propertyInfo.PropertyType, out setValue))
+                {
                     propertyInfo.SetValue(act, setValue);
+                }
             }
 
             return propertyInfo.GetValue(act);

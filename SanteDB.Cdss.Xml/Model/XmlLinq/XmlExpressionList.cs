@@ -45,7 +45,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         public virtual void InitializeContext(XmlExpression context)
         {
             foreach (var itm in this.Item)
+            {
                 itm.InitializeContext(context);
+            }
         }
 
         /// <summary>

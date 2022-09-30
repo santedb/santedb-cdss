@@ -19,7 +19,6 @@
  * Date: 2022-5-30
  */
 using SanteDB.Cdss.Xml.Model;
-using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Acts;
@@ -27,10 +26,8 @@ using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -97,18 +94,30 @@ namespace SanteDB.Cdss.Xml
                     {
                         var content = f.Content ?? appletManager.Applets.Resolver(f);
                         if (content is String)
+                        {
                             using (var rStream = new StringReader(content as String))
+                            {
                                 protocolRepositoryService.InsertProtocol(
                                     new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
                                 );
+                            }
+                        }
                         else if (content is byte[])
+                        {
                             using (var rStream = new MemoryStream(content as byte[]))
+                            {
                                 protocolRepositoryService.InsertProtocol(new XmlClinicalProtocol(ProtocolDefinition.Load(rStream)));
+                            }
+                        }
                         else if (content is XElement)
+                        {
                             using (var rStream = (content as XElement).CreateReader())
+                            {
                                 protocolRepositoryService.InsertProtocol(
                                     new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
                                     );
+                            }
+                        }
                     }
                 }
             }

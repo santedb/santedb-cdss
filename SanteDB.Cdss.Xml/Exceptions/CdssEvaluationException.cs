@@ -20,8 +20,6 @@
  */
 using SanteDB.Cdss.Xml.Model;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.Cdss.Xml.Exceptions
 {

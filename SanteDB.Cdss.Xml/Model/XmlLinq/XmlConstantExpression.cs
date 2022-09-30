@@ -47,7 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Create constant expression from the specitifed expression
         /// </summary>
-        /// <param name="constantExpression"></param>
+        /// <param name="expr">The expression to be represented in this xml structure</param>
         public XmlConstantExpression(ConstantExpression expr)
         {
             this.Value = expr.Value;

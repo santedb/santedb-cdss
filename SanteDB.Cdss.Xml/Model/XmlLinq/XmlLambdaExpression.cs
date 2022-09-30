@@ -100,7 +100,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
                 return Expression.Lambda(lamdaType.MakeGenericType(typeParameters.ToArray()), this.Object.ToExpression(), this.Parameters.Select(o => o.ToExpression()).OfType<ParameterExpression>().ToArray());
             }
             else
+            {
                 return Expression.Lambda(this.Object.ToExpression(), this.Parameters.Select(o => o.ToExpression()).OfType<ParameterExpression>().ToArray());
+            }
         }
     }
 }

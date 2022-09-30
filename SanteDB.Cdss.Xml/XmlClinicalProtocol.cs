@@ -23,7 +23,6 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Applets.ViewModel.Null;
 using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Roles;
@@ -113,7 +112,9 @@ namespace SanteDB.Cdss.Xml
                 sw.Start();
 #endif
                 if (parameters == null)
+                {
                     parameters = new Dictionary<String, Object>();
+                }
 
                 // Get a clone to make decisions on
                 Patient patient = null;
@@ -128,7 +129,7 @@ namespace SanteDB.Cdss.Xml
                 var context = new CdssContext<Patient>(patient);
                 context.Set("index", 0);
                 context.Set("parameters", parameters);
-                foreach(var itm in parameters)
+                foreach (var itm in parameters)
                 {
                     context.Set(itm.Key, itm.Value);
                 }
@@ -166,6 +167,7 @@ namespace SanteDB.Cdss.Xml
 
                             // Assign protocol
                             foreach (var itm in acts)
+                            {
                                 itm.Protocols.Add(new ActProtocol()
                                 {
                                     ProtocolKey = this.Id,
@@ -173,9 +175,12 @@ namespace SanteDB.Cdss.Xml
                                     Sequence = step,
                                     Version = this.Version
                                 });
+                            }
                         }
                         else
+                        {
                             this.m_tracer.TraceInfo("{0} does not meet criteria for rule {1}.{2}", patient, this.Name, rule.Name ?? rule.Id);
+                        }
 
                         step++;
                     }
@@ -183,7 +188,9 @@ namespace SanteDB.Cdss.Xml
 
                 // Now we want to add the stuff to the patient
                 lock (triggerPatient)
-                    triggerPatient.LoadProperty(o=>o.Participations).AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                {
+                    triggerPatient.LoadProperty(o => o.Participations).AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                }
 #if DEBUG
                 sw.Stop();
                 this.m_tracer.TraceVerbose("Protocol {0} took {1} ms", this.Name, sw.ElapsedMilliseconds);
@@ -203,6 +210,7 @@ namespace SanteDB.Cdss.Xml
         public Core.Model.Acts.Protocol GetProtocolData()
         {
             if (this.m_protocolDefinition == null)
+            {
                 using (MemoryStream ms = new MemoryStream())
                 {
                     this.Definition.Save(ms);
@@ -215,6 +223,8 @@ namespace SanteDB.Cdss.Xml
                         Oid = this.Definition.Oid
                     };
                 }
+            }
+
             return this.m_protocolDefinition;
         }
 
@@ -223,15 +233,22 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public IClinicalProtocol Load(Core.Model.Acts.Protocol protocolData)
         {
-            if (protocolData == null) throw new ArgumentNullException(nameof(protocolData));
+            if (protocolData == null)
+            {
+                throw new ArgumentNullException(nameof(protocolData));
+            }
+
             using (MemoryStream ms = new MemoryStream(protocolData.Definition))
+            {
                 this.Definition = ProtocolDefinition.Load(ms);
+            }
 
             var context = new CdssContext<Patient>();
             context.Declare("index", typeof(Int32));
 
             // Add callback rules
             foreach (var rule in this.Definition.Rules)
+            {
                 for (var index = 0; index < rule.Repeat; index++)
                 {
                     foreach (var itm in rule.Variables)
@@ -239,10 +256,13 @@ namespace SanteDB.Cdss.Xml
                         context.Declare(itm.VariableName, itm.VariableType);
                     }
                 }
+            }
 
             this.Definition.When?.Compile<Patient>(context);
             foreach (var wc in this.Definition.Rules)
+            {
                 wc.When.Compile<Patient>(context);
+            }
 
             return this;
         }
@@ -260,7 +280,10 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public void Prepare(Patient p, IDictionary<String, Object> parameters)
         {
-            if (parameters.ContainsKey("xml.initialized")) return;
+            if (parameters.ContainsKey("xml.initialized"))
+            {
+                return;
+            }
 
             // Merge the view models
             NullViewModelSerializer serializer = new NullViewModelSerializer();

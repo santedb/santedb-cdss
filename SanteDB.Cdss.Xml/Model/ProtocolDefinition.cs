@@ -90,7 +90,9 @@ namespace SanteDB.Cdss.Xml.Model
             {
                 IgnoreWhitespace = true
             }))
+            {
                 return s_xsz.Deserialize(xr) as ProtocolDefinition;
+            }
         }
     }
 }
