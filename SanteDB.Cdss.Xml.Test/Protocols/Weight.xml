@@ -59,7 +59,7 @@
         <!-- Represents any reference sets -->
         <refSets>
           <!-- Weight references for MALES -->
-          <refSet>
+          <refSet name="MaleWeightZScores">
             <when>
               <hdsiExpression>genderConcept.mnemonic=MALE</hdsiExpression>
             </when>
@@ -71,7 +71,7 @@
             </data>
           </refSet>
           <!-- Weight references for FEMALES -->
-          <refSet>
+          <refSet name="FemaleWeightZScores">
             <when>
               <hdsiExpression>genderConcept.mnemonic=FEMALE</hdsiExpression>
             </when>
@@ -87,12 +87,10 @@
         <transforms>
           <transform>
             <when>
-              <hdsiExpression>
-                unitOfMeasure=<!-- uuid for lbs -->
-              </hdsiExpression>
+              <hdsiExpression>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</hdsiExpression>
             </when>
             <then>
-              <assign property="value">value * 0.4535</assign>
+              <assign property="Value">_.Target.Value * 0.4535</assign>
             </then>
           </transform>
         </transforms>
