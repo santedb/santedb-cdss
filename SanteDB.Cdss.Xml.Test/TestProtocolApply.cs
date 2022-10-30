@@ -51,6 +51,8 @@ namespace SanteDB.Cdss.Xml.Test
 
         public String ApplicationName => "Test";
 
+        public Guid ActivityUuid => Guid.NewGuid();
+
         public DateTime StartTime => DateTime.Now;
 
         public event EventHandler Starting;
