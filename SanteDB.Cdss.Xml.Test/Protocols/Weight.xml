@@ -23,10 +23,21 @@
   <when evaluation="and">
     <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
   </when>
+  <!-- Represents any reference sets -->
+  <refSets>
+    <!-- Weight references for MALES -->
+    <refSet name="WeightScores">
+      <data format="csv">
+        <![CDATA[
+              gender,age,low,nominal,high
+              MALE,1,3,5,7
+              ]]>
+      </data>
+    </refSet>
+  </refSets>
   <rule id="Weight" repeat="60">
     <variable name="minDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer))</variable>
     <variable name="maxDate" type="System.DateTimeOffset">_.Target.DateOfBirth.Value.Date.AddMonths(_.Get("index", Types.Integer) + 1).AddDays(-1).AddHours(23).AddMinutes(59)</variable>
-    <variable name="age"  type="System.Int32">DateTime.Now.Subtract(_.Target.DateOfBirth.Value).TotalDays / 7</variable>
     <when evaluation="and">
       <!-- Patient does not have Weights taken or proposed-->
       <hdsiExpression negationIndicator="true">participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$minDate&amp;participation[RecordTarget].source.actTime=&lt;$maxDate</hdsiExpression>
@@ -54,89 +65,77 @@
         <assign propertyName="StartTime">_.Get("minDate", Types.DateTime)</assign>
         <assign propertyName="StopTime">_.Get("maxDate", Types.DateTime)</assign>
       </action>
-      <!-- Insights for Weight -->
-      <insights>
-        <!-- Represents any reference sets -->
-        <refSets>
-          <!-- Weight references for MALES -->
-          <refSet name="MaleWeightZScores">
-            <when>
-              <hdsiExpression>genderConcept.mnemonic=MALE</hdsiExpression>
-            </when>
-            <data format="csv">
-              <![CDATA[
-              age,low,nominal,high
-              1,3,5,7
-              ]]>
-            </data>
-          </refSet>
-          <!-- Weight references for FEMALES -->
-          <refSet name="FemaleWeightZScores">
-            <when>
-              <hdsiExpression>genderConcept.mnemonic=FEMALE</hdsiExpression>
-            </when>
-            <data format="csv">
-              <![CDATA[
-              age,low,nominal,high
-              1,3,5,7
-              ]]>
-            </data>
-          </refSet>
-        </refSets>
-        <!-- Transform weight if recorded in LBS -->
-        <transforms>
-          <transform>
-            <when>
-              <hdsiExpression>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</hdsiExpression>
-            </when>
-            <then>
-              <assign property="Value">_.Target.Value * 0.4535</assign>
-            </then>
-          </transform>
-        </transforms>
-        <!-- When the value is less than the underweight threshold -->
-        <case>
-          <when>
-            <hdsiExpression>value=&lt;$refSet[$age].low</hdsiExpression>
-          </when>
-          <then>
-            <assign propertyName="interpretationConcept">
-              <!-- code for low -->
-            </assign>
-          </then>
-          <then>
-            <action>
-              <jsonModel>
-                <![CDATA[
+    </then>
+  </rule>
+  <!-- Insights are used for the data captured -->
+  <insight id="weight.interpretation">
+    <variable name="gender" type="System.String">_.Expand("participation[RecordTarget].player@Patient.genderConcept.mnemonic")</variable>
+    <variable name="age" type="System.Int32">DateTime.Today.Subtract(_.Expand("participation[RecordTarget].player@Patient.dateOfBirth")).TotalDays / 7</variable>
+    <!-- Transform weight if recorded in LBS -->
+    <transform>
+      <when>
+        <hdsiExpression>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</hdsiExpression>
+      </when>
+      <then>
+        <assign property="Value">_.Target.Value * 0.4535</assign>
+      </then>
+    </transform>
+    <!-- When the value is less than the underweight threshold -->
+    <case>
+      <when>
+        <linqExpression>
+          <![CDATA[_.RefSet("WeightScores").Where("gender", _.Get("gender")).Where("age", _.Get("age")).Select("low") > _.Target.Value]]>
+        </linqExpression>
+      </when>
+      <then>
+        <assign propertyName="interpretationConcept">
+          <!-- code for low -->
+        </assign>
+      </then>
+      <then>
+        <action>
+          <jsonModel>
+            <![CDATA[
                   {
                     "$type" : "DetectedIssue",
                     "text" : "ui.user.underweight",
                     "priority" : "Warning"
                   }
                 ]]>
-              </jsonModel>
-            </action>
-          </then>
-        </case>
-        <!-- When the weight is above the high threshold -->
-        <case>
-          <when>
-            <hdsiExpression>value=&gt;$refSet[$age].high</hdsiExpression>
-          </when>
-          <then>
-            <assign propertyName="interpretationConcept">
-              <!-- code for high -->
-            </assign>
-          </then>
-        </case>
-        <otherwise>
-          <then>
-            <assign propertyName="interpretationConcept">
-              <!-- code for normal -->
-            </assign>
-          </then>
-        </otherwise>
-      </insights>
-    </then>
-  </rule>
+          </jsonModel>
+        </action>
+      </then>
+    </case>
+    <!-- When the weight is above the high threshold -->
+    <case>
+      <linqExpression>
+        <![CDATA[_.RefSet("WeightScores").Where("gender", _.Get("gender")).Where("age", _.Get("age")).Select("high") < _.Target.Value]]>
+      </linqExpression>
+      <then>
+        <assign propertyName="interpretationConcept">
+          <!-- code for high -->
+        </assign>
+      </then>
+    </case>
+    <otherwise>
+      <then>
+        <assign propertyName="interpretationConcept">
+          <!-- code for normal -->
+        </assign>
+      </then>
+      <then>
+        <action>
+          <jsonModel>
+            <![CDATA[
+                  {
+                    "$type" : "DetectedIssue",
+                    "text" : "ui.user.underweight",
+                    "priority" : "Warning"
+                  }
+                ]]>
+          </jsonModel>
+        </action>
+      </then>
+    </otherwise>
+  </insight>
 </ProtocolDefinition>
