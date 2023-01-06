@@ -452,5 +452,10 @@ namespace SanteDB.Cdss.Xml.Test
         {
             throw new NotImplementedException();
         }
+
+        public IClinicalProtocol RemoveProtocol(Guid protocolUuid)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
