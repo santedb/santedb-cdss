@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
- - Copyright 2021-2021 SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ - Copyright 2021-2022 SanteSuite Contributors (See NOTICE.md for full copyright notices)
  - Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  - Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  - 
@@ -17,7 +17,7 @@
  - the License.
  - 
  - User: fyfej
- - Date: 2021-8-5
+ - Date: 2022-5-30
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="DTP-HepB-Hib" name="DTP-HepB-Hib Vaccine Schedule">
   <!-- Younger than 5 only -->
@@ -158,9 +158,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StartTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="ActTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=1&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StopTime">_.Act.ActTime.Value + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>
@@ -230,9 +230,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StartTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="ActTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source.classConcept=932A3C7E-AD77-450A-8A1F-030FC2855450&amp;source@SubstanceAdministration.doseSequence=2&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB" propertyName="StopTime">_.Act.ActTime.Value + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>

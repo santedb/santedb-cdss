@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2022-5-30
  */
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
@@ -136,7 +136,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestGuardNoPolioDose0()
         {
-            Expression<Func<Patient, bool>> filterCondition = (data) => !data.Participations.Where(guard => guard.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is SubstanceAdministration && (o.SourceEntity as SubstanceAdministration).SequenceId == 0 && o.SourceEntity.Participations.Any(p => p.PlayerEntity.TypeConcept.Mnemonic == "VaccineType-OralPolioVaccine"));
+            Expression<Func<Patient, bool>> filterCondition = (data) => !data.Participations.Where(guard => guard.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is SubstanceAdministration && (o.SourceEntity as SubstanceAdministration).SequenceId == 0 && o.SourceEntity.Participations.Any(p => p.PlayerEntity.TypeConcept.Mnemonic == "VaccineType-OralPolioVaccine"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             var xml = this.ToXmlString(xmlExpr);
             Trace.TraceInformation(xml);
@@ -154,7 +154,7 @@ namespace SanteDB.Cdss.Xml.Test
         public void TestGuardNotImmunoSuppressed()
         {
 
-            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKey.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
+            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
 
@@ -180,7 +180,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
 
             Expression<Func<Patient, DateTime?>> filterCondition = (data) => data.DateOfBirth;
-            
+
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             // Serialize
             var xml = this.ToXmlString(xmlExpr);
@@ -189,7 +189,7 @@ namespace SanteDB.Cdss.Xml.Test
             var parsed = this.FromXmlString(xml, typeof(XmlLambdaExpression));
             parsed.InitializeContext(null);
             var expression = parsed.ToExpression();
-            
+
             var compile = (expression as LambdaExpression).Compile();
         }
 

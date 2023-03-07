@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
 using SanteDB.Cdss.Xml.Model.XmlLinq;
@@ -36,9 +36,9 @@ namespace SanteDB.Cdss.Xml.Model
     public class ProtocolWhenClauseCollection : DecisionSupportBaseElement
     {
 
-       
+
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(ProtocolWhenClauseCollection));
 
         /// <summary>
         /// Operator
@@ -82,48 +82,54 @@ namespace SanteDB.Cdss.Xml.Model
             foreach (var itm in this.Clause)
             {
                 Expression clauseExpr = null;
-                if (itm is ProtocolWhenClauseCollection)
+                switch(itm)
                 {
-                    clauseExpr = Expression.Invoke((itm as ProtocolWhenClauseCollection).Compile<TData>(context), expressionParm);
-                }
-                else if (itm is WhenClauseHdsiExpression)
-                {
-                    var varDict = new Dictionary<String, Func<Object>>();
-                    foreach (var varRef in context.Variables)
-                        varDict.Add(varRef, () => st_contextReference?.Get(varRef));
+                    case ProtocolWhenClauseCollection pwcc:
+                        clauseExpr = Expression.Invoke(pwcc.Compile<TData>(context), expressionParm);
+                        break;
+                    case WhenClauseHdsiExpression hdsiExpr:
+                        var varDict = new Dictionary<String, Func<Object>>();
+                        foreach (var varRef in context.Variables)
+                        {
+                            varDict.Add(varRef, () => st_contextReference?.Get(varRef));
+                        }
 
-                    var hdsiExpr = itm as WhenClauseHdsiExpression;
-                    clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(NameValueCollection.ParseQueryString(hdsiExpr.Expression), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
-                    clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
-                    if (hdsiExpr.NegationIndicator)
-                        clauseExpr = Expression.Not(clauseExpr);
-                    this.m_tracer.TraceVerbose("Converted WHEN {0} > {1}", hdsiExpr.Expression, clauseExpr);
-                }
-                else if (itm is XmlLambdaExpression)
-                {
-                    var xmlLambda = itm as XmlLambdaExpression;
-                    (itm as XmlLambdaExpression).InitializeContext(null);
-                    // replace parameter
-                    clauseExpr = Expression.Invoke(((itm as XmlLambdaExpression).ToExpression() as LambdaExpression), expressionParm);
-                }
-                else
-                {
-                    var interpreter = new Interpreter(InterpreterOptions.Default)
+                        clauseExpr = QueryExpressionParser.BuildLinqExpression<TData>(hdsiExpr.Expression.ParseQueryString(), "s", varDict, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
+                        clauseExpr = Expression.Invoke(clauseExpr, Expression.MakeMemberAccess(expressionParm, typeof(CdssContext<TData>).GetProperty("Target")));
+                        if (hdsiExpr.NegationIndicator)
+                        {
+                            clauseExpr = Expression.Not(clauseExpr);
+                        }
+
+                        this.m_tracer.TraceVerbose("Converted WHEN {0} > {1}", hdsiExpr.Expression, clauseExpr);
+                        break;
+                    case XmlLambdaExpression xmlLambda:
+                        (itm as XmlLambdaExpression).InitializeContext(null);
+                        // replace parameter
+                        clauseExpr = Expression.Invoke(((itm as XmlLambdaExpression).ToExpression() as LambdaExpression), expressionParm);
+                        break;
+                    default:
+                        var interpreter = new Interpreter(InterpreterOptions.Default)
                         .Reference(typeof(TData))
                         .Reference(typeof(Guid))
                         .Reference(typeof(TimeSpan))
                         .Reference(typeof(Types))
                         .EnableReflection();
-                    var linqAction = interpreter.ParseAsExpression<Func<CdssContext<TData>, bool>>(itm.ToString(), "_");
-                    clauseExpr = Expression.Invoke(linqAction, expressionParm);
-                    //clauseExpr = Expression.Invoke(d, expressionParm);
+                        var linqAction = interpreter.ParseAsExpression<Func<CdssContext<TData>, bool>>(itm.ToString(), "_");
+                        clauseExpr = Expression.Invoke(linqAction, expressionParm);
+                        break;
                 }
+               
 
                 // Append to master expression
                 if (body == null)
+                {
                     body = clauseExpr;
+                }
                 else
+                {
                     body = Expression.MakeBinary((ExpressionType)Enum.Parse(typeof(ExpressionType), this.Operator.ToString()), body, clauseExpr);
+                }
             }
 
             // Wrap and compile
@@ -148,7 +154,9 @@ namespace SanteDB.Cdss.Xml.Model
         public bool Evaluate<TData>(CdssContext<TData> context)
         {
             if (this.m_compiledExpression == null)
+            {
                 this.Compile<TData>(context);
+            }
 
             lock (m_lockObject)
             {

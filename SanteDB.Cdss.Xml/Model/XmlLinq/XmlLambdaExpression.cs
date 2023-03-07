@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using System;
 using System.Collections.Generic;
@@ -100,7 +100,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
                 return Expression.Lambda(lamdaType.MakeGenericType(typeParameters.ToArray()), this.Object.ToExpression(), this.Parameters.Select(o => o.ToExpression()).OfType<ParameterExpression>().ToArray());
             }
             else
+            {
                 return Expression.Lambda(this.Object.ToExpression(), this.Parameters.Select(o => o.ToExpression()).OfType<ParameterExpression>().ToArray());
+            }
         }
     }
 }

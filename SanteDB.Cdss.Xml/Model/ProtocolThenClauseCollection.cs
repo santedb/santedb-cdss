@@ -16,12 +16,12 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
+using SanteDB;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
-using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Query;
@@ -29,6 +29,7 @@ using SanteDB.Core.Model.Roles;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -72,8 +73,8 @@ namespace SanteDB.Cdss.Xml.Model
                     // Load all concepts for the specified objects
                 }
                 act = (itm.Element as Act).Clone() as Act;
-                act.Participations = new List<ActParticipation>((itm.Element as Act).Participations.Select(o => o.Clone() as ActParticipation));
-                act.Relationships = new List<ActRelationship>((itm.Element as Act).Relationships.Select(o => o.Clone() as ActRelationship));
+                act.Participations = (itm.Element as Act).Participations?.Select(o => o.Clone() as ActParticipation).ToList();
+                act.Relationships = (itm.Element as Act).Relationships?.Select(o => o.Clone() as ActRelationship).ToList();
                 act.Protocols = new List<ActProtocol>();// (itm.Element as Act).Protocols);
                 // Now do the actions to the properties as stated
                 foreach (var instr in itm.Do)
@@ -84,9 +85,10 @@ namespace SanteDB.Cdss.Xml.Model
                 // Assign this patient as the record target
                 act.Key = act.Key ?? Guid.NewGuid();
                 Guid pkey = Guid.NewGuid();
-                act.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+
+                act.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target.Key) { ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 // Add record target to the source for forward rules
-                context.Target.Participations.Add(new ActParticipation(ActParticipationKey.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
+                context.Target.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, context.Target) { SourceEntity = act, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = pkey });
                 act.CreationTime = DateTimeOffset.Now;
                 // The act to the return value
                 retVal.Add(act);
@@ -223,15 +225,18 @@ namespace SanteDB.Cdss.Xml.Model
                 {
                     var scopeProperty = context.Target.GetType().GetRuntimeProperty(this.ScopeSelector);
 
-                    if (scopeProperty == null) return null; // no scope
+                    if (scopeProperty == null)
+                    {
+                        return null; // no scope
+                    }
 
                     // Where clause?
                     if (!String.IsNullOrEmpty(this.WhereFilter) && this.m_scopeSelectMethod == null)
                     {
                         var itemType = scopeProperty.PropertyType.GenericTypeArguments[0];
+                        this.m_linqExpression = QueryExpressionParser.BuildLinqExpression(itemType, this.WhereFilter.ParseQueryString());
                         var predicateType = typeof(Func<,>).MakeGenericType(new Type[] { itemType, typeof(bool) });
                         var builderMethod = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression), new Type[] { itemType }, new Type[] { typeof(NameValueCollection) });
-                        this.m_linqExpression = builderMethod.Invoke(null, new Object[] { NameValueCollection.ParseQueryString(this.WhereFilter) }) as Expression;
                         this.m_compiledExpression = (this.m_linqExpression as LambdaExpression).Compile();
                         // Call where clause
                         builderMethod = typeof(Expression).GetGenericMethod(nameof(Expression.Lambda), new Type[] { predicateType }, new Type[] { typeof(Expression), typeof(ParameterExpression[]) });
@@ -245,7 +250,9 @@ namespace SanteDB.Cdss.Xml.Model
                     this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", this.m_scopeSelectMethod.ReturnType));
                 }
                 else
+                {
                     this.m_setter = interpretor.Parse(this.ValueExpression, new Parameter("_", typeof(CdssContext<Patient>)));
+                }
             }
 
             Object setValue = null;
@@ -261,15 +268,24 @@ namespace SanteDB.Cdss.Xml.Model
                     var scopeValue = scopeProperty.GetValue(context.Target);
                     scope = scopeValue;
                     if (!String.IsNullOrEmpty(this.WhereFilter))
+                    {
                         scope = this.m_scopeSelectMethod.Invoke(null, new Object[] { scopeValue, this.m_compiledExpression });
+                    }
+
                     lock (scopes)
+                    {
                         if (!scopes.ContainsKey(scopeKey))
+                        {
                             scopes.Add(scopeKey, scope);
+                        }
+                    }
                 }
                 setValue = this.m_setter.Invoke(scope);
             }
             else
+            {
                 setValue = this.m_setter.Invoke(context);
+            }
 
             return setValue;
         }
@@ -282,14 +298,18 @@ namespace SanteDB.Cdss.Xml.Model
             var propertyInfo = act.GetType().GetRuntimeProperty(this.PropertyName);
 
             if (this.Element != null)
+            {
                 propertyInfo.SetValue(act, this.Element);
+            }
             else
             {
                 var setValue = this.GetValue(act, context, scopes);
 
                 //exp.TypeRegistry.RegisterSymbol("data", expressionParm);
                 if (Core.Model.Map.MapUtil.TryConvert(setValue, propertyInfo.PropertyType, out setValue))
+                {
                     propertyInfo.SetValue(act, setValue);
+                }
             }
 
             return propertyInfo.GetValue(act);

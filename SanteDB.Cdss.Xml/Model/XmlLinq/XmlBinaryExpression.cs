@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using System;
 using System.Collections.Generic;
@@ -111,7 +111,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             base.InitializeContext(context);
             foreach (var itm in this.Parts)
+            {
                 itm.InitializeContext(this);
+            }
         }
 
         /// <summary>
@@ -121,7 +123,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             BinaryOperatorType opType = BinaryOperatorType.AndAlso;
             if (!Enum.TryParse<BinaryOperatorType>(expr.NodeType.ToString(), out opType))
+            {
                 throw new ArgumentOutOfRangeException(nameof(Expression.NodeType));
+            }
+
             this.Operator = opType;
 
             this.Parts = new List<XmlExpression>() {
@@ -173,17 +178,24 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         public override Expression ToExpression()
         {
             if (this.Parts.Count < 2)
+            {
                 throw new InvalidOperationException("At least two parts must be in a expression tree");
+            }
 
             // We basically take the two parts and construct those :) 
             ExpressionType type = ExpressionType.Add;
             if (!Enum.TryParse<ExpressionType>(this.Operator.ToString(), out type))
+            {
                 throw new ArgumentOutOfRangeException(nameof(ExpressionType));
+            }
+
             Queue<XmlExpression> parts = new Queue<XmlExpression>(this.Parts);
             var retVal = Expression.MakeBinary(type, parts.Dequeue().ToExpression(), parts.Dequeue().ToExpression());
 
             while (parts.Count > 0)
+            {
                 retVal = Expression.MakeBinary(type, retVal, parts.Dequeue().ToExpression());
+            }
 
             return retVal;
         }

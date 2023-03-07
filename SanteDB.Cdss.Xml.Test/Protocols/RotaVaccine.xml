@@ -1,5 +1,5 @@
 ﻿<!--
- - Copyright 2021-2021 SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ - Copyright 2021-2022 SanteSuite Contributors (See NOTICE.md for full copyright notices)
  - Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  - Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  - 
@@ -16,7 +16,7 @@
  - the License.
  - 
  - User: fyfej
- - Date: 2021-8-5
+ - Date: 2022-5-30
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="D4DFD6C2-2A83-4A4E-BBFE-7D607604A60C" name="Rota Virus Vaccine">
   <when evaluation="and">
@@ -140,9 +140,9 @@
 			      }
           ]]>
         </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StartTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="ActTime">_.Act.ActTime + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StopTime">_.Act.ActTime + new TimeSpan(5 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StartTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="ActTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
+        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus" propertyName="StopTime">_.Act.ActTime.Value + new TimeSpan(5 * 7,0,0,0)</assign>
       </action>
     </then>
   </rule>

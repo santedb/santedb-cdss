@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using System;
 using System.Linq.Expressions;
@@ -47,7 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         /// <summary>
         /// Create constant expression from the specitifed expression
         /// </summary>
-        /// <param name="constantExpression"></param>
+        /// <param name="expr">The expression to be represented in this xml structure</param>
         public XmlConstantExpression(ConstantExpression expr)
         {
             this.Value = expr.Value;

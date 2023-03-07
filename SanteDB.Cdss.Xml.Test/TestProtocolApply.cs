@@ -1,30 +1,30 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
  * the License.
- *
+ * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2022-5-30
  */
-
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Protocol;
 using SanteDB.Core.Services;
@@ -49,6 +49,10 @@ namespace SanteDB.Cdss.Xml.Test
 
         public SanteDBHostType HostType => SanteDBHostType.Other;
 
+        public String ApplicationName => "Test";
+
+        public Guid ActivityUuid => Guid.NewGuid();
+
         public DateTime StartTime => DateTime.Now;
 
         public event EventHandler Starting;
@@ -59,6 +63,11 @@ namespace SanteDB.Cdss.Xml.Test
 
         public event EventHandler Stopped;
 
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            ServiceUtil.Start(Guid.Empty, this);
+        }
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
         /// </summary>
@@ -80,7 +89,7 @@ namespace SanteDB.Cdss.Xml.Test
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
-            Assert.AreEqual(4, acts.Count);
+            Assert.AreEqual(4, acts.Count());
         }
 
         /// <summary>
@@ -104,7 +113,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(1, acts.Count);
+            Assert.AreEqual(1, acts.Count());
         }
 
         /// <summary>
@@ -128,7 +137,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.Count);
+            Assert.AreEqual(60, acts.Count());
         }
 
         /// <summary>
@@ -173,7 +182,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(59, acts.Count);
+            Assert.AreEqual(59, acts.Count());
         }
 
         /// <summary>
@@ -197,7 +206,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(2, acts.Count);
+            Assert.AreEqual(2, acts.Count());
         }
 
         /// <summary>
@@ -221,7 +230,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(3, acts.Count);
+            Assert.AreEqual(3, acts.Count());
         }
 
         /// <summary>
@@ -245,7 +254,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(3, acts.Count);
+            Assert.AreEqual(3, acts.Count());
         }
 
         /// <summary>
@@ -269,7 +278,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.Calculate(newborn, null);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(2, acts.Count);
+            Assert.AreEqual(2, acts.Count());
         }
 
         /// <summary>
@@ -278,8 +287,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldHandlePartials()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
-            ApplicationServiceContext.Current = this;
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -291,17 +299,16 @@ namespace SanteDB.Cdss.Xml.Test
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(83, acts.Action.Count());
-            Assert.IsFalse(acts.Action.Any(o => o.Protocols.Count() > 1));
+            String json = jsonSerializer.Serialize(acts);
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
             acts = scp.CreateCarePlan(newborn);
-            //Assert.AreEqual(60, acts.Action.Count());
-            acts.Action.RemoveAll(o => o is QuantityObservation);
-            Assert.AreEqual(23, acts.Action.Count);
+            //Assert.AreEqual(60, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
+            Assert.AreEqual(23, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
             acts = scp.CreateCarePlan(newborn);
-            //Assert.AreEqual(60, acts.Action.Count());
-            Assert.AreEqual(83, acts.Action.Count());
-            Assert.IsFalse(acts.Action.Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKey.RecordTarget)));
+            //Assert.AreEqual(60, acts.LoadCollection(o=>o.Relationships).Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o=>o.LoadProperty(r=>r.TargetAct)).Count());
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKeys.RecordTarget)));
         }
 
         /// <summary>
@@ -310,8 +317,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldExcludeAdults()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
-            ApplicationServiceContext.Current = this;
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             // Patient that is just born = Schedule OPV
             Patient adult = new Patient()
             {
@@ -324,7 +330,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(adult);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(adult);
-            Assert.AreEqual(0, acts.Action.Count());
+            Assert.AreEqual(0, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
         }
 
         /// <summary>
@@ -333,8 +339,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAll()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
-            ApplicationServiceContext.Current = this;
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -347,8 +352,8 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(83, acts.Action.Count());
-            Assert.IsFalse(acts.Action.Any(o => o.Protocols.Count() > 1));
+            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
         /// <summary>
@@ -357,8 +362,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAppointments()
         {
-            SimpleCarePlanService scp = new SimpleCarePlanService();
-            ApplicationServiceContext.Current = this;
+            SimpleCarePlanService scp = new SimpleCarePlanService(new DummyProtocolRepository());
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -371,8 +375,8 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn, true);
             var jsonSerializer = new JsonViewModelSerializer();
             string json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.Action.Count());
-            Assert.IsFalse(acts.Action.Any(o => o.Protocols.Count() > 1));
+            Assert.AreEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Protocols.IsNullOrEmpty()));
         }
 
         /// <summary>
@@ -385,12 +389,10 @@ namespace SanteDB.Cdss.Xml.Test
 
         public void Start()
         {
-            throw new NotImplementedException();
         }
 
         public void Stop()
         {
-            throw new NotImplementedException();
         }
     }
 
@@ -402,21 +404,56 @@ namespace SanteDB.Cdss.Xml.Test
     {
         public String ServiceName => "Fake Repository";
 
+        [Obsolete("Use FindProtocol()", true)]
         public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
         {
             List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
 
             foreach (var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
+            {
                 if (i.EndsWith(".xml"))
                 {
                     ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
                     retVal.Add(new XmlClinicalProtocol(definition).GetProtocolData());
                 }
+            }
+
             totalResults = retVal.Count;
             return retVal;
         }
 
+        public IQueryResultSet<IClinicalProtocol> FindProtocol(String name = null, String oid = null)
+        {
+            return new MemoryQueryResultSet<IClinicalProtocol>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Select(i =>
+            {
+                if (i.EndsWith(".xml"))
+                {
+                    ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
+                    return new XmlClinicalProtocol(definition);
+                }
+                else
+                {
+                    return null;
+                }
+            })).Where(o => o.Name == (name ?? o.Name));
+        }
+
+        public IClinicalProtocol GetProtocol(Guid protocolUuid)
+        {
+            throw new NotImplementedException();
+        }
+
         public Core.Model.Acts.Protocol InsertProtocol(Core.Model.Acts.Protocol data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IClinicalProtocol InsertProtocol(IClinicalProtocol data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IClinicalProtocol RemoveProtocol(Guid protocolUuid)
         {
             throw new NotImplementedException();
         }

@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +45,9 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         public virtual void InitializeContext(XmlExpression context)
         {
             foreach (var itm in this.Item)
+            {
                 itm.InitializeContext(context);
+            }
         }
 
         /// <summary>

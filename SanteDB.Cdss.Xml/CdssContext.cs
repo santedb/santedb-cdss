@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.Core.Model.Map;
 using System;
@@ -98,9 +98,13 @@ namespace SanteDB.Cdss.Xml
         {
             if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration registration) &&
                 MapUtil.TryConvert(registration.Value, registration.Type, out object retVal))
+            {
                 return retVal;
+            }
             else
+            {
                 return null;
+            }
         }
 
         /// <summary>
@@ -109,7 +113,10 @@ namespace SanteDB.Cdss.Xml
         public TValue Get<TValue>(String parameterName)
         {
             if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
+            {
                 return (TValue)retVal.Value;
+            }
+
             return default(TValue);
         }
 
@@ -120,7 +127,10 @@ namespace SanteDB.Cdss.Xml
         public TValue Get<TValue>(String parameterName, TValue defaultValue)
         {
             if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
+            {
                 return (TValue)retVal.Value;
+            }
+
             return defaultValue;
         }
 
@@ -130,11 +140,13 @@ namespace SanteDB.Cdss.Xml
         public void Declare(string variableName, Type variableType)
         {
             if (!this.m_parameters.ContainsKey(variableName))
+            {
                 this.m_parameters.Add(variableName, new ParameterRegistration()
                 {
                     Type = variableType,
                     Value = null
                 });
+            }
         }
     }
 }

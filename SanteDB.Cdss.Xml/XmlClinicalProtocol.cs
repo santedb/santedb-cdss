@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
@@ -35,25 +35,22 @@ using System.Linq;
 
 namespace SanteDB.Cdss.Xml
 {
-
     /// <summary>
     /// Clinicl protocol that is stored/loaded via XML
     /// </summary>
     public class XmlClinicalProtocol : IClinicalProtocol
     {
-
         // Protocol definition
         private Core.Model.Acts.Protocol m_protocolDefinition = null;
 
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
 
         /// <summary>
         /// Default ctor
         /// </summary>
         public XmlClinicalProtocol()
         {
-
         }
 
         /// <summary>
@@ -93,6 +90,11 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <summary>
+        /// Gets the versionof this protocol
+        /// </summary>
+        public string Version => this.Definition?.Version;
+
+        /// <summary>
         /// Local index
         /// </summary>
         [ThreadStatic]
@@ -101,9 +103,8 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Calculate the protocol against a atient
         /// </summary>
-        public List<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
+        public IEnumerable<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
         {
-
             try
             {
 #if DEBUG
@@ -111,14 +112,16 @@ namespace SanteDB.Cdss.Xml
                 sw.Start();
 #endif
                 if (parameters == null)
+                {
                     parameters = new Dictionary<String, Object>();
+                }
 
                 // Get a clone to make decisions on
                 Patient patient = null;
                 lock (triggerPatient)
                 {
                     patient = triggerPatient.Clone() as Patient;
-                    patient.Participations = new List<ActParticipation>(triggerPatient.Participations);
+                    patient.Participations = triggerPatient.Participations?.ToList();
                 }
 
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, patient);
@@ -126,7 +129,7 @@ namespace SanteDB.Cdss.Xml
                 var context = new CdssContext<Patient>(patient);
                 context.Set("index", 0);
                 context.Set("parameters", parameters);
-                foreach(var itm in parameters)
+                foreach (var itm in parameters)
                 {
                     context.Set(itm.Key, itm.Value);
                 }
@@ -156,7 +159,7 @@ namespace SanteDB.Cdss.Xml
                             context.Set(itm.VariableName, value);
                         }
 
-                        // TODO: Variable initialization 
+                        // TODO: Variable initialization
                         if (rule.When.Evaluate(context) && !parameters.ContainsKey("ignoreWhen"))
                         {
                             var acts = rule.Then.Evaluate(context);
@@ -164,25 +167,30 @@ namespace SanteDB.Cdss.Xml
 
                             // Assign protocol
                             foreach (var itm in acts)
+                            {
                                 itm.Protocols.Add(new ActProtocol()
                                 {
                                     ProtocolKey = this.Id,
                                     Protocol = this.GetProtocolData(),
-                                    Sequence = step
+                                    Sequence = step,
+                                    Version = this.Version
                                 });
-
+                            }
                         }
                         else
+                        {
                             this.m_tracer.TraceInfo("{0} does not meet criteria for rule {1}.{2}", patient, this.Name, rule.Name ?? rule.Id);
+                        }
 
                         step++;
-
                     }
                 }
 
                 // Now we want to add the stuff to the patient
                 lock (triggerPatient)
-                    triggerPatient.Participations.AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKey.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKey.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                {
+                    triggerPatient.LoadProperty(o => o.Participations).AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
+                }
 #if DEBUG
                 sw.Stop();
                 this.m_tracer.TraceVerbose("Protocol {0} took {1} ms", this.Name, sw.ElapsedMilliseconds);
@@ -202,6 +210,7 @@ namespace SanteDB.Cdss.Xml
         public Core.Model.Acts.Protocol GetProtocolData()
         {
             if (this.m_protocolDefinition == null)
+            {
                 using (MemoryStream ms = new MemoryStream())
                 {
                     this.Definition.Save(ms);
@@ -214,23 +223,32 @@ namespace SanteDB.Cdss.Xml
                         Oid = this.Definition.Oid
                     };
                 }
+            }
+
             return this.m_protocolDefinition;
         }
 
         /// <summary>
         /// Create the protocol data from the protocol instance
         /// </summary>
-        public void Load(Core.Model.Acts.Protocol protocolData)
+        public IClinicalProtocol Load(Core.Model.Acts.Protocol protocolData)
         {
-            if (protocolData == null) throw new ArgumentNullException(nameof(protocolData));
+            if (protocolData == null)
+            {
+                throw new ArgumentNullException(nameof(protocolData));
+            }
+
             using (MemoryStream ms = new MemoryStream(protocolData.Definition))
+            {
                 this.Definition = ProtocolDefinition.Load(ms);
+            }
 
             var context = new CdssContext<Patient>();
             context.Declare("index", typeof(Int32));
 
             // Add callback rules
             foreach (var rule in this.Definition.Rules)
+            {
                 for (var index = 0; index < rule.Repeat; index++)
                 {
                     foreach (var itm in rule.Variables)
@@ -238,17 +256,21 @@ namespace SanteDB.Cdss.Xml
                         context.Declare(itm.VariableName, itm.VariableType);
                     }
                 }
+            }
 
             this.Definition.When?.Compile<Patient>(context);
             foreach (var wc in this.Definition.Rules)
+            {
                 wc.When.Compile<Patient>(context);
+            }
 
+            return this;
         }
 
         /// <summary>
         /// Updates an existing plan
         /// </summary>
-        public List<Act> Update(Patient p, List<Act> existingPlan)
+        public IEnumerable<Act> Update(Patient p, IEnumerable<Act> existingPlan)
         {
             throw new NotImplementedException();
         }
@@ -256,9 +278,12 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Initialize the patient
         /// </summary>
-        public void Initialize(Patient p, IDictionary<String, Object> parameters)
+        public void Prepare(Patient p, IDictionary<String, Object> parameters)
         {
-            if (parameters.ContainsKey("xml.initialized")) return;
+            if (parameters.ContainsKey("xml.initialized"))
+            {
+                return;
+            }
 
             // Merge the view models
             NullViewModelSerializer serializer = new NullViewModelSerializer();
@@ -278,8 +303,6 @@ namespace SanteDB.Cdss.Xml
             serializer.Serialize(p);
 
             parameters.Add("xml.initialized", true);
-
-
         }
     }
 }

@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Model.Acts;
@@ -90,7 +90,9 @@ namespace SanteDB.Cdss.Xml.Model
             {
                 IgnoreWhitespace = true
             }))
+            {
                 return s_xsz.Deserialize(xr) as ProtocolDefinition;
+            }
         }
     }
 }

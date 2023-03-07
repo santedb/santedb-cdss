@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using System;
 using System.Linq.Expressions;
@@ -62,7 +62,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             UnaryOperatorType uop = UnaryOperatorType.Negate;
             if (!Enum.TryParse<UnaryOperatorType>(expr.NodeType.ToString(), out uop))
+            {
                 throw new ArgumentOutOfRangeException(nameof(UnaryExpression.NodeType));
+            }
+
             this.Operator = uop;
             this.TypeXml = expr.Type.AssemblyQualifiedName;
         }
@@ -105,7 +108,10 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
         {
             ExpressionType uop = ExpressionType.Parameter;
             if (!Enum.TryParse<ExpressionType>(this.Operator.ToString(), out uop))
+            {
                 throw new ArgumentOutOfRangeException(nameof(ExpressionType));
+            }
+
             return Expression.MakeUnary(uop, this.Object.ToExpression(), this.Type);
         }
     }
