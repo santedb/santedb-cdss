@@ -113,7 +113,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SharpCompress" Version="0.32.2" />
   </ItemGroup>
   <ItemGroup>
