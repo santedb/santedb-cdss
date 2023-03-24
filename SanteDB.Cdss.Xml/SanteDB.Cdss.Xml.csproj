@@ -114,7 +114,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SharpCompress" Version="0.32.2" />
+    <PackageReference Include="SharpCompress" Version="0.33.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
