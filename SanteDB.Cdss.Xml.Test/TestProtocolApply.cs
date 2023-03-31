@@ -55,6 +55,8 @@ namespace SanteDB.Cdss.Xml.Test
 
         public DateTime StartTime => DateTime.Now;
 
+#pragma warning disable CS0067
+
         public event EventHandler Starting;
 
         public event EventHandler Started;
@@ -62,6 +64,7 @@ namespace SanteDB.Cdss.Xml.Test
         public event EventHandler Stopping;
 
         public event EventHandler Stopped;
+#pragma warning restore
 
         [OneTimeSetUp]
         public void OneTimeSetup()
