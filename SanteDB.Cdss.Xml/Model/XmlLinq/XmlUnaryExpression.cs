@@ -31,12 +31,24 @@ namespace SanteDB.Cdss.Xml.Model.XmlLinq
     [XmlType(nameof(UnaryOperatorType), Namespace = "http://santedb.org/cdss")]
     public enum UnaryOperatorType
     {
+        /// <summary>
+        /// The operation is a NOT! operator
+        /// </summary>
         [XmlEnum("not")]
         Not,
+        /// <summary>
+        /// The operation is a conversion
+        /// </summary>
         [XmlEnum("convert")]
         Convert,
+        /// <summary>
+        /// The operation is a negation
+        /// </summary>
         [XmlEnum("neg")]
         Negate,
+        /// <summary>
+        /// Th eoperation is a type as
+        /// </summary>
         [XmlEnum("as")]
         TypeAs
     }
