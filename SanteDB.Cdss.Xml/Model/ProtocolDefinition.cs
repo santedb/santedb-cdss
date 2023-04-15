@@ -74,6 +74,12 @@ namespace SanteDB.Cdss.Xml.Model
         public string Oid { get; set; }
 
         /// <summary>
+        /// Represents the group that this protocol belongs to - this is useful for blocking 
+        /// </summary>
+        [XmlElement("group")]
+        public string GroupId { get; set; }
+
+        /// <summary>
         /// Save the protocol definition to the specified stream
         /// </summary>
         public void Save(Stream ms)

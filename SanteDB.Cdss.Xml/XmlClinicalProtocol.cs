@@ -95,6 +95,11 @@ namespace SanteDB.Cdss.Xml
         public string Version => this.Definition?.Version;
 
         /// <summary>
+        /// Gets the group id
+        /// </summary>
+        public string GroupId => this.Definition?.GroupId;
+
+        /// <summary>
         /// Local index
         /// </summary>
         [ThreadStatic]

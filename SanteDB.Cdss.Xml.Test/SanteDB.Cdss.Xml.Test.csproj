@@ -7,6 +7,9 @@
 	<PropertyGroup Condition="'$(VersionNumber)' == ''">
     <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
+	<ItemGroup>
+	  <None Remove="TestConfig.xml" />
+	</ItemGroup>
 
   <ItemGroup>
     <Reference Include="System" />
@@ -27,6 +30,9 @@
           <Project>{39E61451-F4FE-493D-B754-5F06EB284AAC}</Project>
           <Name>SanteDB.Core.Applets</Name>
         </ProjectReference>
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Data\SanteDB.Persistence.Data.csproj" />
+        <ProjectReference Include="..\..\santedb-api\SanteDB.Core.TestFramework\SanteDB.Core.TestFramework.csproj" />
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Core.TestFramework.SQLite\SanteDB.Core.TestFramework.SQLite.csproj" />
       </ItemGroup>
     </When>
     <Otherwise>
@@ -34,6 +40,9 @@
         <PackageReference Include="SanteDB.Core.Api" Version="$(VersionNumber)" />
         <PackageReference Include="SanteDB.Core.Applets" Version="$(VersionNumber)" />
         <PackageReference Include="SanteDB.Core.Model" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Core.TestFramework" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Core.TestFramework.Sqlite" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Persistence.Data" Version="$(VersionNumber)" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -62,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Protocols\Supplement.xml" />
+    <EmbeddedResource Include="TestConfig.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\SanteDB.licenseheader">
