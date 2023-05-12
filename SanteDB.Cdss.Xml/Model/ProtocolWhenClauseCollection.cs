@@ -82,7 +82,7 @@ namespace SanteDB.Cdss.Xml.Model
             foreach (var itm in this.Clause)
             {
                 Expression clauseExpr = null;
-                switch(itm)
+                switch (itm)
                 {
                     case ProtocolWhenClauseCollection pwcc:
                         clauseExpr = Expression.Invoke(pwcc.Compile<TData>(context), expressionParm);
@@ -119,7 +119,7 @@ namespace SanteDB.Cdss.Xml.Model
                         clauseExpr = Expression.Invoke(linqAction, expressionParm);
                         break;
                 }
-               
+
 
                 // Append to master expression
                 if (body == null)
