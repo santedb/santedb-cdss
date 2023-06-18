@@ -17,7 +17,7 @@
  - the License.
  - 
  - User: fyfej
- - Date: 2023-3-10
+ - Date: 2023-5-19
  -->
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="BCG" name="BCG Vaccine Schedule">
   <when evaluation="and">
