@@ -103,7 +103,11 @@ namespace SanteDB.Cdss.Xml
         /// Local index
         /// </summary>
         [ThreadStatic]
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS0414
         private static Dictionary<String, Object> s_variables = null;
+#pragma warning restore CS0414
+#pragma warning restore IDE0051 // Remove unused private members
 
         /// <summary>
         /// Calculate the protocol against a atient
