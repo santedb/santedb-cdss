@@ -26,7 +26,7 @@ using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Protocol;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
 using System;
@@ -71,7 +71,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.ComputeProposals(newborn, new Dictionary<String, Object>(), out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -96,7 +96,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(1, acts.Count());
@@ -120,7 +120,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(60, acts.Count());
@@ -165,7 +165,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(59, acts.Count());
@@ -189,7 +189,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
@@ -213,7 +213,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -237,7 +237,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -261,7 +261,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.ComputeProposals(newborn, null, out _);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
@@ -406,53 +406,41 @@ namespace SanteDB.Cdss.Xml.Test
     /// Dummy clinical repository
     /// </summary>
     [ExcludeFromCodeCoverage]
-    internal class DummyProtocolRepository : IClinicalProtocolRepositoryService
+    internal class DummyProtocolRepository : ICdssAssetRepository
     {
         public String ServiceName => "Fake Repository";
 
-        [Obsolete("Use FindProtocol()", true)]
-        public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
+
+        public IQueryResultSet<ICdssAsset> Find(Expression<Func<ICdssAsset, bool>> filter)
         {
-            List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
-
-            foreach (var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
-            {
-                if (i.EndsWith(".xml"))
-                {
-                    ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
-                    retVal.Add(new XmlClinicalProtocol(definition).GetProtocolData());
-                }
-            }
-
-            totalResults = retVal.Count;
-            return retVal;
-        }
-
-        public IQueryResultSet<IClinicalProtocol> FindProtocol(String name = null, String oid = null, String group = null)
-        {
-            return new MemoryQueryResultSet<IClinicalProtocol>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
+            return new MemoryQueryResultSet<ICdssAsset>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
             {
                 ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
                 return new XmlClinicalProtocol(definition);
-            })).Where(o => o.Name == (name ?? o.Name) || o.GroupId == (group ?? o.GroupId));
+            })).Where(filter);
         }
 
-        public IClinicalProtocol GetProtocol(Guid protocolUuid)
+        public ICdssAsset Get(Guid protocolUuid)
         {
             throw new NotImplementedException();
         }
 
-        public Core.Model.Acts.Protocol InsertProtocol(Core.Model.Acts.Protocol data)
+        public ICdssAsset GetByOid(String protocolOid)
         {
             throw new NotImplementedException();
         }
 
-        public IClinicalProtocol InsertProtocol(IClinicalProtocol data)
+        public ICdssAsset InsertOrUpdate(ICdssAsset data)
         {
             throw new NotImplementedException();
         }
 
-        public IClinicalProtocol RemoveProtocol(Guid protocolUuid)
+        public ICdssProtocolAsset InsertProtocol(ICdssProtocolAsset data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICdssAsset Remove(Guid protocolUuid)
         {
             throw new NotImplementedException();
         }

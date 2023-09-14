@@ -20,7 +20,7 @@
  */
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
-using SanteDB.Cdss.Xml.Model.XmlLinq;
+using SanteDB.Cdss.Xml.XmlLinq;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.DataTypes;
 using SanteDB.Core.Model.Entities;

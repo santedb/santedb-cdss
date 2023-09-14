@@ -18,16 +18,22 @@
  * User: fyfej
  * Date: 2023-5-19
  */
+using DynamicExpresso;
+using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Map;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SanteDB.Cdss.Xml
 {
     /// <summary>
     /// Parameter manager for the CDSS
     /// </summary>
-    public class CdssContext<TModel> : ICdssContext
+    internal class CdssContext<TTarget>  : ICdssContext
     {
         /// <summary>
         /// Parameter registration
@@ -55,37 +61,50 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Gets the target
         /// </summary>
-        public CdssContext(TModel target)
+        public CdssContext(TTarget target)
         {
             this.Target = target;
         }
 
         // Parameter values
-        private Dictionary<String, ParameterRegistration> m_parameters = new Dictionary<String, ParameterRegistration>();
+        private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
+        private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
+        private readonly IDictionary<String, CdssComputableAssetDefinition> m_factDefinitions = new Dictionary<String, CdssComputableAssetDefinition>();
 
         /// <summary>
         /// Gets or sets the target of the context
         /// </summary>
-        public TModel Target { get; private set; }
+        public TTarget Target { get; private set; }
 
         /// <summary>
         /// Get the variables
         /// </summary>
-        public IEnumerable<String> Variables => m_parameters.Keys;
+        public IEnumerable<String> Variables => m_variables.Keys;
+
+        /// <summary>
+        /// Property indexer for variable name
+        /// </summary>
+        /// <param name="variableName">The name of the variable to fetch</param>
+        /// <returns>The variable value (if it is declared) for <paramref name="variableName"/></returns>
+        public object this[string variableName]
+        {
+            get => this.GetValue(variableName);
+            set => this.SetValue(variableName, value);
+        }
 
         /// <summary>
         /// Sets the specified variable name
         /// </summary>
-        public void Set(String parameterName, object value)
+        public void SetValue(String parameterName, object value)
         {
-            if (!this.m_parameters.TryGetValue(parameterName, out ParameterRegistration registration))
+            if (!this.m_variables.TryGetValue(parameterName, out ParameterRegistration registration))
             {
                 registration = new ParameterRegistration()
                 {
                     Type = value.GetType(),
                     Value = value
                 };
-                this.m_parameters.Add(parameterName, registration);
+                this.m_variables.Add(parameterName, registration);
             }
 
             registration.Value = value;
@@ -94,12 +113,22 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the parameter name
         /// </summary>
-        public object Get(String parameterName)
+        public object GetValue(String parameterOrFactName)
         {
-            if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration registration) &&
+            if (this.m_variables.TryGetValue(parameterOrFactName, out ParameterRegistration registration) &&
                 MapUtil.TryConvert(registration.Value, registration.Type, out object retVal))
             {
                 return retVal;
+            }
+            else if(this.m_factCache.TryGetValue(parameterOrFactName, out var cache))
+            {
+                return cache;
+            }
+            else if(this.m_factDefinitions.TryGetValue(parameterOrFactName, out var defn))
+            {
+                var value = defn.Compute(this);
+                this.m_factCache.Add(parameterOrFactName, value);
+                return value;
             }
             else
             {
@@ -110,43 +139,57 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get strongly type parameter
         /// </summary>
-        public TValue Get<TValue>(String parameterName)
-        {
-            if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
-            {
-                return (TValue)retVal.Value;
-            }
-
-            return default(TValue);
-        }
-
-
-        /// <summary>
-        /// Get strongly type parameter
-        /// </summary>
-        public TValue Get<TValue>(String parameterName, TValue defaultValue)
-        {
-            if (this.m_parameters.TryGetValue(parameterName, out ParameterRegistration retVal))
-            {
-                return (TValue)retVal.Value;
-            }
-
-            return defaultValue;
-        }
+        public TValue GetValue<TValue>(String parameterOrFactName) => (TValue)this.GetValue(parameterOrFactName);
 
         /// <summary>
         /// Decalare a  variable
         /// </summary>
         public void Declare(string variableName, Type variableType)
         {
-            if (!this.m_parameters.ContainsKey(variableName))
+            if (!this.m_variables.ContainsKey(variableName))
             {
-                this.m_parameters.Add(variableName, new ParameterRegistration()
+                this.m_variables.Add(variableName, new ParameterRegistration()
                 {
                     Type = variableType,
                     Value = null
                 });
             }
+        }
+
+        /// <summary>
+        /// Declares a fact registration to the CDSS context
+        /// </summary>
+        public void Declare(CdssComputableAssetDefinition fact)
+        {
+            if (!String.IsNullOrEmpty(fact.Name))
+            {
+                this.m_factCache.Add(fact.Name, fact);
+            }
+            if (!String.IsNullOrEmpty(fact.Id))
+            {
+                this.m_factCache.Add($"#{fact.Id}", fact);
+            }
+        }
+
+        /// <summary>
+        /// Clear all evaluated fact values 
+        /// </summary>
+        public void ClearEvaluatedFacts()
+        {
+            this.m_factCache.Clear();
+        }
+
+        /// <summary>
+        /// Get an expression interpreter for this CDSS context
+        /// </summary>
+        /// <returns></returns>
+        internal Interpreter GetExpressionInterpreter()
+        {
+            var expressionInterpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default | InterpreterOptions.LateBindObject)
+                               .Reference(typeof(TimeSpan))
+                               .Reference(typeof(Guid))
+                               .Reference(typeof(DateTimeOffset));
+            return expressionInterpreter;
         }
     }
 }

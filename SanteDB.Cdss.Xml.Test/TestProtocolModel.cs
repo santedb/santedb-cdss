@@ -19,7 +19,7 @@
  * Date: 2023-5-19
  */
 using NUnit.Framework;
-using SanteDB.Cdss.Xml.Model.XmlLinq;
+using SanteDB.Cdss.Xml.XmlLinq;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Roles;

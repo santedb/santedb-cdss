@@ -21,13 +21,16 @@
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Serialization;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -41,7 +44,7 @@ namespace SanteDB.Cdss.Xml
     public class AppletClinicalProtocolRepository : AppletClinicalProtocolInstaller
     {
         /// <inheritdoc/>
-        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, IClinicalProtocolRepositoryService clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssAssetRepository clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
         {
         }
     }
@@ -59,7 +62,8 @@ namespace SanteDB.Cdss.Xml
     [ServiceProvider("Applet Based Clinical Protocol Installer")]
     public class AppletClinicalProtocolInstaller
     {
-        private XmlSerializer m_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
+        private XmlSerializer m_protocolReader = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
+        private XmlSerializer m_libraryReader = XmlModelSerializerFactory.Current.CreateSerializer(typeof(RulesetLibrary));
 
         /// <summary>
         /// Gets the service name
@@ -68,54 +72,75 @@ namespace SanteDB.Cdss.Xml
 
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolInstaller));
+        private readonly IAppletManagerService m_appletManager;
+        private readonly ICdssAssetRepository m_protocolRepository;
 
 
         /// <summary>
         /// Clinical repository service
         /// </summary>
-        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, IClinicalProtocolRepositoryService clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssAssetRepository clinicalProtocolRepositoryService)
         {
-            this.LoadProtocols(appletManager, clinicalProtocolRepositoryService);
+            this.m_appletManager = appletManager;
+            this.m_protocolRepository = clinicalProtocolRepositoryService;
+            this.LoadProtocols();
+            appletManager.Changed += (o, e) => this.LoadProtocols();
         }
 
         /// <summary>
         /// Load protocols
         /// </summary>
-        private void LoadProtocols(IAppletManagerService appletManager, IClinicalProtocolRepositoryService protocolRepositoryService)
+        private void LoadProtocols()
         {
             try
             {
                 using (AuthenticationContext.EnterSystemContext())
                 {
                     // Get protocols from the applet
-                    var protocols = appletManager.Applets.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
+                    var protocols = this.m_appletManager.Applets.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
 
                     foreach (var f in protocols)
                     {
-                        var content = f.Content ?? appletManager.Applets.Resolver(f);
-                        if (content is String)
+                        var content = f.Content ?? this.m_appletManager.Applets.Resolver(f);
+                        XmlReader sourceReader = null;
+                        switch(content)
                         {
-                            using (var rStream = new StringReader(content as String))
-                            {
-                                protocolRepositoryService.InsertProtocol(
-                                    new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
-                                );
-                            }
+                            case String str:
+                                sourceReader = XmlReader.Create(new StringReader(str));
+                                break;
+                            case byte[] b:
+                                sourceReader = XmlReader.Create(new MemoryStream(b));
+                                break;
+                            case XElement xe:
+                                sourceReader = xe.CreateReader();
+                                break;
+                            default:
+                                this.m_tracer.TraceWarning("Will not load {0}", f.Name);
+                                continue;
                         }
-                        else if (content is byte[])
+
+                        using(sourceReader)
                         {
-                            using (var rStream = new MemoryStream(content as byte[]))
+                            try
                             {
-                                protocolRepositoryService.InsertProtocol(new XmlClinicalProtocol(ProtocolDefinition.Load(rStream)));
+                                if (m_protocolReader.CanDeserialize(sourceReader))
+                                {
+                                    var protocol = this.m_protocolReader.Deserialize(sourceReader) as ProtocolDefinition;
+                                    this.m_protocolRepository.InsertOrUpdate(new XmlClinicalProtocol(protocol));
+                                }
+                                else if(m_libraryReader.CanDeserialize(sourceReader))
+                                {
+                                    var library = this.m_libraryReader.Deserialize(sourceReader) as RulesetLibrary;
+                                    this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException(ErrorMessages.INVALID_FILE_FORMAT);
+                                }
                             }
-                        }
-                        else if (content is XElement)
-                        {
-                            using (var rStream = (content as XElement).CreateReader())
+                            catch(Exception e)
                             {
-                                protocolRepositoryService.InsertProtocol(
-                                    new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
-                                    );
+                                this.m_tracer.TraceWarning("Could not load {0} due to {1}", f.Name, e.ToHumanReadableString());
                             }
                         }
                     }
