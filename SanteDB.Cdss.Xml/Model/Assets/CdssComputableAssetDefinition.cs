@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.Model;
 using System.Xml.Serialization;
 
-namespace SanteDB.Cdss.Xml.Model
+namespace SanteDB.Cdss.Xml.Model.Assets
 {
     /// <summary>
     /// CDSS computable asset definition
@@ -21,7 +22,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         /// <param name="cdssContext">The context which the value should be computed based on</param>
         /// <returns>The computed value</returns>
-        internal abstract object Compute<TContext>(CdssContext<TContext> cdssContext);
+        internal abstract object Compute(CdssContext cdssContext);
 
     }
 }

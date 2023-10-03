@@ -19,8 +19,11 @@
  * Date: 2023-5-19
  */
 using DynamicExpresso;
-using SanteDB.Cdss.Xml.Model;
+using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Map;
 using System;
@@ -30,10 +33,11 @@ using System.Linq;
 
 namespace SanteDB.Cdss.Xml
 {
+
     /// <summary>
-    /// Parameter manager for the CDSS
+    /// Represents a base class for the cdss context
     /// </summary>
-    internal class CdssContext<TTarget>  : ICdssContext
+    public abstract class CdssContext
     {
         /// <summary>
         /// Parameter registration
@@ -51,35 +55,34 @@ namespace SanteDB.Cdss.Xml
             public object Value { get; set; }
         }
 
-        /// <summary>
-        /// Get the CDSS context
-        /// </summary>
-        public CdssContext()
-        {
-        }
-
-        /// <summary>
-        /// Gets the target
-        /// </summary>
-        public CdssContext(TTarget target)
-        {
-            this.Target = target;
-        }
+        // Target
+        protected readonly IdentifiedData m_target;
 
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
         private readonly IDictionary<String, CdssComputableAssetDefinition> m_factDefinitions = new Dictionary<String, CdssComputableAssetDefinition>();
+        private readonly ConcurrentBag<Act> m_proposedActions = new ConcurrentBag<Act>();
+        private readonly ConcurrentBag<DetectedIssue> m_detectedIssues = new ConcurrentBag<DetectedIssue>();
+        private readonly object m_lock = new object();
 
         /// <summary>
-        /// Gets or sets the target of the context
+        /// Create a new context with specified target
         /// </summary>
-        public TTarget Target { get; private set; }
+        public CdssContext(IdentifiedData target)
+        {
+            this.m_target = target;
+        }
 
         /// <summary>
         /// Get the variables
         /// </summary>
-        public IEnumerable<String> Variables => m_variables.Keys;
+        public IEnumerable<String> Variables => this.m_variables.Keys;
+
+        /// <summary>
+        /// Get all proposals
+        /// </summary>
+        public IEnumerable<Act> Proposals => this.m_proposedActions.ToArray();
 
         /// <summary>
         /// Property indexer for variable name
@@ -92,9 +95,7 @@ namespace SanteDB.Cdss.Xml
             set => this.SetValue(variableName, value);
         }
 
-        /// <summary>
-        /// Sets the specified variable name
-        /// </summary>
+        /// <inheritdoc/>
         public void SetValue(String parameterName, object value)
         {
             if (!this.m_variables.TryGetValue(parameterName, out ParameterRegistration registration))
@@ -110,9 +111,7 @@ namespace SanteDB.Cdss.Xml
             registration.Value = value;
         }
 
-        /// <summary>
-        /// Get the parameter name
-        /// </summary>
+        /// <inheritdoc/>
         public object GetValue(String parameterOrFactName)
         {
             if (this.m_variables.TryGetValue(parameterOrFactName, out ParameterRegistration registration) &&
@@ -120,11 +119,11 @@ namespace SanteDB.Cdss.Xml
             {
                 return retVal;
             }
-            else if(this.m_factCache.TryGetValue(parameterOrFactName, out var cache))
+            else if (this.m_factCache.TryGetValue(parameterOrFactName, out var cache))
             {
                 return cache;
             }
-            else if(this.m_factDefinitions.TryGetValue(parameterOrFactName, out var defn))
+            else if (this.m_factDefinitions.TryGetValue(parameterOrFactName, out var defn))
             {
                 var value = defn.Compute(this);
                 this.m_factCache.Add(parameterOrFactName, value);
@@ -136,15 +135,11 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
-        /// <summary>
-        /// Get strongly type parameter
-        /// </summary>
+        /// <inheritdoc/>
         public TValue GetValue<TValue>(String parameterOrFactName) => (TValue)this.GetValue(parameterOrFactName);
 
-        /// <summary>
-        /// Decalare a  variable
-        /// </summary>
-        public void Declare(string variableName, Type variableType)
+        /// <inheritdoc/>
+        internal void Declare(string variableName, Type variableType)
         {
             if (!this.m_variables.ContainsKey(variableName))
             {
@@ -156,10 +151,8 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
-        /// <summary>
-        /// Declares a fact registration to the CDSS context
-        /// </summary>
-        public void Declare(CdssComputableAssetDefinition fact)
+        /// <inheritdoc/>
+        internal void Declare(CdssComputableAssetDefinition fact)
         {
             if (!String.IsNullOrEmpty(fact.Name))
             {
@@ -171,13 +164,67 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
-        /// <summary>
-        /// Clear all evaluated fact values 
-        /// </summary>
-        public void ClearEvaluatedFacts()
+        /// <inheritdoc/>
+        internal void ClearEvaluatedFacts()
         {
             this.m_factCache.Clear();
         }
+
+        /// <summary>
+        /// Push a proposal act 
+        /// </summary>
+        internal void PushProposal(Act proposedAct)
+        {
+            if (this.m_proposedActions.Contains(proposedAct))
+            {
+                return; // Already proposed
+            }
+
+            // Enusre properties are set correctly
+            this.m_proposedActions.Add(proposedAct);
+            proposedAct.MoodConceptKey = ActMoodKeys.Propose;
+            proposedAct.Key = proposedAct.Key ?? Guid.NewGuid();
+            proposedAct.StatusConceptKey = StatusKeys.New;
+
+            switch (this.m_target)
+            {
+                case Entity entity:
+                    if (!entity.Participations.Any(p => p.Act == proposedAct || p.ActKey == proposedAct.Key))
+                    {
+                        lock (this.m_lock)
+                        {
+                            var proposal = new ActParticipation(ActParticipationKeys.RecordTarget, entity)
+                            {
+                                Act = proposedAct
+                            };
+                            entity.Participations.Add(proposal);
+                        }
+                    }
+                    break;
+                case Act act:
+                    if (!act.Relationships.Any(r => r.TargetAct == proposedAct || r.TargetActKey == proposedAct.Key))
+                    {
+                        lock (this.m_lock)
+                        {
+                            var proposal = new ActRelationship(ActRelationshipTypeKeys.HasComponent, proposedAct)
+                            {
+                                SourceEntity = act
+                            };
+                            act.Relationships.Add(proposal);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Push an alert
+        /// </summary>
+        internal void PushIssue(DetectedIssue issue)
+        {
+            this.m_detectedIssues.Add(issue);
+        }
+
 
         /// <summary>
         /// Get an expression interpreter for this CDSS context
@@ -191,5 +238,43 @@ namespace SanteDB.Cdss.Xml
                                .Reference(typeof(DateTimeOffset));
             return expressionInterpreter;
         }
+
+        /// <summary>
+        /// Create a context for the provided object
+        /// </summary>
+        /// <param name="forObject">The object which the context should be created for</param>
+        /// <returns>The constructed context</returns>
+        public static CdssContext CreateContext(IdentifiedData forObject)
+        {
+            if(forObject == null)
+            {
+                throw new ArgumentNullException(nameof(forObject));
+            }
+            var cdssType = typeof(CdssContext<>).MakeGenericType(forObject.GetType());
+            return (CdssContext)Activator.CreateInstance(cdssType, forObject);
+        }
+
+    }
+    /// <summary>
+    /// Parameter manager for the CDSS
+    /// </summary>
+    public class CdssContext<TTarget>  : CdssContext
+        where TTarget : IdentifiedData
+    {
+       
+        
+        /// <summary>
+        /// Gets the target
+        /// </summary>
+        public CdssContext(TTarget target) : base(target)
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the target of the context
+        /// </summary>
+        public TTarget Target => (TTarget)base.m_target;
+
+
     }
 }

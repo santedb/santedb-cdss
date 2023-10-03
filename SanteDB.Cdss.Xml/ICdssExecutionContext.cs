@@ -18,35 +18,28 @@
  * User: fyfej
  * Date: 2023-5-19
  */
-using SanteDB.Cdss.Xml.Model;
-using SanteDB.Cdss.Xml.Model.Assets;
-using SanteDB.Core.Cdss;
+using SanteDB.Core.Model;
 using System;
 
-namespace SanteDB.Cdss.Xml
+namespace SanteDB.Core.Cdss
 {
     /// <summary>
-    /// XML protocol asset grouping
+    /// Represents a CDSS execution context to be shared between protocols
     /// </summary>
-    internal class XmlProtocolAssetGroup : ICdssProtocolGroup
+    public interface ICdssExecutionContext
     {
-        private readonly CdssProtocolGroupDefinition m_definition;
 
         /// <summary>
-        /// Gets the group OID and name
+        /// Gets a variable value by name
         /// </summary>
-        public XmlProtocolAssetGroup(CdssProtocolGroupDefinition groupDefinition)
-        {
-            this.m_definition = groupDefinition;
-        }
+        /// <param name="name">The name of the variable</param>
+        /// <returns></returns>
+        object GetValue(String name);
 
-        /// <inheritdoc/>
-        public Guid Uuid => this.m_definition.Uuid;
+        /// <summary>
+        /// Get the target of the CDSS context
+        /// </summary>
+        IdentifiedData Target { get; }
 
-        /// <inheritdoc/>
-        public string Name => this.m_definition.Name;
-
-        /// <inheritdoc/>
-        public string Oid => this.m_definition.Oid;
     }
 }

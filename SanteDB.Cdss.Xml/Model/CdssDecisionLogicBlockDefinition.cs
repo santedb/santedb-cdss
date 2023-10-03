@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Model.Assets;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -24,7 +25,7 @@ namespace SanteDB.Cdss.Xml.Model
             XmlArrayItem("fact", typeof(CdssFactAssetDefinition)),
             XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
             XmlArrayItem("protocol", typeof(CdssProtocolAssetDefinition)),
-            XmlArrayItem("normalize", typeof(CdssNormalizeAssetDefinition)),
+            //XmlArrayItem("normalize", typeof(CdssNormalizeAssetDefinition)),
             JsonProperty("define")]
         public List<CdssComputableAssetDefinition> Definitions { get; set; }
 

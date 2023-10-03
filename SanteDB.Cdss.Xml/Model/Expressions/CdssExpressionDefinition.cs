@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SanteDB.Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
@@ -16,11 +17,10 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// <summary>
         /// Generate the LINQ expression so it can be computed
         /// </summary>
-        /// <typeparam name="TContext">The context in which the expression is being constructed</typeparam>
         /// <param name="cdssContext">The CDSS context</param>
-        /// <param name="contextParameterExpression">The context parameter expression</param>
+        /// <param name="parameters">The context parameter expressions to pass to the generation</param>
         /// <returns>The generated expression</returns>
-        internal abstract Expression GenerateComputableExpression<TContext>(CdssContext<TContext> cdssContext, ParameterExpression contextParameterExpression);
+        internal abstract Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters);
 
     }
 }

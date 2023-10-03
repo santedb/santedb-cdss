@@ -10,7 +10,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace SanteDB.Cdss.Xml.Model
+namespace SanteDB.Cdss.Xml.Model.Assets
 {
     /// <summary>
     /// Represents an expression 
@@ -20,7 +20,7 @@ namespace SanteDB.Cdss.Xml.Model
     {
 
         // The expression which has been calculated
-        private Func<Object, Object> m_compiledExpression;
+        private Func<object, object, object> m_compiledExpression;
 
         /// <summary>
         /// Gets the expression of the fact
@@ -51,63 +51,69 @@ namespace SanteDB.Cdss.Xml.Model
         public bool ValueTypeSpecified { get; set; }
 
         /// <inheritdoc/>
-        internal override object Compute<TContext>(CdssContext<TContext> cdssContext)
+        internal override object Compute(CdssContext cdssContext)
         {
-            if(this.m_compiledExpression == null)
+
+            if (m_compiledExpression == null)
             {
-                var contextParameter = Expression.Parameter(typeof(CdssContext<TContext>));
-                Expression bodyExpression = Expression.Lambda<Func<CdssContext<TContext>, Object>>(this.FactComputation.GenerateComputableExpression(cdssContext, contextParameter), contextParameter);
-               
+                var contextParameter = Expression.Parameter(typeof(CdssContext));
+                var scopedParameter = Expression.Parameter(CdssExecutionContext.Current.ScopedObject.GetType());
+                Expression bodyExpression = Expression.Lambda(FactComputation.GenerateComputableExpression(cdssContext, contextParameter, scopedParameter), contextParameter, scopedParameter);
+
                 // Wrap the expression, compile and set to this value
                 // We do this because calling this.m_compiledExpression(context) is faster than 
                 // (bool)this.m_compiledExpression.DynamicInvoke(context);
-                var objParam = Expression.Parameter(typeof(Object));
+                var contextObjParam = Expression.Parameter(typeof(object));
+                var scopeObjParam = Expression.Parameter(typeof(object));
                 bodyExpression = Expression.Invoke(
-                        bodyExpression, Expression.Convert(objParam, typeof(CdssContext<TContext>))
+                        bodyExpression, 
+                        Expression.Convert(contextObjParam, contextParameter.Type ), 
+                        Expression.Convert(scopeObjParam, scopedParameter.Type)
                     );
 
                 // Convert the value?
-                if (this.ValueTypeSpecified == true)
+                if (ValueTypeSpecified == true)
                 {
-                    var netType = typeof(String);
-                    switch(this.ValueType)
+                    var netType = typeof(string);
+                    switch (ValueType)
                     {
                         case CdssValueType.Boolean:
-                            netType = typeof(Boolean);
+                            netType = typeof(bool);
                             break;
                         case CdssValueType.Date:
                             netType = typeof(DateTimeOffset);
                             break;
                         case CdssValueType.Integer:
-                            netType = typeof(Int32);
+                            netType = typeof(int);
                             break;
                         case CdssValueType.Real:
                             netType = typeof(double);
                             break;
                     }
 
-                    if(netType != bodyExpression.Type)
+                    if (netType != bodyExpression.Type)
                     {
                         bodyExpression = Expression.Convert(bodyExpression, netType);
                     }
                 }
-                
-                if(this.IsNegated)
+
+                if (IsNegated)
                 {
                     bodyExpression = Expression.Not(bodyExpression);
                 }
 
-                var uncompiledExpression = Expression.Lambda<Func<Object, Object>>(
+                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
                     bodyExpression,
-                    objParam
+                    contextObjParam,
+                    scopeObjParam
                 );
-                this.DebugView = bodyExpression.ToString();
+                this.DebugView = uncompiledExpression.ToString();
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
 
-            using (CdssExecutionContext.Enter(cdssContext))
+            using (CdssExecutionContext.EnterChildContext(this))
             {
-                return this.m_compiledExpression(cdssContext);
+                return m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject);
             }
         }
     }

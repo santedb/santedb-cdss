@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Model.Actions;
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace SanteDB.Cdss.Xml.Model
+namespace SanteDB.Cdss.Xml.Model.Assets
 {
     /// <summary>
     /// CDSS rule asset definition
@@ -21,32 +22,35 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Action definition
         /// </summary>
-        [XmlArray("then"), 
+        [XmlArray("then"),
             XmlArrayItem("propose", typeof(CdssProposeActionDefinition)),
-            XmlArrayItem("assign", typeof(CdssAssignActionDefinition)),
+            XmlArrayItem("assign", typeof(CdssProperyAssignActionDefinition)),
+            XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
+            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
             XmlArrayItem("execute", typeof(CdssExecuteActionDefinition))]
         public List<CdssActionDefinition> Actions { get; set; }
 
         /// <summary>
         /// Compute the rule and execute any actions in the rule
         /// </summary>
-        /// <typeparam name="TContext">The type of context to which the rule applies</typeparam>
         /// <param name="cdssContext">The current CDSS context</param>
         /// <returns>True if the rule was executed, false if it was not executed</returns>
-        internal override object Compute<TContext>(CdssContext<TContext> cdssContext)
+        internal override object Compute(CdssContext cdssContext)
         {
-
-            var whenResult = this.When.Compute(cdssContext);
-            if(whenResult is Boolean whenSuccessful && whenSuccessful)
+            using (CdssExecutionContext.EnterChildContext(this))
             {
-
-                foreach(var act in this.Actions)
+                var whenResult = When.Compute(cdssContext);
+                if (whenResult is bool whenSuccessful && whenSuccessful)
                 {
-                    act.Execute(cdssContext);
+                    foreach (var act in this.Actions)
+                    {
+                        act.Execute(cdssContext);
+                    }
+                    return true;
                 }
-                return true;
+
+                return null;
             }
-            return false;
 
         }
     }

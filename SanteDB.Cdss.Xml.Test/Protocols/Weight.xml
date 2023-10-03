@@ -98,7 +98,7 @@
           <fact ref="Patient Is Under 5 Years Old" />
         </when>
         <then>
-          <repeat iterations="60" iterator="index">
+          <repeat iterations="60" trackBy="index">
             <rule ref="Should Weigh Child" />
           </repeat>
         </then>
@@ -156,13 +156,13 @@
         </then>
       </rule>
       <execute evaluation="any">
-        <rule ref="Patient Is Underweight" />
-        <rule ref="Patient Is Overweight" />
         <rule>
           <then>
             <assign path="interpretationContext"></assign>
           </then>
         </rule>
+        <rule ref="Patient Is Underweight" />
+        <rule ref="Patient Is Overweight" />
       </execute>
     </define>
 

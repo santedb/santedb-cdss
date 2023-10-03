@@ -9,9 +9,9 @@ using System.Text;
 namespace SanteDB.Cdss.Xml
 {
     /// <summary>
-    /// An implementation of the <see cref="ICdssLibraryAsset"/> which uses the XML format
+    /// An implementation of the <see cref="ICdssLibrary"/> which uses the XML format
     /// </summary>
-    public class XmlProtocolLibrary : ICdssLibraryAsset
+    public class XmlProtocolLibrary : ICdssLibrary
     {
 
         // definition loaded from XML

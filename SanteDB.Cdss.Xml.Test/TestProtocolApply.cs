@@ -406,7 +406,7 @@ namespace SanteDB.Cdss.Xml.Test
     /// Dummy clinical repository
     /// </summary>
     [ExcludeFromCodeCoverage]
-    internal class DummyProtocolRepository : ICdssAssetRepository
+    internal class DummyProtocolRepository : ICdssLibraryRepository
     {
         public String ServiceName => "Fake Repository";
 
@@ -435,7 +435,7 @@ namespace SanteDB.Cdss.Xml.Test
             throw new NotImplementedException();
         }
 
-        public ICdssProtocolAsset InsertProtocol(ICdssProtocolAsset data)
+        public ICdssProtocol InsertProtocol(ICdssProtocol data)
         {
             throw new NotImplementedException();
         }

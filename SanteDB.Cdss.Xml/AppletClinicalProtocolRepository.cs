@@ -44,7 +44,7 @@ namespace SanteDB.Cdss.Xml
     public class AppletClinicalProtocolRepository : AppletClinicalProtocolInstaller
     {
         /// <inheritdoc/>
-        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssAssetRepository clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
         {
         }
     }
@@ -73,13 +73,13 @@ namespace SanteDB.Cdss.Xml
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolInstaller));
         private readonly IAppletManagerService m_appletManager;
-        private readonly ICdssAssetRepository m_protocolRepository;
+        private readonly ICdssLibraryRepository m_protocolRepository;
 
 
         /// <summary>
         /// Clinical repository service
         /// </summary>
-        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssAssetRepository clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService)
         {
             this.m_appletManager = appletManager;
             this.m_protocolRepository = clinicalProtocolRepositoryService;

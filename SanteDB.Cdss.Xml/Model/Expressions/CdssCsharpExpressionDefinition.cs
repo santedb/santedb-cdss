@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using DynamicExpresso;
+using Newtonsoft.Json;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Serialization;
@@ -23,8 +25,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public String ExpressionValue { get; set; }
 
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression<TContext>(CdssContext<TContext> cdssContext, ParameterExpression parameterExpression) => 
-            Expression.Invoke(cdssContext.GetExpressionInterpreter().ParseAsExpression<Func<CdssContext<TContext>, object>>(this.ExpressionValue, "context"), parameterExpression);
+        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters) => 
+            Expression.Invoke(cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o=> new Parameter(o)).ToArray()).Expression, parameters);
 
     }
 }

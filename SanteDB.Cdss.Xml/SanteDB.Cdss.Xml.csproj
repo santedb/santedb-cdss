@@ -26,7 +26,25 @@
     <Company>SanteSuite Contributors</Company>
     <PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
     <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
-  </PropertyGroup>  
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <Compile Remove="Model.old\DecisionSupportBaseElement.cs" />
+    <Compile Remove="Model.old\PropertyAssignAction.cs" />
+    <Compile Remove="Model.old\ProtocolCollection.cs" />
+    <Compile Remove="Model.old\ProtocolDefinition.cs" />
+    <Compile Remove="Model.old\ProtocolGroupDefinition.cs" />
+    <Compile Remove="Model.old\ProtocolProposeAction.cs" />
+    <Compile Remove="Model.old\ProtocolResourceTypeReference.cs" />
+    <Compile Remove="Model.old\ProtocolRuleDefinition.cs" />
+    <Compile Remove="Model.old\ProtocolRuleset.cs" />
+    <Compile Remove="Model.old\ProtocolThenClauseCollection.cs" />
+    <Compile Remove="Model.old\ProtocolTransformDefinition.cs" />
+    <Compile Remove="Model.old\ProtocolVariableDefinition.cs" />
+    <Compile Remove="Model.old\ProtocolWhenClauseCollection.cs" />
+    <Compile Remove="Model.old\RulesetLibrary.cs" />
+    <Compile Remove="Model.old\Types.cs" />
+  </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="DynamicExpresso.Core" Version="2.16.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
@@ -61,6 +79,21 @@
       <Link>SanteDB.licenseheader</Link>
     </None>
     <None Include="Doc\XmlDecisionSupport\index.md" />
+    <None Include="Model.old\DecisionSupportBaseElement.cs" />
+    <None Include="Model.old\PropertyAssignAction.cs" />
+    <None Include="Model.old\ProtocolCollection.cs" />
+    <None Include="Model.old\ProtocolDefinition.cs" />
+    <None Include="Model.old\ProtocolGroupDefinition.cs" />
+    <None Include="Model.old\ProtocolProposeAction.cs" />
+    <None Include="Model.old\ProtocolResourceTypeReference.cs" />
+    <None Include="Model.old\ProtocolRuleDefinition.cs" />
+    <None Include="Model.old\ProtocolRuleset.cs" />
+    <None Include="Model.old\ProtocolThenClauseCollection.cs" />
+    <None Include="Model.old\ProtocolTransformDefinition.cs" />
+    <None Include="Model.old\ProtocolVariableDefinition.cs" />
+    <None Include="Model.old\ProtocolWhenClauseCollection.cs" />
+    <None Include="Model.old\RulesetLibrary.cs" />
+    <None Include="Model.old\Types.cs" />
     <None Include="Schema\SanteDBProtocol.xsd">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

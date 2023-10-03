@@ -33,12 +33,12 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         }
 
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression<TContext>(CdssContext<TContext> cdssContext, ParameterExpression contextParameterExpression)
+        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters)
         {
             Expression currentBody = null;
             foreach (var itm in this.ContainedExpressions)
             {
-                var clause = itm.GenerateComputableExpression(cdssContext, contextParameterExpression);
+                var clause = itm.GenerateComputableExpression(cdssContext, parameters);
                 if(currentBody == null)
                 {
                     currentBody = clause;
