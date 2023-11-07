@@ -1,6 +1,7 @@
 ﻿using SanteDB.Cdss.Xml.Model.Assets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Serialization;
@@ -10,6 +11,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     /// <summary>
     /// CDSS composite expression definition for ALL/ANY
     /// </summary>
+    [XmlType(nameof(CdssAggregateExpressionDefinition), Namespace = "http://santedb.org/cdss")]
     public abstract class CdssAggregateExpressionDefinition : CdssExpressionDefinition
     {
         private readonly ExpressionType m_operator;
@@ -34,8 +36,16 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             this.m_operator = binaryOperator;
         }
 
+        /// <summary>
+        /// Creates a new CDSS aggreate expression with the specified <paramref name="containedExpressions"/>
+        /// </summary>
+        protected CdssAggregateExpressionDefinition(ExpressionType binaryOperator, params CdssExpressionDefinition[] containedExpressions) : this(binaryOperator)
+        {
+            this.ContainedExpressions = containedExpressions.ToList();
+        }
+
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters)
+        internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
         {
             Expression currentBody = null;
             foreach (var itm in this.ContainedExpressions)
@@ -57,23 +67,35 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     /// <summary>
     /// Or-else-expression
     /// </summary>
+    [XmlType(nameof(CdssAnyExpressionDefinition), Namespace = "http://santedb.org/cdss")]
     public class CdssAnyExpressionDefinition : CdssAggregateExpressionDefinition
     {
         /// <inheritdoc/>
         public CdssAnyExpressionDefinition() : base(ExpressionType.OrElse)
         {
         }
+
+        /// <inheritdoc/>
+        public CdssAnyExpressionDefinition(params CdssExpressionDefinition[] contents) : base(ExpressionType.OrElse, contents)
+        {
+        }
+
     }
 
     /// <summary>
     /// And expression aggregate
     /// </summary>
+    [XmlType(nameof(CdssAllExpressionDefinition), Namespace = "http://santedb.org/cdss")]
     public class CdssAllExpressionDefinition : CdssAggregateExpressionDefinition
     {
         /// <inheritdoc/>
         public CdssAllExpressionDefinition() : base(ExpressionType.AndAlso)
         {
-            
+        }
+
+        /// <inheritdoc/>
+        public CdssAllExpressionDefinition(params CdssExpressionDefinition[] contents) : base(ExpressionType.AndAlso, contents)
+        {
         }
     }
 }

@@ -27,20 +27,24 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         public List<object> Statements { get; set; }
 
         /// <inheritdoc/>
-        internal override void Execute(CdssContext cdssContext)
+        internal override void Execute()
         {
-            foreach (var stmt in this.Statements)
+            base.ThrowIfInvalidState();
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                switch (stmt)
+                foreach (var stmt in this.Statements)
                 {
-                    case CdssActionDefinition action:
-                        action.Execute(cdssContext);
-                        break;
-                    case CdssComputableAssetDefinition asset:
-                        asset.Compute(cdssContext);
-                        break;
-                    default:
-                        throw new InvalidOperationException(String.Format(ErrorMessages.TYPE_NOT_FOUND, stmt.GetType()));
+                    switch (stmt)
+                    {
+                        case CdssActionDefinition action:
+                            action.Execute();
+                            break;
+                        case CdssComputableAssetDefinition asset:
+                            asset.Compute();
+                            break;
+                        default:
+                            throw new InvalidOperationException(String.Format(ErrorMessages.TYPE_NOT_FOUND, stmt.GetType()));
+                    }
                 }
             }
         }

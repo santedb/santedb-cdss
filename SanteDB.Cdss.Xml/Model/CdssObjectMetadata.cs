@@ -7,7 +7,7 @@ namespace SanteDB.Cdss.Xml.Model
     /// <summary>
     /// Metadata about an object in the CDSS subsystem
     /// </summary>
-    [XmlType(nameof(CdssObjectMetadata))]
+    [XmlType(nameof(CdssObjectMetadata), Namespace = "http://santedb.org/cdss")]
     public class CdssObjectMetadata
     {
 

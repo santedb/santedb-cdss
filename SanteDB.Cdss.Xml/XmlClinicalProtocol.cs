@@ -131,21 +131,24 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 
-                var context = CdssContext.CreateContext(targetClone);
+                var context = CdssExecutionContext.CreateContext(targetClone);
                 foreach (var itm in parameters)
                 {
                     context.SetValue(itm.Key, itm.Value);
                 }
 
-                if(!(bool)this.m_protocol.Compute(context))
+                using (CdssExecutionStackFrame.Enter(context))
                 {
-                    yield break; // no computations
-                }
-                else
-                {
-                    foreach(var prop in context.Proposals)
+                    if (!(bool)this.m_protocol.Compute())
                     {
-                        yield return prop;
+                        yield break; // no computations
+                    }
+                    else
+                    {
+                        foreach (var prop in context.Proposals)
+                        {
+                            yield return prop;
+                        }
                     }
                 }
             }

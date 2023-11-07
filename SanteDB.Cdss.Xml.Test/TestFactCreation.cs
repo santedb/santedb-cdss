@@ -18,8 +18,11 @@
  * User: fyfej
  * Date: 2023-5-19
  */
+using Microsoft.CSharp;
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
+using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Cdss.Xml.XmlLinq;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.DataTypes;
@@ -34,7 +37,7 @@ namespace SanteDB.Cdss.Xml.Test
 {
     [ExcludeFromCodeCoverage]
     [TestFixture(Category = "CDSS")]
-    public class TestWhereClauseExecution
+    public class TestFactCreation
     {
         /// <summary>
         /// Test patient 
@@ -99,11 +102,36 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldMatchLinq()
         {
-            ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                Clause = new List<object>() { "!_.Target.DeceasedDate.HasValue" }
+                FactComputation = new CdssCsharpExpressionDefinition("!scopedObject.DeceasedDate.HasValue")
             };
-            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
+
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                var fact = when.Compute();
+                Assert.IsInstanceOf<bool>(fact);
+                Assert.IsFalse((bool)fact);
+            }
+        }
+
+        /// <summary>
+        /// Tests the where clause extracts via LINQ
+        /// </summary>
+        [Test]
+        public void TestShouldExtractLinq()
+        {
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
+            {
+                FactComputation = new CdssCsharpExpressionDefinition("scopedObject.DateOfBirth")
+            };
+
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                var fact = when.Compute();
+                Assert.IsInstanceOf<DateTime>(fact);
+                Assert.AreEqual(this.m_patientUnderTest.DateOfBirth, fact);
+            }
         }
 
         /// <summary>
@@ -112,15 +140,36 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldMatchSimpleHdsi()
         {
-            ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                Clause = new List<Object>() {
-                    new WhenClauseHdsiExpression() {
-                        Expression = "deceasedDate=null"
-                    }
-                }
+                FactComputation = new CdssHdsiExpressionDefinition("deceasedDate=null")
             };
-            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
+
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                var fact = when.Compute();
+                Assert.IsInstanceOf<bool>(fact);
+                Assert.IsFalse((bool)fact);
+            }
+        }
+
+        /// <summary>
+        /// Tests the where clause matches LINQ
+        /// </summary>
+        [Test]
+        public void TestShouldExtractSimpleHdsi()
+        {
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
+            {
+                FactComputation = new CdssHdsiExpressionDefinition("dateOfBirth")
+            };
+
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                var fact = when.Compute();
+                Assert.IsInstanceOf<DateTime>(fact);
+                Assert.AreEqual(this.m_patientUnderTest.DateOfBirth, fact);
+            }
         }
 
         /// <summary>
@@ -129,15 +178,18 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldMatchSimpleXmlLinq()
         {
-            Expression<Func<CdssContext<Patient>, bool>> filterCondition = (data) => data.Target.DeceasedDate == null;
+            Expression<Func<Patient, bool>> filterCondition = (data) => data.DeceasedDate == null;
 
-            ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                Clause = new List<Object>() {
-                    XmlExpression.FromExpression(filterCondition)
-                }
+                FactComputation = new CdssXmlLinqExpressionDefinition(
+                    filterCondition
+                )
             };
-            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                Assert.IsFalse((bool)when.Compute());
+            }
         }
 
         /// <summary>
@@ -146,22 +198,29 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldMatchAllCondition()
         {
-            Expression<Func<CdssContext<Patient>, bool>> filterCondition = (data) => data.Target.DateOfBirth <= DateTime.Now;
+            Expression<Func<Patient, bool>> filterCondition = (data) => data.DateOfBirth <= DateTime.Now;
 
-            ProtocolWhenClauseCollection when = new ProtocolWhenClauseCollection()
+            var factComputation = new CdssAllExpressionDefinition(
+                    new CdssXmlLinqExpressionDefinition(filterCondition),
+                    new CdssHdsiExpressionDefinition("tag[hasBirthCertificate].value=true"),
+                    new CdssCsharpExpressionDefinition($"scopedObject.StatusConceptKey.Value == Guid.Parse(\"{StatusKeys.Active}\")")
+                );
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                Operator = BinaryOperatorType.AndAlso,
-                Clause = new List<Object>() {
-                    XmlExpression.FromExpression(filterCondition),
-                    new WhenClauseHdsiExpression() { Expression = "tag[hasBirthCertificate].value=true" },
-                    "_.Target.StatusConceptKey.Value == Guid.Parse(\"" + StatusKeys.Active + "\")"
-                }
+                FactComputation = factComputation,
             };
-            Assert.IsTrue(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
 
-            when.Clause.Add("_.Target.Tags.Count == 0");
-            when.Compile(new CdssContext<Patient>(this.m_patientUnderTest));
-            Assert.IsFalse(when.Evaluate(new CdssContext<Patient>(this.m_patientUnderTest)));
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                Assert.IsTrue((bool)when.Compute());
+            }
+
+            factComputation.ContainedExpressions.Add(new CdssCsharpExpressionDefinition("scopedObject.Tags.Count == 0"));
+            when = new CdssFactAssetDefinition() { FactComputation = factComputation };
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                Assert.IsFalse((bool)when.Compute());
+            }
         }
 
     }

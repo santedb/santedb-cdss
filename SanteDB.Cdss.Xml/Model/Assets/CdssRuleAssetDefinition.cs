@@ -26,7 +26,10 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlArrayItem("propose", typeof(CdssProposeActionDefinition)),
             XmlArrayItem("assign", typeof(CdssProperyAssignActionDefinition)),
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
-            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition))]
+            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
+            XmlArrayItem("apply", typeof(CdssExecuteActionDefinition)),
+            XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
+            JsonProperty("then")]
         public List<CdssActionDefinition> Actions { get; set; }
 
         /// <summary>
@@ -34,16 +37,18 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// </summary>
         /// <param name="cdssContext">The current CDSS context</param>
         /// <returns>True if the rule was executed, false if it was not executed</returns>
-        internal override object Compute(CdssContext cdssContext)
+        public override object Compute()
         {
-            using (CdssExecutionContext.EnterChildContext(this))
+            base.ThrowIfInvalidState();
+
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var whenResult = When.Compute(cdssContext);
+                var whenResult = this.When.Compute();
                 if (whenResult is bool whenSuccessful && whenSuccessful)
                 {
                     foreach (var act in this.Actions)
                     {
-                        act.Execute(cdssContext);
+                        act.Execute();
                     }
                     return true;
                 }

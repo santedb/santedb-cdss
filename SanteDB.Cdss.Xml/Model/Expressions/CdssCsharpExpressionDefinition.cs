@@ -19,14 +19,30 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     {
 
         /// <summary>
+        /// Defualt ctor
+        /// </summary>
+        public CdssCsharpExpressionDefinition()
+        {
+                
+        }
+
+        /// <summary>
+        /// Create a new CDSS C# expression based on <paramref name="expression"/>
+        /// </summary>
+        public CdssCsharpExpressionDefinition(String expression)
+        {
+            this.ExpressionValue = expression;
+        }
+
+        /// <summary>
         /// Expression value
         /// </summary>
         [XmlText, JsonProperty("expression")]
         public String ExpressionValue { get; set; }
 
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters) => 
-            Expression.Invoke(cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o=> new Parameter(o)).ToArray()).Expression, parameters);
+        internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters) => 
+            cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o=> new Parameter(o)).ToArray()).Expression;
 
     }
 }

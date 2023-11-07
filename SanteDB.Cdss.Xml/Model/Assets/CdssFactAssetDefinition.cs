@@ -60,25 +60,26 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         public bool ValueTypeSpecified { get; set; }
 
         /// <inheritdoc/>
-        internal override object Compute(CdssContext cdssContext)
+        public override object Compute()
         {
-
+            base.ThrowIfInvalidState();
+            
             if (m_compiledExpression == null)
             {
-                var contextParameter = Expression.Parameter(typeof(CdssContext));
-                var scopedParameter = Expression.Parameter(CdssExecutionContext.Current.ScopedObject.GetType());
-                Expression bodyExpression = Expression.Lambda(FactComputation.GenerateComputableExpression(cdssContext, contextParameter, scopedParameter), contextParameter, scopedParameter);
+                var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+                var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                Expression bodyExpression = Expression.Lambda(FactComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
 
                 // Wrap the expression, compile and set to this value
                 // We do this because calling this.m_compiledExpression(context) is faster than 
                 // (bool)this.m_compiledExpression.DynamicInvoke(context);
                 var contextObjParam = Expression.Parameter(typeof(object));
                 var scopeObjParam = Expression.Parameter(typeof(object));
-                bodyExpression = Expression.Invoke(
+                bodyExpression = Expression.Convert(Expression.Invoke(
                         bodyExpression, 
                         Expression.Convert(contextObjParam, contextParameter.Type ), 
                         Expression.Convert(scopeObjParam, scopedParameter.Type)
-                    );
+                    ), typeof(Object));
 
                 // Convert the value?
                 if (ValueTypeSpecified == true)
@@ -120,10 +121,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
 
-            using (CdssExecutionContext.EnterChildContext(this))
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var retVal = m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject);
-                retVal = this.Normalize?.FirstOrDefault(o => o.TransformObject(cdssContext, retVal) != null) ?? retVal;
+                var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                retVal = this.Normalize?.FirstOrDefault(o => o.TransformObject(retVal) != null) ?? retVal;
+                
                 return retVal;
             }
         }

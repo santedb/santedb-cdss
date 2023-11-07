@@ -19,12 +19,14 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         public DetectedIssue IssueToRaise { get; set; }
 
         /// <inheritdoc/>
-        internal override void Execute(CdssContext cdssContext)
+        internal override void Execute()
         {
-            using(CdssExecutionContext.EnterChildContext(this))
+            base.ThrowIfInvalidState();
+
+            using(CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionContext.Current.ScopedObject.Key.GetValueOrDefault());
-                cdssContext.PushIssue(this.IssueToRaise);
+                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionStackFrame.Current.ScopedObject.Key.GetValueOrDefault());
+                CdssExecutionStackFrame.Current.Context.PushIssue(this.IssueToRaise);
             }
         }
     }

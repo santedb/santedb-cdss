@@ -6,6 +6,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -17,6 +18,22 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     [XmlType(nameof(CdssHdsiExpressionDefinition), Namespace = "http://santedb.org/cdss")]
     public class CdssHdsiExpressionDefinition : CdssExpressionDefinition
     {
+
+        /// <summary>
+        /// Default CTOR
+        /// </summary>
+        public CdssHdsiExpressionDefinition()
+        {
+        }
+
+        /// <summary>
+        /// Create a new HDSI expression definition from a string
+        /// </summary>
+        /// <param name="hdsiExpression">The expression to set</param>
+        public CdssHdsiExpressionDefinition(string hdsiExpression)
+        {
+            this.ExpressionValue = hdsiExpression;
+        }
 
         /// <summary>
         /// Gets or sets where the object should be pulled from
@@ -31,34 +48,34 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public String ExpressionValue { get; set; }
 
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters)
+        internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
         {
 
             var variableDictionary = new Dictionary<String, Func<Object>>();
             foreach (var varRef in cdssContext.Variables)
             {
-                variableDictionary.Add(varRef, () => CdssExecutionContext.Current?.GetValue(varRef));
+                variableDictionary.Add(varRef, () => CdssExecutionStackFrame.Current?.GetValue(varRef));
             }
 
             Expression bodyExpression = null;
             if (this.ExpressionValue.Contains("="))
             {
-                bodyExpression = QueryExpressionParser.BuildLinqExpression(CdssExecutionContext.Current.ScopedObject.GetType(), this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
+                bodyExpression = QueryExpressionParser.BuildLinqExpression(CdssExecutionStackFrame.Current.ScopedObject.GetType(), this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
             }
             else
             {
-                bodyExpression = QueryExpressionParser.BuildPropertySelector(CdssExecutionContext.Current.ScopedObject.GetType(), this.ExpressionValue, true);
+                bodyExpression = QueryExpressionParser.BuildPropertySelector(CdssExecutionStackFrame.Current.ScopedObject.GetType(), this.ExpressionValue, true);
             }
 
             Expression scopedObjectExpression = null;
             switch(this.Scope)
             {
-                case CdssHdsiExpressionScopeType.ScopedObject:
-                    scopedObjectExpression = parameters.First(o => o.Type != typeof(CdssContext));
+                case CdssHdsiExpressionScopeType.Context:
+                    scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Name == CdssConstants.ContextVariableName), (MemberInfo)cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
                     break;
                 default:
-                    scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Type == cdssContext.GetType()), cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
-                        break;
+                    scopedObjectExpression = parameters.First(o => o.Name == CdssConstants.ScopedObjectVariableName);
+                    break;
 
             }
             return Expression.Invoke(bodyExpression, scopedObjectExpression);

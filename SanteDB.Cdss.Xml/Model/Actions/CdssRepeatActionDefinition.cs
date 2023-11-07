@@ -33,19 +33,21 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         public CdssFactAssetDefinition Until { get; set; }
 
         /// <inheritdoc/>
-        internal override void Execute(CdssContext cdssContext)
+        internal override void Execute()
         {
-            using(CdssExecutionContext.EnterChildContext(this))
+            base.ThrowIfInvalidState();
+
+            using(CdssExecutionStackFrame.EnterChildFrame(this))
             {
                 var iteration = 0;
                 
                 while(this.Iterations.HasValue && iteration <= this.Iterations.Value || true) {
 
                     iteration++;
-                    base.Execute(cdssContext);
+                    base.Execute();
 
                     // If there is an UNTIL clause evaluate it
-                    var untilResult = this.Until?.Compute(cdssContext);
+                    var untilResult = this.Until?.Compute();
                     if(untilResult is Boolean b && b || untilResult != null)
                     {
                         break;

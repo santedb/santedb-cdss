@@ -97,6 +97,7 @@
       </rule>
 
       <protocol uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" name="Weigh Child Every Month">
+        <!-- Entry Point into the execution -->
         <when>
           <fact ref="Patient Is Under 5 Years Old" />
         </when>

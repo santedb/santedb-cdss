@@ -43,14 +43,16 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         public List<CdssProperyAssignActionDefinition> Assignment { get; set; }
 
         /// <inheritdoc/>
-        internal override void Execute(CdssContext cdssContext)
+        internal override void Execute()
         {
+            base.ThrowIfInvalidState();
+
             if (this.Model == null)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(Model)));
             }
 
-            using (CdssExecutionContext.EnterChildContext(this))
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
 
                 Act model = null;
@@ -66,7 +68,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
 
                 model.Protocols = new List<ActProtocol>();
                 // Get any protocols in the execution context hierarchy
-                var ctx = CdssExecutionContext.Current;
+                var ctx = CdssExecutionStackFrame.Current;
                 var sequence = 0;
                 while (ctx != null)
                 {
@@ -94,10 +96,10 @@ namespace SanteDB.Cdss.Xml.Model.Actions
 
                 // Set the scoped object for this and call the assign actions
                 model.Key = model.Key ?? Guid.NewGuid();
-                CdssExecutionContext.Current.ScopedObject = model;
+                CdssExecutionStackFrame.Current.ScopedObject = model;
                 foreach(var asgn in this.Assignment)
                 {
-                    asgn.Execute(cdssContext);
+                    asgn.Execute();
                 }
             }
         }

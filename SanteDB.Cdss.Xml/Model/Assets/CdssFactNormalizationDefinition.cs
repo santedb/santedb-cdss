@@ -14,7 +14,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     {
 
         // The expression which has been calculated
-        private Func<object, object, object> m_compiledExpression;
+        private Func<object, object, object, object> m_compiledExpression;
 
         /// <summary>
         /// Represents the "when" clause for the rule
@@ -43,37 +43,41 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <summary>
         /// Transform the object, return null if the transfomration is not successful
         /// </summary>
-        internal object TransformObject(CdssContext cdssContext, object retVal)
+        internal object TransformObject(object retVal)
         {
-            if(this.When.Compute(cdssContext) is bool b && b)
+            
+            if(this.When.Compute() is bool b && b)
             {
                 if(this.m_compiledExpression == null)
                 {
-                    var contextParameter = Expression.Parameter(typeof(CdssContext), "context");
-                    var valueParameter = Expression.Parameter(retVal.GetType(), "value");
+                    var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+                    var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                    var valueParameter = Expression.Parameter(retVal.GetType(), CdssConstants.ValueVariableName);
 
-                    var expressionForValue = this.EmitExpression.GenerateComputableExpression(cdssContext, contextParameter, valueParameter);
+                    var expressionForValue = this.EmitExpression.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter, valueParameter);
 
-                    // Convert object parameters
+                    // Convert object parameters for our FUNC
                     var contextObjParameter = Expression.Parameter(typeof(Object));
                     var valueObjParameter = Expression.Parameter(typeof(Object));
+                    var scopeObjParameter = Expression.Parameter(typeof(Object));
                     expressionForValue = Expression.Invoke(
                             expressionForValue,
                             Expression.Convert(contextObjParameter, contextParameter.Type),
+                            Expression.Convert(scopeObjParameter, scopedParameter.Type),
                             Expression.Convert(valueObjParameter, valueParameter.Type)
                         );
 
-                    var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
+                    var uncompiledExpression = Expression.Lambda<Func<object, object, object, object>>(
                         expressionForValue,
                         contextObjParameter,
-                        contextObjParameter,
+                        scopeObjParameter,
                         valueObjParameter
                     );
                     this.DebugView = uncompiledExpression.ToString();
                     this.m_compiledExpression = uncompiledExpression.Compile();
                 }
 
-                return this.m_compiledExpression(cdssContext, retVal);
+                return this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject, retVal);
             }
             return null;
         }

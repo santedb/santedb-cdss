@@ -1,4 +1,6 @@
-﻿using SanteDB.Core.Model;
+﻿using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
+using System;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Actions
@@ -11,10 +13,21 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     {
 
         /// <summary>
-        /// Execute the action against <paramref name="cdssContext"/>
+        /// Throw an appropriate exception if the CDSS engine is in an invalid state
         /// </summary>
-        /// <param name="cdssContext">The CDSS context</param>
-        internal abstract void Execute(CdssContext cdssContext);
+        /// <exception cref="ArgumentNullException">When the context is not provided</exception>
+        protected void ThrowIfInvalidState()
+        {
+            if (CdssExecutionStackFrame.Current == null)
+            {
+                throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
+            }
+        }
+
+        /// <summary>
+        /// Execute the action against the current <see cref="CdssExecutionStackFrame"/> frame
+        /// </summary>
+        internal abstract void Execute();
 
     }
 }

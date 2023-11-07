@@ -101,17 +101,18 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
-                var executionContext = CdssContext.CreateContext((IdentifiedData)analysisTarget.DeepCopy());
+                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget.DeepCopy());
+                using (CdssExecutionStackFrame.Enter(context))
+                {
+                    var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
+                        .Where(o => o.Context.Type == analysisTarget.GetType())
+                        .SelectMany(o => o.Definitions)
+                        .OfType<CdssRuleAssetDefinition>()
+                        .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
+                        .ToArray();
 
-                var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                    .Where(o => o.Context.Type == analysisTarget.GetType())
-                    .SelectMany(o => o.Definitions)
-                    .OfType<CdssRuleAssetDefinition>()
-                    .Select(r => new { result = (bool?)r.Compute(executionContext), rule = r.Name })
-                    .ToArray();
-
-                return executionContext.Issues;
-
+                    return context.Issues;
+                }
             }
             finally
             {
@@ -134,15 +135,18 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
-                var executionContext = CdssContext.CreateContext((IdentifiedData)target.DeepCopy());
+                var executionContext = CdssExecutionContext.CreateContext((IdentifiedData)target.DeepCopy());
 
-                var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                    .Where(o => o.Context.Type == target.GetType())
-                    .SelectMany(o => o.Definitions)
-                    .Select(r => new { result = (bool?)r.Compute(executionContext), rule = r.Name })
-                    .ToArray();
+                using (CdssExecutionStackFrame.Enter(executionContext))
+                {
+                    var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
+                        .Where(o => o.Context.Type == target.GetType())
+                        .SelectMany(o => o.Definitions)
+                        .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
+                        .ToArray();
 
-                return executionContext.Proposals.OfType<Object>().Union(executionContext.Issues);
+                    return executionContext.Proposals.OfType<Object>().Union(executionContext.Issues);
+                }
 
             }
             finally
