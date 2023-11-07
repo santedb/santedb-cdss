@@ -21,7 +21,6 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         [XmlElement("rule", typeof(CdssRuleAssetDefinition)),
             XmlElement("assign", typeof(CdssProperyAssignActionDefinition)),
             XmlElement("propose", typeof(CdssProposeActionDefinition)),
-            XmlElement("execute", typeof(CdssExecuteActionDefinition)),
             XmlElement("protocol", typeof(CdssProtocolAssetDefinition)),
             XmlElement("raise", typeof(CdssIssueActionDefinition)),
             JsonProperty("actions")]

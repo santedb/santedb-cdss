@@ -43,37 +43,49 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
-            XmlElement("any", typeof(CdssAnyExpressionDefinition))]
-        public CdssExpressionDefinition ContainedExpression { get; set; }
+            XmlElement("any", typeof(CdssAnyExpressionDefinition)),
+            XmlElement("fixed", typeof(String))]
+        public Object ContainedExpression { get; set; }
 
         /// <inheritdoc/>
         internal override void Execute(CdssContext cdssContext)
         {
-            if (this.m_compiledExpression == null)
+            switch (this.ContainedExpression)
             {
-                var contextParameter = Expression.Parameter(typeof(CdssContext));
-                var scopeParameter = Expression.Parameter(CdssExecutionContext.Current.ScopedObject.GetType());
-                var expressionForValue = this.ContainedExpression.GenerateComputableExpression(cdssContext, contextParameter, scopeParameter);
+                case CdssExpressionDefinition exe:
+                    if (this.m_compiledExpression == null)
+                    {
+                        var contextParameter = Expression.Parameter(typeof(CdssContext), "context");
+                        var scopeParameter = Expression.Parameter(CdssExecutionContext.Current.ScopedObject.GetType(), "target");
 
-                // Convert object parameters
-                var contextObjParameter = Expression.Parameter(typeof(Object));
-                var scopeObjParameter = Expression.Parameter(typeof(Object));
-                expressionForValue = Expression.Invoke(
-                        expressionForValue,
-                        Expression.Convert(contextObjParameter, contextParameter.Type),
-                        Expression.Convert(scopeObjParameter, scopeParameter.Type)
-                    );
+                        var expressionForValue = exe.GenerateComputableExpression(cdssContext, contextParameter, scopeParameter);
 
-                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                    contextObjParameter,
-                    contextObjParameter,
-                    scopeObjParameter
-                );
-                this.DebugView = uncompiledExpression.ToString();
-                this.m_compiledExpression = uncompiledExpression.Compile();
+                        // Convert object parameters
+                        var contextObjParameter = Expression.Parameter(typeof(Object));
+                        var scopeObjParameter = Expression.Parameter(typeof(Object));
+                        expressionForValue = Expression.Invoke(
+                                expressionForValue,
+                                Expression.Convert(contextObjParameter, contextParameter.Type),
+                                Expression.Convert(scopeObjParameter, scopeParameter.Type)
+                            );
+
+                        var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
+                            expressionForValue,
+                            contextObjParameter,
+                            contextObjParameter,
+                            scopeObjParameter
+                        );
+                        this.DebugView = uncompiledExpression.ToString();
+                        this.m_compiledExpression = uncompiledExpression.Compile();
+                        CdssExecutionContext.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject), this.OverwriteValue);
+                    }
+                    break;
+                case String str:
+                    CdssExecutionContext.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);
+                    break;
+                default:
+                    throw new InvalidOperationException();
             }
-
-            CdssExecutionContext.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject), this.OverwriteValue);
 
         }
     }

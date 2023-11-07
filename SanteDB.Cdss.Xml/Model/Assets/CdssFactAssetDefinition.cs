@@ -5,6 +5,7 @@ using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Query;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,8 +30,16 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
-            XmlElement("any", typeof(CdssAnyExpressionDefinition))]
+            XmlElement("any", typeof(CdssAnyExpressionDefinition)),
+            XmlElement("fact", typeof(CdssFactAssetDefinition)),
+            JsonProperty("logic")]
         public CdssExpressionDefinition FactComputation { get; set; }
+        
+        /// <summary>
+        /// Normalize the datain the computation
+        /// </summary>
+        [XmlElement("normalize"), JsonProperty("normalize")]
+        public List<CdssFactNormalizationDefinition> Normalize { get; set; }
 
         /// <summary>
         /// Invert the result
@@ -113,7 +122,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             using (CdssExecutionContext.EnterChildContext(this))
             {
-                return m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject);
+                var retVal = m_compiledExpression(cdssContext, CdssExecutionContext.Current.ScopedObject);
+                retVal = this.Normalize?.FirstOrDefault(o => o.TransformObject(cdssContext, retVal) != null) ?? retVal;
+                return retVal;
             }
         }
     }

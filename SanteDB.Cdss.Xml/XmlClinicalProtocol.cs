@@ -82,7 +82,7 @@ namespace SanteDB.Cdss.Xml
         public string Documentation => this.m_definition?.Metadata?.Documentation;
 
         /// <inheritdoc/>
-        public IEnumerable<ICdssProtocolGroup> Groups => this.m_definition.Groups.Select(o => new XmlProtocolAssetGroup(o));
+        public IEnumerable<ICdssProtocolScope> Scopes => this.m_definition.Scopes.Select(o => new XmlProtocolAssetGroup(o));
 
         ///// <summary>
         ///// Initialize the patient

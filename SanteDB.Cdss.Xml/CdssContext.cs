@@ -21,6 +21,7 @@
 using DynamicExpresso;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
@@ -33,11 +34,11 @@ using System.Linq;
 
 namespace SanteDB.Cdss.Xml
 {
-
     /// <summary>
     /// Represents a base class for the cdss context
     /// </summary>
-    public abstract class CdssContext
+    public abstract class CdssContext : ICdssExecutionContext
+
     {
         /// <summary>
         /// Parameter registration
@@ -83,6 +84,16 @@ namespace SanteDB.Cdss.Xml
         /// Get all proposals
         /// </summary>
         public IEnumerable<Act> Proposals => this.m_proposedActions.ToArray();
+
+        /// <summary>
+        /// Issues that were raised
+        /// </summary>
+        public IEnumerable<DetectedIssue> Issues => this.m_detectedIssues.ToArray();
+
+        /// <summary>
+        /// Get the target
+        /// </summary>
+        IdentifiedData ICdssExecutionContext.Target => this.m_target;
 
         /// <summary>
         /// Property indexer for variable name

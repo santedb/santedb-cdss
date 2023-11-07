@@ -32,12 +32,12 @@ namespace SanteDB.Cdss.Xml.Exceptions
         /// <summary>
         /// Gets the protocol which caused this exception
         /// </summary>
-        public ProtocolDefinition Protocol { get; }
+        public CdssBaseObjectDefinition Protocol { get; }
 
         /// <summary>
         /// Create a new CDSS evaluation exception
         /// </summary>
-        public CdssEvaluationException(String message, ProtocolDefinition protocol, Exception cause) : base(message, cause)
+        public CdssEvaluationException(String message, CdssBaseObjectDefinition protocol, Exception cause) : base(message, cause)
         {
             this.Protocol = protocol;
         }

@@ -41,12 +41,12 @@
       <documentation><![CDATA[Contains logic which computes and proposes a weight schedule]]></documentation>
     </meta>
     <define>
-      <fact name="Minimum Allowed Observation Date">
+      <variable name="minDate">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
-      </fact>
-      <fact name="Maximum Allowed Observation Date">
+      </variable>
+      <variable name="maxDate">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"] + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
-      </fact>
+      </variable>
       <fact name="Patient Age In Years">
         <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
       </fact>
@@ -56,10 +56,13 @@
       <fact name="No Weight Has Been Proposed For Period" negation="true">
         <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$minDate&amp;participation[RecordTarget].source.actTime=&lt;$maxDate</hdsi>
       </fact>
-      
+
       <rule name="Should Weigh Child" id="org.santedb.cdss.weight.patient.rule.shouldWeigh">
         <when>
-          <fact ref="No Weight Has Been Proposed For Period" />
+          <all>
+            <fact ref="No Weight Has Been Proposed For Period" />
+            <fact ref="Patient Is Under 5 Years Old" />
+          </all>
         </when>
         <then>
           <propose type="QuantityObservation">
@@ -103,48 +106,64 @@
           </repeat>
         </then>
       </protocol>
-      
+
     </define>
   </logic>
   <logic id="org.santedb.cdss.weight.observation">
     <context type="QuantityObservation"/>
+    <when>
+      <hdsi>typeConcept=a261f8cd-69b0-49aa-91f4-e6d3e5c612ed</hdsi>
+    </when>
     <status>active</status>
     <meta>
       <documentation>
-        <![CDATA[Analyse a weight collected]]></documentation>
+        <![CDATA[Analyse a weight collected]]>
+      </documentation>
     </meta>
     <define>
-      <fact grammar="hdsi" name="Record Target Gender">
+      <fact name="Record Target Gender">
         <hdsi>participation[RecordTarget].player@Patient.genderConcept.mnemonic</hdsi>
       </fact>
-      <fact grammar="hdsi" name="Record Target Date Of Birth">
-        <expression>participation[RecordTarget].player@Patient.dateOfBirth</expression>
+      <fact name="Record Target Date Of Birth">
+        <hdsi>participation[RecordTarget].player@Patient.dateOfBirth</hdsi>
       </fact>
-      <fact grammar="csharp" name="Record Target Age in Days">
-        <expression>DateTime.Today.Subtract(context.Get("Record Target Date Of Birth")).TotalDays</expression>
+      <fact name="Record Target Age in Days">
+        <csharp>DateTime.Today.Subtract(context.Get("Record Target Date Of Birth")).TotalDays</csharp>
       </fact>
-      
-      <fact grammar="hdsi" name="Unit of Measure is Lbs">
+
+      <fact name="Unit of Measure is in Lbs">
         <expression>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</expression>
       </fact>
 
-      <fact grammar="hdsi" name="Observed Weight In Kgs">
-        <expression>value</expression>
-        <transform>
+      <fact name="Observed Weight In Kgs">
+        <hdsi>value</hdsi>
+        <normalize>
           <when>
-            <ref>Unit of Measure is l</ref>
+            <fact ref="Unit of Measure is in lbs"/>
           </when>
-        </transform>
+          <compute>
+            <csharp>value * 0.45359237</csharp>
+          </compute>
+        </normalize>
       </fact>
-      
+
       <fact grammar="csharp" name="Patient Is Underweight"><![CDATA[(float)context.DataSet("org.santedb.cdss.weight.zscores").Where("gender", context.Get("gender")).Where("age", context.Get("age_in_weeks")).Select("zMinus2") < (float)context["Observed Weight In Kgs"]]]></fact>
-      
+
+      <rule>
+        <then>
+          <assign path="interpretationContext">
+            <fixed>41D42ABF-17AD-4144-BF97-EC3FD907F57D</fixed>
+          </assign>
+        </then>
+      </rule>
       <rule name="Patient Is Underweight">
         <when>
           <expression grammar="linq"><![CDATA[(float)context.DataSet("org.santedb.cdss.weight.zscores").Where("gender", context.Get("gender")).Where("age", context.Get("age_in_weeks")).Select("zMinus2") < (float)context.Target.Value]]></expression>
         </when>
         <then>
-          <assign path="interpretationConcept"></assign>
+          <assign path="interpretationConcept">
+            <fixed>6188F821-261F-420C-9520-0DE240A05661</fixed>
+          </assign>
         </then>
       </rule>
       <rule name="Patient Is Overweight">
@@ -152,18 +171,25 @@
           <expression grammar="linq"><![CDATA[(float)context.DataSet("org.santedb.cdss.weight.zscores").Where("gender", context.Get("gender")).Where("age", context.Get("age_in_weeks")).Select("zPlus2") > (float)context.Target.Value]]></expression>
         </when>
         <then>
-          <assign path="interpretationConcept"></assign>
+          <assign path="interpretationConcept">
+            <fixed>3C4D6579-7496-4B44-AAC1-18A714FF7A05</fixed>
+          </assign>
         </then>
       </rule>
-      <execute evaluation="any">
-        <rule>
-          <then>
-            <assign path="interpretationContext"></assign>
-          </then>
-        </rule>
-        <rule ref="Patient Is Underweight" />
-        <rule ref="Patient Is Overweight" />
-      </execute>
+
+      <rule>
+        <when>
+          <any>
+            <fact ref="Patient Is Overweight" />
+            <fact ref="Patient Is Underweight" />
+          </any>
+        </when>
+        <then>
+          <raise xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
+            Please provide nutritional counseling to patient
+          </raise>
+        </then>
+      </rule>
     </define>
 
 

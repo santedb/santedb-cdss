@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Query;
 using System;
 using System.CodeDom;
@@ -56,7 +57,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                     scopedObjectExpression = parameters.First(o => o.Type != typeof(CdssContext));
                     break;
                 default:
-                    scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Type == cdssContext.GetType()), cdssContext.GetType().GetProperty("Target")));
+                    scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Type == cdssContext.GetType()), cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
                         break;
 
             }

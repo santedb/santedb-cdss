@@ -44,6 +44,11 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("meta"), JsonProperty("meta")]
         public CdssObjectMetadata Metadata { get; set; }
 
+        /// <summary>
+        /// Gets or sets the object identifier
+        /// </summary>
+        [XmlAttribute("oid"), JsonProperty("oid")]
+        public String Oid { get; set; }
 
     }
 }

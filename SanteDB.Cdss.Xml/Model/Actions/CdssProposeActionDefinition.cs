@@ -93,6 +93,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                 }
 
                 // Set the scoped object for this and call the assign actions
+                model.Key = model.Key ?? Guid.NewGuid();
                 CdssExecutionContext.Current.ScopedObject = model;
                 foreach(var asgn in this.Assignment)
                 {

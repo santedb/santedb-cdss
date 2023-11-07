@@ -26,8 +26,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlArrayItem("propose", typeof(CdssProposeActionDefinition)),
             XmlArrayItem("assign", typeof(CdssProperyAssignActionDefinition)),
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
-            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
-            XmlArrayItem("execute", typeof(CdssExecuteActionDefinition))]
+            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition))]
         public List<CdssActionDefinition> Actions { get; set; }
 
         /// <summary>

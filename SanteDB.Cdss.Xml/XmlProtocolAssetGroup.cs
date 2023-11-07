@@ -28,7 +28,7 @@ namespace SanteDB.Cdss.Xml
     /// <summary>
     /// XML protocol asset grouping
     /// </summary>
-    internal class XmlProtocolAssetGroup : ICdssProtocolGroup
+    internal class XmlProtocolAssetGroup : ICdssProtocolScope
     {
         private readonly CdssProtocolGroupDefinition m_definition;
 

@@ -16,15 +16,10 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     {
 
         /// <summary>
-        /// Gets or sets the object identifier
+        /// Gets or sets the scopes where this protocol should be applied
         /// </summary>
-        [XmlAttribute("oid"), JsonProperty("oid")]
-        public string Oid { get; set; }
+        [XmlArray("scopes"), XmlArrayItem("type"), JsonProperty("scopes")]
+        public List<CdssProtocolGroupDefinition> Scopes { get; set; }
 
-        /// <summary>
-        /// Gets or sets the groups this protocol belongs to
-        /// </summary>
-        [XmlArray("groups"), XmlArrayItem("group"), JsonProperty("groups")]
-        public List<CdssProtocolGroupDefinition> Groups { get; set; }
     }
 }

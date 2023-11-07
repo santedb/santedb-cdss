@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.XmlLinq;
+using SanteDB.Core.Cdss;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -20,11 +21,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         [XmlElement("linq"), JsonProperty("linq")]
         public XmlLambdaExpression ExpressionDefinition { get; set; }
 
-        /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression<TContext>(CdssContext<TContext> cdssContext, ParameterExpression parameterExpression)
+        /// <inheritdoc/
+        internal override Expression GenerateComputableExpression(CdssContext cdssContext, params ParameterExpression[] parameters)
         {
             this.ExpressionDefinition.InitializeContext(null);
-            return Expression.Invoke(this.ExpressionDefinition.ToExpression(), parameterExpression);
+            return Expression.Invoke(this.ExpressionDefinition.ToExpression(), parameters);
         }
     }
 }

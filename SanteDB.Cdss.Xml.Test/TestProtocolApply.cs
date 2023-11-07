@@ -273,7 +273,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldHandlePartials()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -297,7 +297,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldExcludeAdults()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient adult = new Patient()
             {
@@ -319,7 +319,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAll()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -342,7 +342,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAppointments()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -362,7 +362,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldNotModifyOriginal()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()

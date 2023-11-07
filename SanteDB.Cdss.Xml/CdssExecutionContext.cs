@@ -1,4 +1,5 @@
 ﻿using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using System;
@@ -19,14 +20,14 @@ namespace SanteDB.Cdss.Xml
         private static CdssExecutionContext m_currentContext;
 
         // Context
-        private readonly ICdssContext m_context;
+        private readonly ICdssExecutionContext m_context;
         private readonly CdssBaseObjectDefinition m_owner;
         private readonly CdssExecutionContext m_parent;
 
         /// <summary>
         /// Only allow current call
         /// </summary>
-        private CdssExecutionContext(ICdssContext context)
+        private CdssExecutionContext(ICdssExecutionContext context)
         {
             this.m_context = context;
             this.ScopedObject = context.Target;
@@ -68,7 +69,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Enter a context
         /// </summary>
-        internal static CdssExecutionContext Enter(ICdssContext context)
+        internal static CdssExecutionContext Enter(ICdssExecutionContext context)
         {
             if(m_currentContext != null)
             {

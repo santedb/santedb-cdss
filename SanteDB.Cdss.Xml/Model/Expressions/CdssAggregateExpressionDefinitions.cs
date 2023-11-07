@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SanteDB.Cdss.Xml.Model.Assets;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
@@ -19,6 +20,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         [XmlElement("csharp", typeof(CdssCsharpExpressionDefinition)),
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
+            XmlElement("fact", typeof(CdssFactAssetDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition))]
         public List<CdssExpressionDefinition> ContainedExpressions { get; set; }

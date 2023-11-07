@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Cdss;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Actions
@@ -22,6 +23,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             using(CdssExecutionContext.EnterChildContext(this))
             {
+                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionContext.Current.ScopedObject.Key.GetValueOrDefault());
                 cdssContext.PushIssue(this.IssueToRaise);
             }
         }
