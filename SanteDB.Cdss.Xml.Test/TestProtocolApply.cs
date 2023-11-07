@@ -60,8 +60,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleOPV()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -84,8 +84,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleBCG()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -108,8 +108,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldRepeatWeight()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -132,8 +132,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSkipWeight()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -177,8 +177,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleMR()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -201,8 +201,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSchedulePCV()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -225,8 +225,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleDTP()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -249,8 +249,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleRota()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -411,36 +411,36 @@ namespace SanteDB.Cdss.Xml.Test
         public String ServiceName => "Fake Repository";
 
 
-        public IQueryResultSet<ICdssAsset> Find(Expression<Func<ICdssAsset, bool>> filter)
+        public IQueryResultSet<ICdssLibrary> Find(Expression<Func<ICdssLibrary, bool>> filter)
         {
-            return new MemoryQueryResultSet<ICdssAsset>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
+            return new MemoryQueryResultSet<ICdssLibrary>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
             {
-                ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
-                return new XmlClinicalProtocol(definition);
+                var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
+                return new XmlProtocolLibrary(definition);
             })).Where(filter);
         }
 
-        public ICdssAsset Get(Guid protocolUuid)
+        public ICdssLibrary Get(Guid protocolUuid)
         {
             throw new NotImplementedException();
         }
 
-        public ICdssAsset GetByOid(String protocolOid)
+        public ICdssLibrary GetByOid(String protocolOid)
         {
             throw new NotImplementedException();
         }
 
-        public ICdssAsset InsertOrUpdate(ICdssAsset data)
+        public ICdssLibrary InsertOrUpdate(ICdssLibrary data)
         {
             throw new NotImplementedException();
         }
 
-        public ICdssProtocol InsertProtocol(ICdssProtocol data)
+        public ICdssLibrary InsertProtocol(ICdssLibrary data)
         {
             throw new NotImplementedException();
         }
 
-        public ICdssAsset Remove(Guid protocolUuid)
+        public ICdssLibrary Remove(Guid protocolUuid)
         {
             throw new NotImplementedException();
         }

@@ -33,6 +33,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using SanteDB.Core.Applets;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -62,8 +63,6 @@ namespace SanteDB.Cdss.Xml
     [ServiceProvider("Applet Based Clinical Protocol Installer")]
     public class AppletClinicalProtocolInstaller
     {
-        private XmlSerializer m_protocolReader = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
-        private XmlSerializer m_libraryReader = XmlModelSerializerFactory.Current.CreateSerializer(typeof(RulesetLibrary));
 
         /// <summary>
         /// Gets the service name
@@ -73,15 +72,17 @@ namespace SanteDB.Cdss.Xml
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolInstaller));
         private readonly IAppletManagerService m_appletManager;
+        private readonly IAppletSolutionManagerService m_appletSolutionManager;
         private readonly ICdssLibraryRepository m_protocolRepository;
 
 
         /// <summary>
         /// Clinical repository service
         /// </summary>
-        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService, IAppletSolutionManagerService appletSolutionManagerService = null)
         {
             this.m_appletManager = appletManager;
+            this.m_appletSolutionManager = appletSolutionManagerService;
             this.m_protocolRepository = clinicalProtocolRepositoryService;
             this.LoadProtocols();
             appletManager.Changed += (o, e) => this.LoadProtocols();
@@ -96,52 +97,18 @@ namespace SanteDB.Cdss.Xml
             {
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    // Get protocols from the applet
-                    var protocols = this.m_appletManager.Applets.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
-
-                    foreach (var f in protocols)
+                    var solutions = this.m_appletSolutionManager?.Solutions.ToList();
+                    if(solutions == null)
                     {
-                        var content = f.Content ?? this.m_appletManager.Applets.Resolver(f);
-                        XmlReader sourceReader = null;
-                        switch(content)
+                        this.ProcessApplet(this.m_appletManager.Applets); // no solution manager
+                    }
+                    else
+                    {
+                        solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
+                        foreach (var s in solutions)
                         {
-                            case String str:
-                                sourceReader = XmlReader.Create(new StringReader(str));
-                                break;
-                            case byte[] b:
-                                sourceReader = XmlReader.Create(new MemoryStream(b));
-                                break;
-                            case XElement xe:
-                                sourceReader = xe.CreateReader();
-                                break;
-                            default:
-                                this.m_tracer.TraceWarning("Will not load {0}", f.Name);
-                                continue;
-                        }
-
-                        using(sourceReader)
-                        {
-                            try
-                            {
-                                if (m_protocolReader.CanDeserialize(sourceReader))
-                                {
-                                    var protocol = this.m_protocolReader.Deserialize(sourceReader) as ProtocolDefinition;
-                                    this.m_protocolRepository.InsertOrUpdate(new XmlClinicalProtocol(protocol));
-                                }
-                                else if(m_libraryReader.CanDeserialize(sourceReader))
-                                {
-                                    var library = this.m_libraryReader.Deserialize(sourceReader) as RulesetLibrary;
-                                    this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException(ErrorMessages.INVALID_FILE_FORMAT);
-                                }
-                            }
-                            catch(Exception e)
-                            {
-                                this.m_tracer.TraceWarning("Could not load {0} due to {1}", f.Name, e.ToHumanReadableString());
-                            }
+                            var appletCollection = this.m_appletSolutionManager.GetApplets(s.Meta.Id);
+                            this.ProcessApplet(appletCollection);
                         }
                     }
                 }
@@ -152,5 +119,34 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
+        private void ProcessApplet(ReadonlyAppletCollection appletCollection)
+        {
+            try
+            {
+
+                // Get protocols from the applet
+                var protocols = appletCollection.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
+
+                foreach (var f in protocols)
+                {
+                    using (var sourceReader = new MemoryStream(appletCollection.RenderAssetContent(f)))
+                    {
+                        try
+                        {
+                            var library = CdssLibraryDefinition.Load(sourceReader);
+                            this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                        }
+                        catch (Exception e)
+                        {
+                            this.m_tracer.TraceWarning("Could not load {0} due to {1}", f.Name, e.ToHumanReadableString());
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                this.m_tracer.TraceWarning("Cannot process applet {0} for protocols - {1}", appletCollection, e.ToHumanReadableString());
+            }
+        }
     }
 }
