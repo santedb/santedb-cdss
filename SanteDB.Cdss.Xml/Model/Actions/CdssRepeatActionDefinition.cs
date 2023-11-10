@@ -18,7 +18,13 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// The number of iterations to repeat
         /// </summary>
         [XmlAttribute("iterations"), JsonProperty("iterations")]
-        public int? Iterations { get; set; }
+        public int Iterations { get; set; }
+
+        /// <summary>
+        /// Iterations are specified
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool IterationsSpecified { get; set; }
 
         /// <summary>
         /// The variable to track iterations
@@ -41,7 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 var iteration = 0;
                 
-                while(this.Iterations.HasValue && iteration <= this.Iterations.Value || true) {
+                while(this.IterationsSpecified && iteration <= this.Iterations || true) {
 
                     iteration++;
                     base.Execute();

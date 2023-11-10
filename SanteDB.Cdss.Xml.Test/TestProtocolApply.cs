@@ -71,7 +71,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -96,7 +96,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(1, acts.Count());
@@ -120,7 +120,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(60, acts.Count());
@@ -165,7 +165,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(59, acts.Count());
@@ -189,7 +189,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
@@ -213,7 +213,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -237,7 +237,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -261,7 +261,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(typeof(Patient)).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());

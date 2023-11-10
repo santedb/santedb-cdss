@@ -44,6 +44,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
+            XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("fixed", typeof(String))]
         public Object ContainedExpression { get; set; }
 

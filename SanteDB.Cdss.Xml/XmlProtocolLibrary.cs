@@ -1,14 +1,18 @@
 ﻿using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Roles;
+using SharpCompress;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 
@@ -24,6 +28,7 @@ namespace SanteDB.Cdss.Xml
 
         // definition loaded from XML
         private CdssLibraryDefinition m_library;
+        private IList<CdssLibraryDefinition> m_scopedLibraries;
 
         /// <summary>
         /// Creates a new protocol library
@@ -38,6 +43,9 @@ namespace SanteDB.Cdss.Xml
         public XmlProtocolLibrary(CdssLibraryDefinition library)
         {
             this.m_library = library;
+            var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
+            this.m_scopedLibraries = new List<CdssLibraryDefinition>() { library };
+            this.m_scopedLibraries.AddRange(library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<CdssLibraryDefinition>() ?? new CdssLibraryDefinition[0]);
         }
 
         /// <inheritdoc/>
@@ -58,6 +66,23 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         public string Documentation => this.m_library.Metadata?.Documentation;
 
+        /// <summary>
+        /// Get protocols defined for patients in the library
+        /// </summary>
+        public IEnumerable<ICdssProtocol> GetProtocols(String forScope)
+        {
+            var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
+                    .Where(o => o.Context.Type == typeof(Patient))
+                    .SelectMany(o => o.Definitions)
+                    .OfType<CdssProtocolAssetDefinition>()
+                    .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
+            if(!String.IsNullOrEmpty(forScope))
+            {
+                retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope));
+            }
+            return retVal;
+        }
+
         /// <inheritdoc/>
         public void Load(Stream definitionStream)
         {
@@ -68,15 +93,6 @@ namespace SanteDB.Cdss.Xml
 
             this.m_library = CdssLibraryDefinition.Load(definitionStream);
         }
-
-        /// <inheritdoc/>
-        public IEnumerable<ICdssProtocol> GetProtocols(Type forContext) =>
-            this.m_library
-            .Definitions
-            .OfType<CdssDecisionLogicBlockDefinition>()
-            .Where(o => o.Context.Type == forContext)
-            .SelectMany(o => o.Definitions.OfType<CdssProtocolAssetDefinition>())
-            .Select(o => new XmlClinicalProtocol(o));
 
         /// <inheritdoc/>
         public void Save(Stream definitionStream)
@@ -90,7 +106,7 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <inheritdoc/>
-        public IEnumerable<DetectedIssue> Analyze(IdentifiedData analysisTarget)
+        public IEnumerable<DetectedIssue> Analyze(IdentifiedData analysisTarget, IDictionary<String, object> parameters = null)
         {
 
 #if DEBUG
@@ -101,11 +117,15 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
-                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget.DeepCopy());
+                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget.DeepCopy(), this.m_scopedLibraries);
                 using (CdssExecutionStackFrame.Enter(context))
                 {
-                    var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                        .Where(o => o.Context.Type == analysisTarget.GetType())
+                    parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
+                    context.SetValue("mode", "analyze");
+
+                    var definitions = this.m_library.Definitions
+                        .OfType<CdssDecisionLogicBlockDefinition>()
+                        .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
                         .OfType<CdssRuleAssetDefinition>()
                         .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
@@ -124,7 +144,7 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <inheritdoc/>
-        public IEnumerable<object> Execute(IdentifiedData target)
+        public IEnumerable<object> Execute(IdentifiedData target, IDictionary<String, object> parameters = null)
         {
 
 #if DEBUG
@@ -135,17 +155,22 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
-                var executionContext = CdssExecutionContext.CreateContext((IdentifiedData)target.DeepCopy());
+                var context = CdssExecutionContext.CreateContext((IdentifiedData)target.DeepCopy(), this.m_scopedLibraries);
 
-                using (CdssExecutionStackFrame.Enter(executionContext))
+                using (CdssExecutionStackFrame.Enter(context))
                 {
-                    var definitions = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                        .Where(o => o.Context.Type == target.GetType())
+                    parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
+                    context.SetValue("mode", "execute");
+
+                    var definitions = this.m_library.Definitions
+                        .OfType<CdssDecisionLogicBlockDefinition>()
+                        .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
                         .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
                         .ToArray();
 
-                    return executionContext.Proposals.OfType<Object>().Union(executionContext.Issues);
+
+                    return context.Proposals.OfType<Object>().Union(context.Issues);
                 }
 
             }
@@ -157,5 +182,6 @@ namespace SanteDB.Cdss.Xml
 #endif
             }
         }
+
     }
 }

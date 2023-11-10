@@ -22,7 +22,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         [XmlElement("csharp", typeof(CdssCsharpExpressionDefinition)),
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
-            XmlElement("fact", typeof(CdssFactAssetDefinition)),
+            XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition))]
         public List<CdssExpressionDefinition> ContainedExpressions { get; set; }

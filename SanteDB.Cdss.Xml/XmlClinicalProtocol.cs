@@ -51,13 +51,15 @@ namespace SanteDB.Cdss.Xml
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
         private readonly CdssProtocolAssetDefinition m_protocol;
+        private readonly IEnumerable<CdssLibraryDefinition> m_scopedLibraries;
 
         /// <summary>
         /// Default ctor
         /// </summary>
-        internal XmlClinicalProtocol(CdssProtocolAssetDefinition protocolAssetDefinition)
+        internal XmlClinicalProtocol(CdssProtocolAssetDefinition protocolAssetDefinition, IEnumerable<CdssLibraryDefinition> scopedLibraries)
         {
             this.m_protocol = protocolAssetDefinition;
+            this.m_scopedLibraries = scopedLibraries;
         }
 
         // Definition
@@ -115,7 +117,7 @@ namespace SanteDB.Cdss.Xml
         //}
 
         /// <inheritdoc/>
-        public IEnumerable<Act> ComputeProposals(IdentifiedData target, IDictionary<string, object> parameters)
+        public IEnumerable<Act> ComputeProposals(Patient target, IDictionary<string, object> parameters)
         {
 #if DEBUG
             Stopwatch sw = new Stopwatch();
@@ -131,7 +133,7 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 
-                var context = CdssExecutionContext.CreateContext(targetClone);
+                var context = CdssExecutionContext.CreateContext(targetClone, this.m_scopedLibraries);
                 foreach (var itm in parameters)
                 {
                     context.SetValue(itm.Key, itm.Value);

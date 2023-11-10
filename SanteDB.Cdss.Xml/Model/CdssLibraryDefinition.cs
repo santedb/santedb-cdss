@@ -23,7 +23,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// Gets or sets the objects which are included in this definition
         /// </summary>
         [XmlElement("include"), JsonProperty("include")]
-        public List<CdssBaseObjectReference> Include { get; set; }
+        public List<String> Include { get; set; }
 
         /// <summary>
         /// Gets the rulesets in the CDSS library definition

@@ -17,7 +17,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// Represents the "when" clause for the rule
         /// </summary>
         [XmlElement("when"), JsonProperty("when")]
-        public CdssFactAssetDefinition When { get; set; }
+        public CdssWhenDefinition When { get; set; }
 
         /// <summary>
         /// Action definition
@@ -28,14 +28,12 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
             XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
             XmlArrayItem("apply", typeof(CdssExecuteActionDefinition)),
-            XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
             JsonProperty("then")]
         public List<CdssActionDefinition> Actions { get; set; }
 
         /// <summary>
         /// Compute the rule and execute any actions in the rule
         /// </summary>
-        /// <param name="cdssContext">The current CDSS context</param>
         /// <returns>True if the rule was executed, false if it was not executed</returns>
         public override object Compute()
         {
@@ -43,8 +41,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var whenResult = this.When.Compute();
-                if (whenResult is bool whenSuccessful && whenSuccessful)
+                if (this.When?.Compute() != false)
                 {
                     foreach (var act in this.Actions)
                     {

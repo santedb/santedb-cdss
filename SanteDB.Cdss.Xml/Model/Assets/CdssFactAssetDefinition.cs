@@ -31,7 +31,6 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
-            XmlElement("fact", typeof(CdssFactAssetDefinition)),
             JsonProperty("logic")]
         public CdssExpressionDefinition FactComputation { get; set; }
         
@@ -103,7 +102,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
                     if (netType != bodyExpression.Type)
                     {
-                        bodyExpression = Expression.Convert(bodyExpression, netType);
+                        bodyExpression = Expression.Convert(Expression.Convert(bodyExpression, netType), typeof(Object));
                     }
                 }
 

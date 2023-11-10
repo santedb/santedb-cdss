@@ -11,7 +11,7 @@ namespace SanteDB.Cdss.Xml.Model
     /// CDSS base object
     /// </summary>
     [XmlType(nameof(CdssBaseObjectDefinition), Namespace = "http://santedb.org/cdss")]
-    public abstract class CdssBaseObjectDefinition : CdssBaseObjectReference
+    public abstract class CdssBaseObjectDefinition  
     {
 
         /// <summary>

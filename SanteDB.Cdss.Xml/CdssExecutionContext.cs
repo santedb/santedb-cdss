@@ -19,6 +19,7 @@
  * Date: 2023-5-19
  */
 using DynamicExpresso;
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
@@ -61,7 +62,8 @@ namespace SanteDB.Cdss.Xml
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
-        private readonly IDictionary<String, CdssComputableAssetDefinition> m_factDefinitions = new Dictionary<String, CdssComputableAssetDefinition>();
+        private readonly IDictionary<String, CdssComputableAssetDefinition> m_factDefinitions;
+        private readonly IDictionary<String, CdssReferenceDataset> m_datasets;
         private readonly ConcurrentBag<Act> m_proposedActions = new ConcurrentBag<Act>();
         private readonly ConcurrentBag<DetectedIssue> m_detectedIssues = new ConcurrentBag<DetectedIssue>();
         private readonly object m_lock = new object();
@@ -69,10 +71,25 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Create a new context with specified target
         /// </summary>
-        public CdssExecutionContext(IdentifiedData scopedObject)
+        /// <param name="scopedLibraries">The libraries which are in scope of this context</param>
+        /// <param name="scopedObject">The primary focal object for which decision support is being executed</param>
+        public CdssExecutionContext(IdentifiedData scopedObject, IEnumerable<CdssLibraryDefinition> scopedLibraries = null)
         {
             this.m_target = scopedObject;
+            this.m_datasets = scopedLibraries?.SelectMany(o => o.Definitions).OfType<CdssDatasetDefinition>().ToCdssReferenceDictionary(o => new CdssReferenceDataset(o));
+            this.m_factDefinitions = scopedLibraries?
+                .SelectMany(o => o.Definitions)
+                .OfType<CdssDecisionLogicBlockDefinition>()
+                .AppliesTo(this)
+                .SelectMany(o => o.Definitions)
+                .OfType<CdssComputableAssetDefinition>()
+                .ToCdssReferenceDictionary(o => o);
         }
+
+        /// <summary>
+        /// Get the datasets
+        /// </summary>
+        public IDictionary<String, CdssReferenceDataset> DataSets => this.m_datasets;
 
         /// <summary>
         /// Get the variables
@@ -254,14 +271,14 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         /// <param name="forObject">The object which the context should be created for</param>
         /// <returns>The constructed context</returns>
-        public static CdssExecutionContext CreateContext(IdentifiedData forObject)
+        public static CdssExecutionContext CreateContext(IdentifiedData forObject, IEnumerable<CdssLibraryDefinition> scopedLibraries)
         {
             if(forObject == null)
             {
                 throw new ArgumentNullException(nameof(forObject));
             }
             var cdssType = typeof(CdssExecutionContext<>).MakeGenericType(forObject.GetType());
-            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject);
+            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries);
         }
 
     }
@@ -273,10 +290,8 @@ namespace SanteDB.Cdss.Xml
     {
        
         
-        /// <summary>
-        /// Gets the target
-        /// </summary>
-        public CdssExecutionContext(TTarget target) : base(target)
+        /// <inheritdoc/>
+        public CdssExecutionContext(TTarget target, IEnumerable<CdssLibraryDefinition> scopedLibraries = null) : base(target, scopedLibraries)
         {
         }
 

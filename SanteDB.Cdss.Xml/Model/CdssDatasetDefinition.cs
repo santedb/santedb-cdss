@@ -13,33 +13,14 @@ namespace SanteDB.Cdss.Xml.Model
     /// CDSS dataset definition
     /// </summary>
     [XmlType(nameof(CdssDatasetDefinition), Namespace = "http://santedb.org/cdss")]
-    public class CdssDatasetDefinition : CdssBaseObjectDefinition, IEnumerable<IForeignDataRecord>
+    public class CdssDatasetDefinition : CdssBaseObjectDefinition
     {
 
         /// <summary>
         /// Reference data
         /// </summary>
-        [XmlText, JsonProperty("data")]
+        [XmlText, JsonProperty("csv")]
         public string RawData { get; set; }
 
-        /// <summary>
-        /// Get enumerator for the data
-        /// </summary>
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-        /// <summary>
-        /// Get enumerator
-        /// </summary>
-        public IEnumerator<IForeignDataRecord> GetEnumerator()
-        {
-            using (var str = new MemoryStream(Encoding.UTF8.GetBytes(this.RawData)))
-            {
-                using (var dr = new CsvForeignDataFormat().Open(str).CreateReader())
-                {
-                    dr.MoveNext();
-                    yield return dr;
-                }
-            }
-        }
     }
 }
