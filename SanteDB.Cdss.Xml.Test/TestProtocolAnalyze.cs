@@ -81,7 +81,6 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.AreEqual(5.52, objectUnderTest.Value); // Rule has not changed value (only conversions for facts - don't leak into object)
             xmlProto.Analyze(originalObject.DeepCopy() as IdentifiedData);
 
-
         }
 
 

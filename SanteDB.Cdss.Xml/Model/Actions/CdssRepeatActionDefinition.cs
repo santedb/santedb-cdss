@@ -64,9 +64,8 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 var iteration = 0;
                 
-                while(this.IterationsSpecified && iteration <= this.Iterations || true) {
+                while((!this.IterationsSpecified) ^ (iteration < this.Iterations)) {
 
-                    iteration++;
                     CdssExecutionStackFrame.Current.Context.SetValue(this.IterationVariable ?? "index", iteration);
                     base.Execute();
 
@@ -76,6 +75,8 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                     {
                         break;
                     }
+                    iteration++;
+                    CdssExecutionStackFrame.Current.Context.ClearEvaluatedFacts();
                 }
 
                 CdssExecutionStackFrame.Current.Context.DestroyValue(this.IterationVariable);

@@ -130,7 +130,7 @@ namespace SanteDB.Cdss.Xml
 
                 // Get a clone to make decisions on
                 var targetClone = target.DeepCopy() as IdentifiedData;
-
+                
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 
                 var context = CdssExecutionContext.CreateContext(targetClone, this.m_scopedLibraries);

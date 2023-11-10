@@ -3,6 +3,7 @@ using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -69,7 +70,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     if (this.m_compiledExpression == null)
                     {
                         var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                        var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                        var scopedParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
                         var valueParameter = Expression.Parameter(retVal.GetType(), CdssConstants.ValueVariableName);
 
                         var expressionForValue = this.EmitExpression.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter, valueParameter);

@@ -42,27 +42,24 @@
     </meta>
     <define>
       <fact name="Earliest Date Of Weight Observation">
-        <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
+        <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]))</csharp>
       </fact>
       <fact name="Last Date Of Weight Observation">
-        <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"] + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
+        <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
       </fact>
       <fact name="Patient Age In Years">
         <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
       </fact>
       <fact name="Patient Is Under 5 Years Old">
-        <csharp>context["Patient Age In Years"] &lt; 5</csharp>
+        <csharp>((double)context["Patient Age In Years"]) &lt; 5d</csharp>
       </fact>
-      <fact name="No Weight Has Been Proposed For Period" negation="true">
+      <fact name="No Weight Has Been Proposed For Period" negate="true">
         <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Weight Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Weight Observation</hdsi>
       </fact>
 
       <rule name="Should Weigh Child" id="org.santedb.cdss.weight.patient.rule.shouldWeigh">
         <when>
-          <all>
-            <fact ref="No Weight Has Been Proposed For Period" />
-            <fact ref="Patient Is Under 5 Years Old" />
-          </all>
+          <fact ref="No Weight Has Been Proposed For Period" />
         </when>
         <then>
           <propose type="QuantityObservation">
@@ -83,14 +80,14 @@
               }
               ]]>
             </json>
-            <assign path="actTime">
+            <assign path="actTime" >
               <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
             </assign>
             <assign path="startTime">
-              <fact ref="Earliest Date " />
+              <fact ref="Earliest Date Of Weight Observation" />
             </assign>
             <assign path="stopTime">
-              <fact ref="maxDate" />
+              <fact ref="Last Date Of Weight Observation" />
             </assign>
           </propose>
         </then>
@@ -135,7 +132,7 @@
         </meta>
         <hdsi>participation[RecordTarget].player@Patient.dateOfBirth</hdsi>
       </fact>
-      
+
       <fact name="Record Target Age in Days">
         <meta>
           <documentation>The age of the record target expressed in absolute days (the patient for whom this data is about)</documentation>
@@ -177,7 +174,7 @@
           </assign>
         </then>
       </rule>
-      
+
       <rule name="When Patient Is Underweight Set Interpretation to Low and propose vitamin supplement">
         <when>
           <fact ref="Patient Is Underweight" />

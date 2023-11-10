@@ -50,8 +50,6 @@ namespace SanteDB.Cdss.Xml.Test
             // Force load of the DLL
             TestApplicationContext.TestAssembly = typeof(TestProtocolApply).Assembly;
             TestApplicationContext.Initialize(TestContext.CurrentContext.TestDirectory);
-
-
         }
 
         /// <summary>
@@ -120,10 +118,11 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(60, acts.Count());
+
         }
 
         /// <summary>
@@ -165,7 +164,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(59, acts.Count());

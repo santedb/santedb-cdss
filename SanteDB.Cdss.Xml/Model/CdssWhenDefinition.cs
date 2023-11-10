@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Core.BusinessRules;
 using System.Xml;
+using SanteDB.Core.Model;
 
 namespace SanteDB.Cdss.Xml.Model
 {
@@ -63,7 +64,7 @@ namespace SanteDB.Cdss.Xml.Model
             if (this.m_compiledExpression == null)
             {
                 var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                var scopedParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
 
                 Expression bodyExpression = Expression.Lambda(this.WhenComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
 

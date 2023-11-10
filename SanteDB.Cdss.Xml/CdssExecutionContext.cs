@@ -70,8 +70,8 @@ namespace SanteDB.Cdss.Xml
         private readonly IDictionary<String, CdssComputableAssetDefinition> m_computableAssetsInScope;
         private readonly IDictionary<String, CdssReferenceDataset> m_datasets;
         private readonly CdssComputableAssetDefinition[] m_scopedLogicBlocks;
-        private readonly ConcurrentBag<Act> m_proposedActions = new ConcurrentBag<Act>();
-        private readonly ConcurrentBag<DetectedIssue> m_detectedIssues = new ConcurrentBag<DetectedIssue>();
+        private readonly List<Act> m_proposedActions = new List<Act>();
+        private readonly List<DetectedIssue> m_detectedIssues = new List<DetectedIssue>();
         private readonly object m_lock = new object();
 
         /// <summary>
@@ -165,10 +165,9 @@ namespace SanteDB.Cdss.Xml
             {
                 return true;
             }
-            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
+            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition factDefn)
             {
                 value = defn.Compute();
-                this.m_factCache.Add(factName, value);
                 return true;
             }
             return false;
@@ -280,6 +279,9 @@ namespace SanteDB.Cdss.Xml
                             };
                             entity.Participations.Add(proposal);
                         }
+
+                        // Add the entity as a record target to the model
+                        proposedAct.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, entity.Key));
                     }
                     break;
                 case Act act:

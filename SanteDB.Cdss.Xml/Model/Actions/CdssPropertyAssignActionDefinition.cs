@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Model;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -82,7 +83,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                         if (this.m_compiledExpression == null)
                         {
                             var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                            var scopeParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                            var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
 
                             var expressionForValue = exe.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
                             if(!(expressionForValue is LambdaExpression))

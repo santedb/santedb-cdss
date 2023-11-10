@@ -4,6 +4,7 @@ using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,9 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     {
         // JSON Serializer
         private static JsonViewModelSerializer s_serializer = new JsonViewModelSerializer();
+
+        // Parsed model
+        private Act m_parsedModel; 
 
         /// <summary>
         /// Gets or sets the model 
@@ -76,17 +80,19 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
 
-                Act model = null;
-                switch (this.Model)
+                if (this.m_parsedModel == null)
                 {
-                    case String jsonString:
-                        model = s_serializer.DeSerialize<Act>(jsonString);
-                        break;
-                    case Act act:
-                        model = act.DeepCopy() as Act;
-                        break;
+                    switch (this.Model)
+                    {
+                        case String jsonString:
+                            this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
+                            break;
+                        case Act act:
+                            this.m_parsedModel = act.DeepCopy() as Act;
+                            break;
+                    }
                 }
-
+                Act model = this.m_parsedModel.DeepCopy() as Act;
                 model.Protocols = new List<ActProtocol>();
                 // Get any protocols in the execution context hierarchy
                 var ctx = CdssExecutionStackFrame.Current;

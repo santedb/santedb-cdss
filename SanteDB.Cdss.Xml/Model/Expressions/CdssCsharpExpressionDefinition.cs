@@ -1,6 +1,8 @@
 ﻿using DynamicExpresso;
 using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -42,8 +44,17 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public String ExpressionValue { get; set; }
 
         /// <inheritdoc/>
-        internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters) => 
-            cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o=> new Parameter(o)).ToArray()).Expression;
+        internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
+        {
+            try
+            {
+                return cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o => new Parameter(o)).ToArray()).Expression;
+            }
+            catch(Exception e)
+            {
+                throw new CdssEvaluationException($"{e.Message} - \"{this.ExpressionValue}\"", e);
+            }
+        }
 
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)

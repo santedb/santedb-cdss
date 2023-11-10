@@ -4,6 +4,7 @@ using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Cdss.Xml.XmlLinq;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
 using SanteDB.Core.Model.Map;
 using SanteDB.Core.Model.Query;
 using System;
@@ -83,10 +84,10 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             base.ThrowIfInvalidState();
 
-            if (m_compiledExpression == null)
+            if (this.m_compiledExpression == null)
             {
                 var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                var scopedParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
                 Expression bodyExpression = Expression.Lambda(this.FactComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
 
                 if (!(bodyExpression is LambdaExpression))
@@ -99,12 +100,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 // (bool)this.m_compiledExpression.DynamicInvoke(context);
                 var contextObjParam = Expression.Parameter(typeof(object));
                 var scopeObjParam = Expression.Parameter(typeof(object));
-                bodyExpression = Expression.Convert(Expression.Invoke(
+                bodyExpression = Expression.Invoke(
                         bodyExpression,
                         Expression.Convert(contextObjParam, contextParameter.Type),
                         Expression.Convert(scopeObjParam, scopedParameter.Type)
-                    ), typeof(Object));
-
+                    );
 
                 if (IsNegated)
                 {
@@ -112,7 +112,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 }
 
                 var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                    bodyExpression,
+                    Expression.Convert(bodyExpression, typeof(Object)),
                     contextObjParam,
                     scopeObjParam
                 );
@@ -123,7 +123,6 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
                 var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
-
                 // Convert the value?
                 if (ValueTypeSpecified == true)
                 {
