@@ -123,34 +123,51 @@
     </meta>
     <define>
       <fact name="Record Target Gender">
+        <meta>
+          <documentation>The administrative gender of the record target (the patient for whom this data is about)</documentation>
+        </meta>
         <hdsi>participation[RecordTarget].player@Patient.genderConcept.mnemonic</hdsi>
       </fact>
+
       <fact name="Record Target Date Of Birth">
+        <meta>
+          <documentation>The registered date of birth for the record target (the patient for whom this data is about)</documentation>
+        </meta>
         <hdsi>participation[RecordTarget].player@Patient.dateOfBirth</hdsi>
       </fact>
+      
       <fact name="Record Target Age in Days">
+        <meta>
+          <documentation>The age of the record target expressed in absolute days (the patient for whom this data is about)</documentation>
+        </meta>
         <csharp>(long)DateTime.Now.Subtract((DateTime)context["Record Target Date Of Birth"]).TotalDays</csharp>
       </fact>
 
-      <fact name="Unit of Measure is in Lbs">
+      <fact name="Weight is expressed in Lbs">
+        <meta>
+          <documentation>For a quantity observation, indicates wether the observed value is expressed in imperial pounds</documentation>
+        </meta>
         <hdsi>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</hdsi>
       </fact>
 
-      <fact name="Observed Weight in Kgs" type="real">
+      <fact name="Observed Weight Expressed in Kgs" type="real">
+        <meta>
+          <documentation>Ensures that a weight observation is expressed in kilograms, converting from pounds if required</documentation>
+        </meta>
         <hdsi>value</hdsi>
         <normalize>
           <when>
-            <fact ref="Unit of Measure is in Lbs"/>
+            <fact ref="Weight is expressed in Lbs"/>
           </when>
           <csharp>value * 0.45359237d</csharp>
         </normalize>
       </fact>
 
       <fact name="Patient Is Underweight">
-        <csharp><![CDATA[context["Observed Weight in Kgs"] < context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zMinus2")]]></csharp>
+        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) < (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zMinus2")]]></csharp>
       </fact>
       <fact name="Patient Is Overweight">
-        <csharp><![CDATA[context["Observed Weight in Kgs"] > context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zPlus2")]]></csharp>
+        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) > (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zPlus2")]]></csharp>
       </fact>
 
       <rule name="Default Interpretation of Weight - Normal">
@@ -161,7 +178,7 @@
         </then>
       </rule>
       
-      <rule name="When Patient Is Underweight Set Interpretation to Low">
+      <rule name="When Patient Is Underweight Set Interpretation to Low and propose vitamin supplement">
         <when>
           <fact ref="Patient Is Underweight" />
         </when>
@@ -171,7 +188,7 @@
           </assign>
           <raise>
             <issue xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
-              Patient abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, vitamin supplement.
+              Patient weight is abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, vitamin supplement.
             </issue>
           </raise>
           <propose>
@@ -232,7 +249,7 @@
           </propose>
         </then>
       </rule>
-      <rule name="When Patient Is Overweight Set Interpretation to High">
+      <rule name="When Patient Is Overweight Set Interpretation to High and Inform Clinician">
         <when>
           <fact ref="Patient Is Overweight" />
         </when>

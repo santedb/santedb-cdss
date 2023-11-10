@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using DynamicExpresso;
+using NUnit.Framework;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Model;
@@ -8,6 +9,7 @@ using SanteDB.Core.Model.Roles;
 using SanteDB.Core.TestFramework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,9 +79,7 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.IsNotNull(objectUnderTest.InterpretationConceptKey); // Rule has set the interpretation concept
             Assert.AreEqual(1, issues.Count()); // Rule has detected an issue
             Assert.AreEqual(5.52, objectUnderTest.Value); // Rule has not changed value (only conversions for facts - don't leak into object)
-
-            objectUnderTest = originalObject.DeepCopy() as QuantityObservation;
-            var actions = xmlProto.Execute(objectUnderTest);
+            xmlProto.Analyze(originalObject.DeepCopy() as IdentifiedData);
 
 
         }

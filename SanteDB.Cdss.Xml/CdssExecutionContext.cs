@@ -31,6 +31,8 @@ using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Map;
+using SanteDB.Core.Model.Roles;
+using SharpCompress;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -312,11 +314,13 @@ namespace SanteDB.Cdss.Xml
         /// <returns></returns>
         internal Interpreter GetExpressionInterpreter()
         {
-            var expressionInterpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default | InterpreterOptions.LateBindObject)
-                               .Reference(typeof(TimeSpan))
-                               .Reference(typeof(Guid))
+            var expressionInterpreter = new Interpreter(InterpreterOptions.Default)
                                .Reference(typeof(DateTimeOffset))
                                .EnableAssignment(AssignmentOperators.None);
+
+            // Add types
+            typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
+
             return expressionInterpreter;
         }
 

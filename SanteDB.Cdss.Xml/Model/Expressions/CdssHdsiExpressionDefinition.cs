@@ -89,7 +89,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                     break;
 
             }
-            return Expression.Invoke(bodyExpression, scopedObjectExpression);
+            var retVal = Expression.Invoke(bodyExpression, scopedObjectExpression);
+            return retVal;
         }
     }
 
