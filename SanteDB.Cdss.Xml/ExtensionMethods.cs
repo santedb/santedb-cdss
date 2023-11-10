@@ -30,13 +30,13 @@ namespace SanteDB.Cdss.Xml
             foreach(var itm in me)
             {
                 var value = valueSelector(itm);
-                if(!String.IsNullOrEmpty(itm.Name) && !retVal.ContainsKey(itm.Name))
+                if(!String.IsNullOrEmpty(itm.Name))
                 {
-                    retVal.Add(itm.Name, value);
+                    retVal.Add(itm.Name.ToLowerInvariant(), value);
                 }
-                if(!String.IsNullOrEmpty(itm.Id) && !retVal.ContainsKey($"#{itm.Id}"))
+                if(!String.IsNullOrEmpty(itm.Id))
                 {
-                    retVal.Add($"#{itm.Id}", value);
+                    retVal.Add($"#{itm.Id.ToLowerInvariant()}", value);
                 }
             }
             return retVal;

@@ -1,6 +1,8 @@
-﻿using SanteDB.Core.i18n;
+﻿using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Actions
@@ -29,5 +31,10 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// </summary>
         internal abstract void Execute();
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            yield break;
+        }
     }
 }

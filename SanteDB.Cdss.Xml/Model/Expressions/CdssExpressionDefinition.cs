@@ -1,4 +1,5 @@
-﻿using SanteDB.Core.Cdss;
+﻿using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
@@ -23,5 +24,10 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// <returns>The generated expression</returns>
         internal abstract Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters);
 
+        /// <summary>
+        /// Validate that the expression is appropriately represented for execution
+        /// </summary>
+        /// <param name="context">The context in which the validation is occurring</param>
+        public abstract IEnumerable<DetectedIssue> Validate(CdssExecutionContext context);
     }
 }

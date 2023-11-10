@@ -1,5 +1,6 @@
 ﻿using DynamicExpresso;
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -44,5 +45,13 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters) => 
             cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o=> new Parameter(o)).ToArray()).Expression;
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(String.IsNullOrEmpty(this.ExpressionValue))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.missingLogic", "C# expression logic missing", Guid.Empty);
+            }
+        }
     }
 }

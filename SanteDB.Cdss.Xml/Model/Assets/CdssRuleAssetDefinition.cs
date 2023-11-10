@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Actions;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Assets
@@ -24,12 +26,33 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// </summary>
         [XmlArray("then"),
             XmlArrayItem("propose", typeof(CdssProposeActionDefinition)),
-            XmlArrayItem("assign", typeof(CdssProperyAssignActionDefinition)),
+            XmlArrayItem("assign", typeof(CdssPropertyAssignActionDefinition)),
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
             XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
             XmlArrayItem("apply", typeof(CdssExecuteActionDefinition)),
             JsonProperty("then")]
         public List<CdssActionDefinition> Actions { get; set; }
+
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.When == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.rule.whenRecommended", "Rules should carry a WHEN condition unless they are globally applied", Guid.Empty, this.ToString());
+            }
+            if (this.Actions?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.thenRequired", "Rules must carry a THEN block", Guid.Empty, this.ToString());
+            }
+            foreach(var itm in base.Validate(context)
+                .Union(this.Actions?.SelectMany(o=>o.Validate(context) ?? new DetectedIssue[0]))
+                .Union(this.When?.Validate(context) ?? new DetectedIssue[0]))
+            {
+                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                yield return itm;
+            }
+        }
 
         /// <summary>
         /// Compute the rule and execute any actions in the rule
@@ -41,7 +64,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                if (this.When?.Compute() != false)
+                if (this.When == null || this.When.Compute() is bool b &&  b)
                 {
                     foreach (var act in this.Actions)
                     {

@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Assets
@@ -34,9 +36,16 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <summary>
         /// Compute the asset output based on the current context
         /// </summary>
-        /// <param name="cdssContext">The context which the value should be computed based on</param>
         /// <returns>The computed value</returns>
         public abstract object Compute();
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(string.IsNullOrEmpty(this.Id) && string.IsNullOrEmpty(this.Name))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.asset.identification", "CDSS logic asset definitions must carry either a @name or @id attribute", Guid.Empty, this.ToString());
+            }
+        }
     }
 }

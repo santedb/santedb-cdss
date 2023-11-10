@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
@@ -33,6 +34,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         XmlElement(nameof(CodedObservation), typeof(CodedObservation), Namespace = "http://santedb.org/model"),
         XmlElement(nameof(PatientEncounter), typeof(PatientEncounter), Namespace = "http://santedb.org/model"),
         XmlElement(nameof(Procedure), typeof(Procedure), Namespace = "http://santedb.org/model"),
+            XmlElement(nameof(Narrative), typeof(Narrative), Namespace = "http://santedb.org/model"),
         JsonProperty("json")]
         public object Model { get; set; }
 
@@ -40,7 +42,26 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// Gets or sets the property to assign
         /// </summary>
         [XmlElement("assign"), JsonProperty("assign")]
-        public List<CdssProperyAssignActionDefinition> Assignment { get; set; }
+        public List<CdssPropertyAssignActionDefinition> Assignment { get; set; }
+
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.Model == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.propose.model", "Propose action requires a model", Guid.Empty, this.ToString());
+            }
+            if (this.Assignment?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.propose.assign", "Propose action should carry dynamic assignments", Guid.Empty, this.ToString());
+            }
+            foreach (var itm in base.Validate(context).Union(this.Assignment.SelectMany(o=>o.Validate(context)) ?? new DetectedIssue[0]))
+            {
+                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                yield return itm;
+            }
+        }
 
         /// <inheritdoc/>
         internal override void Execute()
@@ -92,6 +113,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             });
                             break;
                     }
+                    ctx = ctx.Parent;
                 }
 
                 // Set the scoped object for this and call the assign actions
@@ -101,6 +123,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                 {
                     asgn.Execute();
                 }
+                CdssExecutionStackFrame.Current.Context.PushProposal(model);
             }
         }
     }

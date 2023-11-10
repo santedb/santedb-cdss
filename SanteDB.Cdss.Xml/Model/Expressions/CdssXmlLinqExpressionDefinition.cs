@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.XmlLinq;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using System;
 using System.CodeDom;
@@ -41,6 +42,15 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         [XmlElement("linq"), JsonProperty("linq")]
         public XmlExpression ExpressionDefinition { get; set; }
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(this.ExpressionDefinition == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.xml.missingExpression", "XML LINQ expression statement required LINQ expression to be present", Guid.Empty);
+            }
+
+        }
 
         /// <summary>
         /// Gets or sets where the object should be pulled from

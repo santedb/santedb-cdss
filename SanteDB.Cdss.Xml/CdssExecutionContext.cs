@@ -19,10 +19,13 @@
  * Date: 2023-5-19
  */
 using DynamicExpresso;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Exceptions;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
@@ -62,8 +65,9 @@ namespace SanteDB.Cdss.Xml
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
-        private readonly IDictionary<String, CdssComputableAssetDefinition> m_factDefinitions;
+        private readonly IDictionary<String, CdssComputableAssetDefinition> m_computableAssetsInScope;
         private readonly IDictionary<String, CdssReferenceDataset> m_datasets;
+        private readonly CdssComputableAssetDefinition[] m_scopedLogicBlocks;
         private readonly ConcurrentBag<Act> m_proposedActions = new ConcurrentBag<Act>();
         private readonly ConcurrentBag<DetectedIssue> m_detectedIssues = new ConcurrentBag<DetectedIssue>();
         private readonly object m_lock = new object();
@@ -77,13 +81,17 @@ namespace SanteDB.Cdss.Xml
         {
             this.m_target = scopedObject;
             this.m_datasets = scopedLibraries?.SelectMany(o => o.Definitions).OfType<CdssDatasetDefinition>().ToCdssReferenceDictionary(o => new CdssReferenceDataset(o));
-            this.m_factDefinitions = scopedLibraries?
+            this.m_scopedLogicBlocks = scopedLibraries?
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .AppliesTo(this)
                 .SelectMany(o => o.Definitions)
+                .ToArray();
+
+            this.m_computableAssetsInScope = this.m_scopedLogicBlocks
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
+            
         }
 
         /// <summary>
@@ -112,6 +120,12 @@ namespace SanteDB.Cdss.Xml
         IdentifiedData ICdssExecutionContext.Target => this.m_target;
 
         /// <summary>
+        /// Get the facts which can be referenced
+        /// </summary>
+        public IEnumerable<string> Facts => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssFactAssetDefinition).Select(o=>o.Key);
+
+
+        /// <summary>
         /// Property indexer for variable name
         /// </summary>
         /// <param name="variableName">The name of the variable to fetch</param>
@@ -125,40 +139,71 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         public void SetValue(String parameterName, object value)
         {
-            if (!this.m_variables.TryGetValue(parameterName, out ParameterRegistration registration))
+            var caseInsitiveName = parameterName.ToLowerInvariant(); // Case insensitive
+            if (!this.m_variables.TryGetValue(caseInsitiveName, out ParameterRegistration registration))
             {
                 registration = new ParameterRegistration()
                 {
                     Type = value.GetType(),
                     Value = value
                 };
-                this.m_variables.Add(parameterName, registration);
+                this.m_variables.Add(caseInsitiveName, registration);
             }
 
             registration.Value = value;
         }
 
+        /// <summary>
+        /// Gets the fact named <paramref name="factName"/>
+        /// </summary>
+        internal bool TryGetFact(String factName, out object value)
+        {
+            var caseInsensitiveName = factName.ToLowerInvariant(); // Case insensitive
+            if (this.m_factCache.TryGetValue(caseInsensitiveName, out value))
+            {
+                return true;
+            }
+            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
+            {
+                value = defn.Compute();
+                this.m_factCache.Add(factName, value);
+                return true;
+            }
+            return false;
+        }
+
         /// <inheritdoc/>
         public object GetValue(String parameterOrFactName)
         {
-            if (this.m_variables.TryGetValue(parameterOrFactName, out ParameterRegistration registration) &&
+            var caseInsensitiveName = parameterOrFactName.ToLowerInvariant(); // Case insensitive
+            if (this.m_variables.TryGetValue(caseInsensitiveName, out ParameterRegistration registration) &&
                 MapUtil.TryConvert(registration.Value, registration.Type, out object retVal))
             {
                 return retVal;
             }
-            else if (this.m_factCache.TryGetValue(parameterOrFactName, out var cache))
+            else if (this.TryGetFact(caseInsensitiveName, out retVal))
             {
-                return cache;
-            }
-            else if (this.m_factDefinitions.TryGetValue(parameterOrFactName, out var defn))
-            {
-                var value = defn.Compute();
-                this.m_factCache.Add(parameterOrFactName, value);
-                return value;
+                return retVal;
             }
             else
             {
-                return null;
+                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, parameterOrFactName));
+            }
+        }
+
+        /// <summary>
+        /// Get the value of the fact in the current context
+        /// </summary>
+        public object GetFact(String factName)
+        {
+            var caseInsensitiveName = factName.ToLowerInvariant(); // Case insensitive
+            if (this.TryGetFact(caseInsensitiveName, out var retVal))
+            {
+                return retVal;
+            }
+            else
+            {
+                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, factName));
             }
         }
 
@@ -168,13 +213,19 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         internal void Declare(string variableName, Type variableType)
         {
-            if (!this.m_variables.ContainsKey(variableName))
+            var caseInsensitiveName = variableName.ToLowerInvariant(); // Case insensitive
+
+            if (!this.m_variables.ContainsKey(caseInsensitiveName))
             {
-                this.m_variables.Add(variableName, new ParameterRegistration()
+                this.m_variables.Add(caseInsensitiveName, new ParameterRegistration()
                 {
                     Type = variableType,
                     Value = null
                 });
+            }
+            else
+            {
+                throw new CdssEvaluationException(String.Format(ErrorMessages.DUPLICATE_OBJECT, variableName));
             }
         }
 
@@ -183,11 +234,11 @@ namespace SanteDB.Cdss.Xml
         {
             if (!String.IsNullOrEmpty(fact.Name))
             {
-                this.m_factCache.Add(fact.Name, fact);
+                this.m_computableAssetsInScope.Add(fact.Name.ToLowerInvariant(), fact);
             }
             if (!String.IsNullOrEmpty(fact.Id))
             {
-                this.m_factCache.Add($"#{fact.Id}", fact);
+                this.m_computableAssetsInScope.Add($"#{fact.Id.ToLowerInvariant()}", fact);
             }
         }
 
@@ -216,7 +267,8 @@ namespace SanteDB.Cdss.Xml
             switch (this.m_target)
             {
                 case Entity entity:
-                    if (!entity.Participations.Any(p => p.Act == proposedAct || p.ActKey == proposedAct.Key))
+                    // If the target of this context is an entity then set them as the record target
+                    if (!entity.LoadProperty(o=>o.Participations).Any(p => p.Act == proposedAct || p.ActKey == proposedAct.Key))
                     {
                         lock (this.m_lock)
                         {
@@ -229,7 +281,8 @@ namespace SanteDB.Cdss.Xml
                     }
                     break;
                 case Act act:
-                    if (!act.Relationships.Any(r => r.TargetAct == proposedAct || r.TargetActKey == proposedAct.Key))
+                    // If the target of this context is another act then set them as a component
+                    if (!act.LoadProperty(o=>o.Relationships).Any(r => r.TargetAct == proposedAct || r.TargetActKey == proposedAct.Key))
                     {
                         lock (this.m_lock)
                         {
@@ -262,7 +315,8 @@ namespace SanteDB.Cdss.Xml
             var expressionInterpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default | InterpreterOptions.LateBindObject)
                                .Reference(typeof(TimeSpan))
                                .Reference(typeof(Guid))
-                               .Reference(typeof(DateTimeOffset));
+                               .Reference(typeof(DateTimeOffset))
+                               .EnableAssignment(AssignmentOperators.None);
             return expressionInterpreter;
         }
 
@@ -281,6 +335,54 @@ namespace SanteDB.Cdss.Xml
             return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries);
         }
 
+        /// <summary>
+        /// Removes <paramref name="variableName"/> from the context
+        /// </summary>
+        internal void DestroyValue(string variableName)
+        {
+            this.m_variables.Remove(variableName);
+        }
+
+        /// <summary>
+        /// Gets a scoped rule definition named <paramref name="ruleName"/>
+        /// </summary>
+        internal bool TryGetRule(string ruleName, out CdssRuleAssetDefinition definition)
+        {
+            if(this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssRuleAssetDefinition defn)
+            {
+                definition = defn;
+                return true;
+            }
+            definition = null;
+            return false;
+        }
+
+
+        /// <summary>
+        /// Gets a scoped rule definition named <paramref name="ruleName"/>
+        /// </summary>
+        internal bool TryGetProtocol(string ruleName, out CdssProtocolAssetDefinition definition)
+        {
+            if (this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssProtocolAssetDefinition defn)
+            {
+                definition = defn;
+                return true;
+            }
+            definition = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Throw a <see cref="DetectedIssueException"/> if the scoped logic in this context is not valid
+        /// </summary>
+        internal void ThrowIfNotValid()
+        {
+            var issues = this.m_scopedLogicBlocks.SelectMany(o => o.Validate(this)).ToArray();
+            if(issues.Any(o=>o.Priority == DetectedIssuePriorityType.Error))
+            {
+                throw new DetectedIssueException(issues);
+            }
+        }
     }
     /// <summary>
     /// Parameter manager for the CDSS

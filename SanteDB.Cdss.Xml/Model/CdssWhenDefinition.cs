@@ -6,6 +6,8 @@ using System.Linq.Expressions;
 using System;
 using System.Xml.Serialization;
 using SanteDB.Cdss.Xml.Model.Actions;
+using SanteDB.Core.BusinessRules;
+using System.Xml;
 
 namespace SanteDB.Cdss.Xml.Model
 {
@@ -37,6 +39,23 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         [XmlIgnore, JsonIgnore]
         public string DebugView { get; private set; }
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.WhenComputation == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.when.definitionMissing", "When condition block is missing logic", Guid.Empty, this.ToString());
+            }
+            else
+            {
+                foreach(var itm in this.WhenComputation.Validate(context))
+                {
+                    itm.RefersTo = itm.RefersTo ?? this.ToString();
+                    yield return itm;
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public bool Compute()

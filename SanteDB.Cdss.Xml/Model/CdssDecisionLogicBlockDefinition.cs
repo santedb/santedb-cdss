@@ -1,6 +1,10 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core.BusinessRules;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model
@@ -24,15 +28,43 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("when"), JsonProperty("when")]
         public CdssWhenDefinition When { get; set; }
 
-        ///// <summary>
-        ///// Gets or sets the logic elements that this decision ruleset block defines
-        ///// </summary>
+        /// <summary>
+        /// Gets or sets the logic elements that this decision ruleset block defines
+        /// </summary>
         [XmlArray("define"),
             XmlArrayItem("fact", typeof(CdssFactAssetDefinition)),
             XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
             XmlArrayItem("protocol", typeof(CdssProtocolAssetDefinition)),
             JsonProperty("define")]
         public List<CdssComputableAssetDefinition> Definitions { get; set; }
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(this.Context == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.contextMissing", "CDSS logic blocks must declare a context (type of data) to which the logic block applies", Guid.Empty, this.ToString());
+            }
+            if(this.When == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Information, "cdss.logic.globalLogic", $"CDSS logic block will be applied to all instances of {this.Context}", Guid.Empty, this.ToString());
+            }
+            if (this.Definitions?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.definitionsMissing", "CDSS logic block should contain at least one definition", Guid.Empty, this.ToString());
+            }
+            else {
+                foreach (var itm in this.Definitions.SelectMany(o => o.Validate(context)).Union(this.When?.Validate(context) ?? new DetectedIssue[0]))
+                {
+                    itm.RefersTo = itm.RefersTo ?? this.ToString();
+                    yield return itm;
+                }
+            }
+            if(String.IsNullOrEmpty(this.Name) && string.IsNullOrEmpty(this.Id))
+            {
+
+            }
+        }
 
     }
 }

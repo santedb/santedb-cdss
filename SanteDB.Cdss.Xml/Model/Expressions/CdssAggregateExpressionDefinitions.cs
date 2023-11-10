@@ -1,4 +1,5 @@
 ﻿using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,19 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             XmlElement("any", typeof(CdssAnyExpressionDefinition))]
         public List<CdssExpressionDefinition> ContainedExpressions { get; set; }
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(this.ContainedExpressions?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.aggregate.missingInstructions", "<any> or <all> missing contained expressions", Guid.Empty);
+            }
+            foreach(var itm in this.ContainedExpressions?.SelectMany(o=>o.Validate(context)))
+            {
+                yield return itm;
+            }
+        }
+
         /// <summary>
         /// Constructor setting the operator type
         /// </summary>
@@ -50,7 +64,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             Expression currentBody = null;
             foreach (var itm in this.ContainedExpressions)
             {
-                var clause = itm.GenerateComputableExpression(cdssContext, parameters);
+                var clause = Expression.Convert(itm.GenerateComputableExpression(cdssContext, parameters), typeof(bool));
                 if(currentBody == null)
                 {
                     currentBody = clause;

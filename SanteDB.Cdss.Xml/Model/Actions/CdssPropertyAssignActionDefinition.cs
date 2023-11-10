@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Expressions;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
 
@@ -11,8 +13,8 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     /// <summary>
     /// Represents an action that assigns a property value
     /// </summary>
-    [XmlType(nameof(CdssProperyAssignActionDefinition), Namespace = "http://santedb.org/cdss")]
-    public class CdssProperyAssignActionDefinition : CdssActionDefinition
+    [XmlType(nameof(CdssPropertyAssignActionDefinition), Namespace = "http://santedb.org/cdss")]
+    public class CdssPropertyAssignActionDefinition : CdssActionDefinition
     {
 
         // The compiled expression
@@ -48,6 +50,25 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("fixed", typeof(String))]
         public Object ContainedExpression { get; set; }
 
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.ContainedExpression == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.property", "Assign action requires a setter expression", Guid.Empty, this.ToString());
+            }
+            if(String.IsNullOrEmpty(this.Path))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.path", "Assign action requires a path expression", Guid.Empty, this.ToString());
+            }
+            foreach (var itm in base.Validate(context).Union((this.ContainedExpression as CdssExpressionDefinition)?.Validate(context) ?? new DetectedIssue[0]))
+            {
+                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                yield return itm;
+            }
+        }
+
         /// <inheritdoc/>
         internal override void Execute()
         {
@@ -64,26 +85,30 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             var scopeParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
 
                             var expressionForValue = exe.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
+                            if(!(expressionForValue is LambdaExpression))
+                            {
+                                expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopeParameter);
+                            }
 
                             // Convert object parameters
                             var contextObjParameter = Expression.Parameter(typeof(Object));
                             var scopeObjParameter = Expression.Parameter(typeof(Object));
-                            expressionForValue = Expression.Invoke(
+                            expressionForValue = Expression.Convert(Expression.Invoke(
                                     expressionForValue,
                                     Expression.Convert(contextObjParameter, contextParameter.Type),
                                     Expression.Convert(scopeObjParameter, scopeParameter.Type)
-                                );
+                                ), typeof(Object));
 
                             var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
                                 expressionForValue,
-                                contextObjParameter,
                                 contextObjParameter,
                                 scopeObjParameter
                             );
                             this.DebugView = uncompiledExpression.ToString();
                             this.m_compiledExpression = uncompiledExpression.Compile();
-                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject), this.OverwriteValue);
                         }
+                        CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject), this.OverwriteValue);
+
                         break;
                     case String str:
                         CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);

@@ -66,7 +66,7 @@
         </when>
         <then>
           <propose type="QuantityObservation">
-            <model>
+            <json>
               <![CDATA[
               {
                 "$type": "QuantityObservation",
@@ -82,7 +82,7 @@
                 "unitOfMeasure" : "a0a8d4db-db72-4bc7-9b8c-c07cef7bc796"
               }
               ]]>
-            </model>
+            </json>
             <assign path="actTime">
               <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
             </assign>
@@ -133,32 +133,35 @@
       </fact>
 
       <fact name="Unit of Measure is in Lbs">
-        <expression>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</expression>
+        <hdsi>unitOfMeasure=49974584-7c48-457e-a79c-031cdd62714a</hdsi>
       </fact>
 
-      <fact name="Observed Weight In Kgs">
+      <fact name="Observed Weight in Kgs" type="real">
         <hdsi>value</hdsi>
         <normalize>
           <when>
-            <fact ref="Unit of Measure is in lbs"/>
+            <fact ref="Unit of Measure is in Lbs"/>
           </when>
-          <compute>
-            <csharp>value * 0.45359237</csharp>
-          </compute>
+          <csharp>value * 0.45359237d</csharp>
         </normalize>
       </fact>
 
-      <fact grammar="csharp" name="Patient Is Underweight"><![CDATA[(float)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zMinus2") < (float)context["Observed Weight In Kgs"]]]></fact>
-      <fact grammar="csharp" name="Patient Is Overweight"><![CDATA[(float)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zPlus2") > (float)context["Observed Weight In Kgs"]]]></fact>
+      <fact name="Patient Is Underweight">
+        <csharp><![CDATA[context["Observed Weight in Kgs"] < context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zMinus2")]]></csharp>
+      </fact>
+      <fact name="Patient Is Overweight">
+        <csharp><![CDATA[context["Observed Weight in Kgs"] > context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zPlus2")]]></csharp>
+      </fact>
 
-      <rule>
+      <rule name="Default Interpretation of Weight - Normal">
         <then>
           <assign path="interpretation">
             <fixed>41D42ABF-17AD-4144-BF97-EC3FD907F57D</fixed>
           </assign>
         </then>
       </rule>
-      <rule name="Patient Is Underweight - Set Interpretation">
+      
+      <rule name="When Patient Is Underweight Set Interpretation to Low">
         <when>
           <fact ref="Patient Is Underweight" />
         </when>
@@ -166,9 +169,70 @@
           <assign path="interpretation">
             <fixed>6188F821-261F-420C-9520-0DE240A05661</fixed>
           </assign>
+          <raise>
+            <issue xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
+              Patient abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, vitamin supplement.
+            </issue>
+          </raise>
+          <propose>
+            <json>
+              <![CDATA[
+                {
+				            "$type": "SubstanceAdministration",
+                    template: {
+                        mnemonic: "Act.SubstanceAdmin.Supplement"
+                    },
+
+                    "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
+                    "typeConceptModel": { "id" : "7D84A057-1FCC-4054-A51F-B77D230FC6D1", "mnemonic" : "DrugTherapy" },
+				            "doseSequence": 1,
+                    "doseQuantity" : 1.0,
+                    "doseUnitModel" : {
+                      "id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
+                      "mnemonic" : "DOSE"
+                    },
+                    "routeModel" : {
+                      "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
+                      "mnemonic": "RouteOfAdministration-PO"
+                    },
+                    "siteModel" : {
+                      "id": "e5b6847e-91e0-4fca-ac2e-753962008080",
+                      "mnemonic": 'Site-Oral'
+                    },
+				            "participation": {
+					            "Product": [{
+                        "playerModel" : {
+                          "$type" : "Material",
+                          "id" : "7D80E518-6E04-4091-8D19-7265BB09BC1F",
+                          "typeConceptModel": {
+                            "id" : "3023bad7-8c16-49ea-81fc-eee6232b80e7",
+                            "mnemonic": "Supplement-VitaminA"
+                          },
+						              "name": {
+							              "OfficialRecord": [{
+								              "component": {
+									              "$other": ["Vitamin A Supplement"]
+								              }
+							              }],
+                            "Assigned": [{
+								              "component": {
+									              "$other": ["Vitamin A"]
+								              }
+							              }]
+						              }
+                        }
+					            }]
+				            }
+			            }
+              ]]>
+            </json>
+            <assign path="actTime">
+              <csharp>DateTimeOffset.Now</csharp>
+            </assign>
+          </propose>
         </then>
       </rule>
-      <rule name="Patient Is Overweight - Set Interpretation">
+      <rule name="When Patient Is Overweight Set Interpretation to High">
         <when>
           <fact ref="Patient Is Overweight" />
         </when>
@@ -176,29 +240,18 @@
           <assign path="interpretation">
             <fixed>3C4D6579-7496-4B44-AAC1-18A714FF7A05</fixed>
           </assign>
-        </then>
-      </rule>
-
-      <rule>
-        <when>
-          <any>
-            <fact ref="Patient Is Overweight" />
-            <fact ref="Patient Is Underweight" />
-          </any>
-        </when>
-        <then>
-          <raise xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
-            Please provide nutritional counseling to patient
+          <raise>
+            <issue xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
+              Patient abnormally high - Please provide appropriate nutritional counseling
+            </issue>
           </raise>
         </then>
       </rule>
     </define>
-
-
   </logic>
 
   <data name="WeightZScores" id="org.santedb.cdss.weight.zscores">
-      <![CDATA[age,gender,zMinus4,zMinus3,zMinus2,zMinus1,Z0,zPlus1,zPlus2,zPlus3,zPlus4
+    <![CDATA[age,gender,zMinus4,zMinus3,zMinus2,zMinus1,Z0,zPlus1,zPlus2,zPlus3,zPlus4
 0,Male,1.701,2.08,2.459,2.881,3.346,3.859,4.419,5.031,5.642
 1,Male,1.692,2.065,2.437,2.854,3.317,3.83,4.394,5.013,5.633
 2,Male,1.707,2.08,2.454,2.872,3.337,3.852,4.421,5.045,5.669

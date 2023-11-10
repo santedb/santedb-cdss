@@ -50,5 +50,12 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlAttribute("oid"), JsonProperty("oid")]
         public String Oid { get; set; }
 
+        /// <inheritdoc/>
+        public override string ToString() => $"{this.GetType().Name} {this.Name} {(!String.IsNullOrEmpty(this.Id) ? $"(#{this.Id})" : "")}";
+
+        /// <summary>
+        /// Validate the object definition
+        /// </summary>
+        public abstract IEnumerable<DetectedIssue> Validate(CdssExecutionContext context);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Query;
 using System;
@@ -48,11 +49,21 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public String ExpressionValue { get; set; }
 
         /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(String.IsNullOrEmpty(this.ExpressionValue))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.hdsi.missingExpression", "HDSI expression require a property selector or binary expression", Guid.Empty);
+            }
+            
+        }
+
+        /// <inheritdoc/>
         internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
         {
 
             var variableDictionary = new Dictionary<String, Func<Object>>();
-            foreach (var varRef in cdssContext.Variables)
+            foreach (var varRef in cdssContext.Variables.Union(cdssContext.Facts ?? new String[0]))
             {
                 variableDictionary.Add(varRef, () => CdssExecutionStackFrame.Current?.GetValue(varRef));
             }

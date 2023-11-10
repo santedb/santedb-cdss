@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Serialization;
@@ -49,6 +51,23 @@ namespace SanteDB.Cdss.Xml.Model
         public void Save(Stream toStream)
         {
             s_serializer.Serialize(toStream, this);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if(this.Definitions?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.library.empty", "CDSS library must contain at least one logic or data block", Guid.Empty, this.ToString());
+            }
+            else
+            {
+                foreach(var itm in this.Definitions.SelectMany(o=>o.Validate(context)))
+                {
+
+                    yield return itm;
+                }
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Exceptions;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Roles;
 using SharpCompress;
@@ -117,11 +118,12 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
-                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget.DeepCopy(), this.m_scopedLibraries);
+                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.m_scopedLibraries);
                 using (CdssExecutionStackFrame.Enter(context))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
                     context.SetValue("mode", "analyze");
+                    context.ThrowIfNotValid();
 
                     var definitions = this.m_library.Definitions
                         .OfType<CdssDecisionLogicBlockDefinition>()
@@ -155,18 +157,19 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
-                var context = CdssExecutionContext.CreateContext((IdentifiedData)target.DeepCopy(), this.m_scopedLibraries);
+                var context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
 
                 using (CdssExecutionStackFrame.Enter(context))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
                     context.SetValue("mode", "execute");
+                    context.ThrowIfNotValid();
 
                     var definitions = this.m_library.Definitions
                         .OfType<CdssDecisionLogicBlockDefinition>()
                         .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
-                        .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
+                        .Select(r => new { result = r.Compute(), rule = r.Name })
                         .ToArray();
 
 

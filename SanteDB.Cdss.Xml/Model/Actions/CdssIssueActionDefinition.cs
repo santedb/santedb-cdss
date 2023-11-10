@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using System.Collections.Generic;
+using System;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Actions
@@ -25,8 +27,23 @@ namespace SanteDB.Cdss.Xml.Model.Actions
 
             using(CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionStackFrame.Current.ScopedObject.Key.GetValueOrDefault());
+                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionStackFrame.Current.ScopedObject.ToString());
                 CdssExecutionStackFrame.Current.Context.PushIssue(this.IssueToRaise);
+            }
+        }
+
+
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.IssueToRaise == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.raise.issue", "Raise action requires a detected issue", Guid.Empty, this.ToString());
+            }
+            foreach(var itm in base.Validate(context))
+            {
+                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                yield return itm;
             }
         }
     }

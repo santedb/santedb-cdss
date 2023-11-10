@@ -1,6 +1,10 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Expressions;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Xml.Serialization;
 
@@ -9,8 +13,8 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     /// <summary>
     /// Represents an instruction to emit/normalize 
     /// </summary>
-    [XmlType(nameof(CdssFactNormalizationDefinition), Namespace = "http://santedb.org/santedb")]
-    public class CdssFactNormalizationDefinition
+    [XmlType(nameof(CdssFactNormalizationDefinition), Namespace = "http://santedb.org/cdss")]
+    public class CdssFactNormalizationDefinition : CdssBaseObjectDefinition
     {
 
         // The expression which has been calculated
@@ -20,7 +24,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// Represents the "when" clause for the rule
         /// </summary>
         [XmlElement("when"), JsonProperty("when")]
-        public CdssFactAssetDefinition When { get; set; }
+        public CdssWhenDefinition When { get; set; }
 
         /// <summary>
         /// Debug view of the normalization
@@ -39,46 +43,66 @@ namespace SanteDB.Cdss.Xml.Model.Assets
           JsonProperty("logic")]
         public CdssExpressionDefinition EmitExpression { get; set; }
 
+        /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.When == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.fact.normalize.when", "Normalization instructions should carry a when condition", Guid.Empty, this.ToString());
+            }
+            if (this.EmitExpression == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.normalize.emit", "Normalization instructions must carry a computation", Guid.Empty, this.ToString());
+            }
+
+        }
+
         /// <summary>
         /// Transform the object, return null if the transfomration is not successful
         /// </summary>
         internal object TransformObject(object retVal)
         {
-            
-            if(this.When.Compute() is bool b && b)
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                if(this.m_compiledExpression == null)
+                if (this.When == null || this.When.Compute() is bool b && b)
                 {
-                    var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                    var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
-                    var valueParameter = Expression.Parameter(retVal.GetType(), CdssConstants.ValueVariableName);
+                    if (this.m_compiledExpression == null)
+                    {
+                        var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+                        var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
+                        var valueParameter = Expression.Parameter(retVal.GetType(), CdssConstants.ValueVariableName);
 
-                    var expressionForValue = this.EmitExpression.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter, valueParameter);
+                        var expressionForValue = this.EmitExpression.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter, valueParameter);
+                        if(!(expressionForValue is LambdaExpression))
+                        {
+                            expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopedParameter, valueParameter);
+                        }
 
-                    // Convert object parameters for our FUNC
-                    var contextObjParameter = Expression.Parameter(typeof(Object));
-                    var valueObjParameter = Expression.Parameter(typeof(Object));
-                    var scopeObjParameter = Expression.Parameter(typeof(Object));
-                    expressionForValue = Expression.Invoke(
+                        // Convert object parameters for our FUNC
+                        var contextObjParameter = Expression.Parameter(typeof(Object));
+                        var valueObjParameter = Expression.Parameter(typeof(Object));
+                        var scopeObjParameter = Expression.Parameter(typeof(Object));
+                        expressionForValue = Expression.Convert(Expression.Invoke(
+                                expressionForValue,
+                                Expression.Convert(contextObjParameter, contextParameter.Type),
+                                Expression.Convert(scopeObjParameter, scopedParameter.Type),
+                                Expression.Convert(valueObjParameter, valueParameter.Type)
+                            ), typeof(Object));
+
+                        var uncompiledExpression = Expression.Lambda<Func<object, object, object, object>>(
                             expressionForValue,
-                            Expression.Convert(contextObjParameter, contextParameter.Type),
-                            Expression.Convert(scopeObjParameter, scopedParameter.Type),
-                            Expression.Convert(valueObjParameter, valueParameter.Type)
+                            contextObjParameter,
+                            scopeObjParameter,
+                            valueObjParameter
                         );
+                        this.DebugView = uncompiledExpression.ToString();
+                        this.m_compiledExpression = uncompiledExpression.Compile();
+                    }
 
-                    var uncompiledExpression = Expression.Lambda<Func<object, object, object, object>>(
-                        expressionForValue,
-                        contextObjParameter,
-                        scopeObjParameter,
-                        valueObjParameter
-                    );
-                    this.DebugView = uncompiledExpression.ToString();
-                    this.m_compiledExpression = uncompiledExpression.Compile();
+                    return this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject, retVal);
                 }
-
-                return this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject, retVal);
+                return null;
             }
-            return null;
         }
     }
 }

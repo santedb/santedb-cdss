@@ -1,9 +1,13 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Cdss.Xml.XmlLinq;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model.Map;
 using SanteDB.Core.Model.Query;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -33,7 +37,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
             JsonProperty("logic")]
         public CdssExpressionDefinition FactComputation { get; set; }
-        
+
         /// <summary>
         /// Normalize the datain the computation
         /// </summary>
@@ -59,15 +63,36 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         public bool ValueTypeSpecified { get; set; }
 
         /// <inheritdoc/>
+        public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
+        {
+            if (this.FactComputation == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.definition", "Fact assets must have a definition in csharp, hdsi, xml", Guid.Empty, this.ToString());
+            }
+            foreach (var itm in base.Validate(context)
+                .Union(this.FactComputation?.Validate(context) ?? new DetectedIssue[0])
+                .Union(this.Normalize.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]))
+            {
+                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                yield return itm;
+            }
+        }
+
+        /// <inheritdoc/>
         public override object Compute()
         {
             base.ThrowIfInvalidState();
-            
+
             if (m_compiledExpression == null)
             {
                 var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
                 var scopedParameter = Expression.Parameter(CdssExecutionStackFrame.Current.ScopedObject.GetType(), CdssConstants.ScopedObjectVariableName);
-                Expression bodyExpression = Expression.Lambda(FactComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
+                Expression bodyExpression = Expression.Lambda(this.FactComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
+
+                if (!(bodyExpression is LambdaExpression))
+                {
+                    bodyExpression = Expression.Lambda(bodyExpression, contextParameter, scopedParameter);
+                }
 
                 // Wrap the expression, compile and set to this value
                 // We do this because calling this.m_compiledExpression(context) is faster than 
@@ -75,10 +100,29 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 var contextObjParam = Expression.Parameter(typeof(object));
                 var scopeObjParam = Expression.Parameter(typeof(object));
                 bodyExpression = Expression.Convert(Expression.Invoke(
-                        bodyExpression, 
-                        Expression.Convert(contextObjParam, contextParameter.Type ), 
+                        bodyExpression,
+                        Expression.Convert(contextObjParam, contextParameter.Type),
                         Expression.Convert(scopeObjParam, scopedParameter.Type)
                     ), typeof(Object));
+
+
+                if (IsNegated)
+                {
+                    bodyExpression = Expression.Not(bodyExpression);
+                }
+
+                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
+                    bodyExpression,
+                    contextObjParam,
+                    scopeObjParam
+                );
+                this.DebugView = uncompiledExpression.ToString();
+                this.m_compiledExpression = uncompiledExpression.Compile();
+            }
+
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
+            {
+                var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
 
                 // Convert the value?
                 if (ValueTypeSpecified == true)
@@ -100,31 +144,14 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                             break;
                     }
 
-                    if (netType != bodyExpression.Type)
+                    if (!MapUtil.TryConvert(retVal, netType, out retVal))
                     {
-                        bodyExpression = Expression.Convert(Expression.Convert(bodyExpression, netType), typeof(Object));
+                        throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
                     }
                 }
 
-                if (IsNegated)
-                {
-                    bodyExpression = Expression.Not(bodyExpression);
-                }
+                retVal = this.Normalize?.Select(o => o.TransformObject(retVal)).FirstOrDefault(o => o != null) ?? retVal;
 
-                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                    bodyExpression,
-                    contextObjParam,
-                    scopeObjParam
-                );
-                this.DebugView = uncompiledExpression.ToString();
-                this.m_compiledExpression = uncompiledExpression.Compile();
-            }
-
-            using (CdssExecutionStackFrame.EnterChildFrame(this))
-            {
-                var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
-                retVal = this.Normalize?.FirstOrDefault(o => o.TransformObject(retVal) != null) ?? retVal;
-                
                 return retVal;
             }
         }
