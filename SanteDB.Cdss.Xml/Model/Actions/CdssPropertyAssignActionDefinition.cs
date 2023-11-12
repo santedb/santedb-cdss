@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
@@ -59,7 +60,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.property", "Assign action requires a setter expression", Guid.Empty, this.ToString());
             }
-            if(String.IsNullOrEmpty(this.Path))
+            if (String.IsNullOrEmpty(this.Path))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.path", "Assign action requires a path expression", Guid.Empty, this.ToString());
             }
@@ -77,45 +78,52 @@ namespace SanteDB.Cdss.Xml.Model.Actions
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                switch (this.ContainedExpression)
+                try
                 {
-                    case CdssExpressionDefinition exe:
-                        if (this.m_compiledExpression == null)
-                        {
-                            var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                            var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
-
-                            var expressionForValue = exe.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
-                            if(!(expressionForValue is LambdaExpression))
+                    switch (this.ContainedExpression)
+                    {
+                        case CdssExpressionDefinition exe:
+                            if (this.m_compiledExpression == null)
                             {
-                                expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopeParameter);
-                            }
+                                var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+                                var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
 
-                            // Convert object parameters
-                            var contextObjParameter = Expression.Parameter(typeof(Object));
-                            var scopeObjParameter = Expression.Parameter(typeof(Object));
-                            expressionForValue = Expression.Convert(Expression.Invoke(
+                                var expressionForValue = exe.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
+                                if (!(expressionForValue is LambdaExpression))
+                                {
+                                    expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopeParameter);
+                                }
+
+                                // Convert object parameters
+                                var contextObjParameter = Expression.Parameter(typeof(Object));
+                                var scopeObjParameter = Expression.Parameter(typeof(Object));
+                                expressionForValue = Expression.Convert(Expression.Invoke(
+                                        expressionForValue,
+                                        Expression.Convert(contextObjParameter, contextParameter.Type),
+                                        Expression.Convert(scopeObjParameter, scopeParameter.Type)
+                                    ), typeof(Object));
+
+                                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
                                     expressionForValue,
-                                    Expression.Convert(contextObjParameter, contextParameter.Type),
-                                    Expression.Convert(scopeObjParameter, scopeParameter.Type)
-                                ), typeof(Object));
+                                    contextObjParameter,
+                                    scopeObjParameter
+                                );
+                                this.DebugView = uncompiledExpression.ToString();
+                                this.m_compiledExpression = uncompiledExpression.Compile();
+                            }
+                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject), this.OverwriteValue);
 
-                            var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                                expressionForValue,
-                                contextObjParameter,
-                                scopeObjParameter
-                            );
-                            this.DebugView = uncompiledExpression.ToString();
-                            this.m_compiledExpression = uncompiledExpression.Compile();
-                        }
-                        CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject), this.OverwriteValue);
-
-                        break;
-                    case String str:
-                        CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);
-                        break;
-                    default:
-                        throw new InvalidOperationException();
+                            break;
+                        case String str:
+                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);
+                            break;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                }
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
                 }
             }
         }

@@ -49,12 +49,12 @@ namespace SanteDB.Cdss.Xml
             {
                 using (CdssExecutionStackFrame.Enter(contextToApply))
                 {
-                    return decisionBlockDefinitions.Where(o => o.Context.Type == contextToApply.Target.GetType() && !false.Equals(o.When?.Compute())).ToList();
+                    return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !false.Equals(o.When?.Compute())).ToList();
                 }
             }
             else
             {
-                return decisionBlockDefinitions.Where(o => o.Context.Type == contextToApply.Target.GetType() && !false.Equals(o.When?.Compute())).ToList();
+                return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !false.Equals(o.When?.Compute())).ToList();
             }
         }
     }

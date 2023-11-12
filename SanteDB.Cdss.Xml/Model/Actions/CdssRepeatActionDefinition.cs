@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
@@ -60,28 +61,36 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             base.ThrowIfInvalidState();
 
-            using(CdssExecutionStackFrame.EnterChildFrame(this))
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var iteration = 0;
-                
-                while((!this.IterationsSpecified) ^ (iteration < this.Iterations)) {
+                try
+                {
+                    var iteration = 0;
 
-                    CdssExecutionStackFrame.Current.Context.SetValue(this.IterationVariable ?? "index", iteration);
-                    base.Execute();
-
-                    // If there is an UNTIL clause evaluate it
-                    var untilResult = this.Until?.Compute();
-                    if(untilResult is Boolean b && b || untilResult != null)
+                    while ((!this.IterationsSpecified) ^ (iteration < this.Iterations))
                     {
-                        break;
+
+                        CdssExecutionStackFrame.Current.Context.SetValue(this.IterationVariable ?? "index", iteration);
+                        base.Execute();
+
+                        // If there is an UNTIL clause evaluate it
+                        var untilResult = this.Until?.Compute();
+                        if (untilResult is Boolean b && b || untilResult != null)
+                        {
+                            break;
+                        }
+                        iteration++;
+                        CdssExecutionStackFrame.Current.Context.ClearEvaluatedFacts();
                     }
-                    iteration++;
-                    CdssExecutionStackFrame.Current.Context.ClearEvaluatedFacts();
+
+                    CdssExecutionStackFrame.Current.Context.DestroyValue(this.IterationVariable);
                 }
-
-                CdssExecutionStackFrame.Current.Context.DestroyValue(this.IterationVariable);
-
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
+                }
             }
+
         }
     }
 }

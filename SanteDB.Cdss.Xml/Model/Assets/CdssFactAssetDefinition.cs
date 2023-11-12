@@ -84,6 +84,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             base.ThrowIfInvalidState();
 
+
             if (this.m_compiledExpression == null)
             {
                 var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
@@ -122,36 +123,46 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
-                // Convert the value?
-                if (ValueTypeSpecified == true)
+                try
                 {
-                    var netType = typeof(string);
-                    switch (ValueType)
+                    var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                    // Convert the value?
+                    if (ValueTypeSpecified == true)
                     {
-                        case CdssValueType.Boolean:
-                            netType = typeof(bool);
-                            break;
-                        case CdssValueType.Date:
-                            netType = typeof(DateTimeOffset);
-                            break;
-                        case CdssValueType.Integer:
-                            netType = typeof(int);
-                            break;
-                        case CdssValueType.Real:
-                            netType = typeof(double);
-                            break;
+                        var netType = typeof(string);
+                        switch (ValueType)
+                        {
+                            case CdssValueType.Boolean:
+                                netType = typeof(bool);
+                                break;
+                            case CdssValueType.Date:
+                                netType = typeof(DateTime);
+                                break;
+                            case CdssValueType.Integer:
+                                netType = typeof(int);
+                                break;
+                            case CdssValueType.Long:
+                                netType = typeof(long);
+                                break;
+                            case CdssValueType.Real:
+                                netType = typeof(double);
+                                break;
+                        }
+
+                        if (!MapUtil.TryConvert(retVal, netType, out retVal))
+                        {
+                            throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
+                        }
                     }
 
-                    if (!MapUtil.TryConvert(retVal, netType, out retVal))
-                    {
-                        throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
-                    }
+                    retVal = this.Normalize?.Select(o => o.TransformObject(retVal)).FirstOrDefault(o => o != null) ?? retVal;
+
+                    return retVal;
                 }
-
-                retVal = this.Normalize?.Select(o => o.TransformObject(retVal)).FirstOrDefault(o => o != null) ?? retVal;
-
-                return retVal;
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
+                }
             }
         }
     }

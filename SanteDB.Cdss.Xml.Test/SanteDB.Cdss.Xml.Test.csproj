@@ -8,6 +8,7 @@
     <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Protocols\CoreCdss.xml" />
 	  <None Remove="TestConfig.xml" />
 	</ItemGroup>
 
@@ -53,6 +54,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Protocols\CoreCdss.xml" />
     <EmbeddedResource Include="Protocols\OralPolioVaccine.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>

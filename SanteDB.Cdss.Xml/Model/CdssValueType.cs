@@ -20,6 +20,11 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlEnum("integer")]
         Integer,
         /// <summary>
+        /// Represents a 64 bit signed integer
+        /// </summary>
+        [XmlEnum("long")]
+        Long,
+        /// <summary>
         /// The CDSS value type is a <see cref="string"/>
         /// </summary>
         [XmlEnum("string")]

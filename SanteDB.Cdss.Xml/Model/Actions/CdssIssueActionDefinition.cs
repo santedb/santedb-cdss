@@ -4,6 +4,7 @@ using SanteDB.Core.Cdss;
 using System.Collections.Generic;
 using System;
 using System.Xml.Serialization;
+using SanteDB.Cdss.Xml.Exceptions;
 
 namespace SanteDB.Cdss.Xml.Model.Actions
 {
@@ -25,10 +26,17 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             base.ThrowIfInvalidState();
 
-            using(CdssExecutionStackFrame.EnterChildFrame(this))
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionStackFrame.Current.ScopedObject.ToString());
-                CdssExecutionStackFrame.Current.Context.PushIssue(this.IssueToRaise);
+                try
+                {
+                    var issue = new DetectedIssue(this.IssueToRaise.Priority, this.IssueToRaise.Id, this.IssueToRaise.Text, this.IssueToRaise.TypeKey, CdssExecutionStackFrame.Current.ScopedObject.ToString());
+                    CdssExecutionStackFrame.Current.Context.PushIssue(this.IssueToRaise);
+                }
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
+                }
             }
         }
 
@@ -40,7 +48,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.raise.issue", "Raise action requires a detected issue", Guid.Empty, this.ToString());
             }
-            foreach(var itm in base.Validate(context))
+            foreach (var itm in base.Validate(context))
             {
                 itm.RefersTo = itm.RefersTo ?? this.ToString();
                 yield return itm;

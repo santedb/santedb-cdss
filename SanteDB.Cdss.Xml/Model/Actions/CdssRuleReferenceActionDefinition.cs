@@ -27,15 +27,22 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// </summary>
         internal override void Execute()
         {
-            using(CdssExecutionStackFrame.EnterChildFrame(this))
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                if(CdssExecutionStackFrame.Current.Context.TryGetRule(this.RuleName, out var rule))
+                try
                 {
-                    rule.Compute();
+                    if (CdssExecutionStackFrame.Current.Context.TryGetRule(this.RuleName, out var rule))
+                    {
+                        rule.Compute();
+                    }
+                    else
+                    {
+                        throw new CdssEvaluationException(string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.RuleName));
+                    }
                 }
-                else
+                catch (Exception e) when (!(e is CdssEvaluationException))
                 {
-                    throw new CdssEvaluationException(string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.RuleName));
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
                 }
             }
         }
@@ -43,15 +50,15 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if(string.IsNullOrEmpty(this.RuleName))
+            if (string.IsNullOrEmpty(this.RuleName))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceRequired", "Rule reference @ref attribute must be present", Guid.Empty, this.ToString());
             }
-            else if(!context.TryGetRule(this.RuleName, out _))
+            else if (!context.TryGetRule(this.RuleName, out _))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToString());
             }
-            foreach(var itm in base.Validate(context))
+            foreach (var itm in base.Validate(context))
             {
                 yield return itm;
             }

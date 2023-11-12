@@ -19,6 +19,16 @@
  - User: fyfej
  - Date: 2023-5-19
  -->
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="BCG" name="BCG Vaccine Schedule">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>Contains logic related to the computation of the BCG dosing schedule</documentation>
+  </meta>
+</CdssLibrary>
 <ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="BCG" name="BCG Vaccine Schedule">
   <when evaluation="and">
     <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>

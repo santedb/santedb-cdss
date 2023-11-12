@@ -21,6 +21,7 @@
  -->
 
 <CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.weight" name="Childhood Healthy Weight">
+  <include>#org.santedb.cdss.core</include>
   <status>active</status>
   <meta>
     <authors>
@@ -47,11 +48,9 @@
       <fact name="Last Date Of Weight Observation">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
       </fact>
-      <fact name="Patient Age In Years">
-        <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
-      </fact>
+      
       <fact name="Patient Is Under 5 Years Old">
-        <csharp>((double)context["Patient Age In Years"]) &lt; 5d</csharp>
+        <csharp>((int)context["Patient Age In Months"]) &lt; 60</csharp>
       </fact>
       <fact name="No Weight Has Been Proposed For Period" negate="true">
         <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Weight Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Weight Observation</hdsi>
@@ -119,27 +118,7 @@
       </documentation>
     </meta>
     <define>
-      <fact name="Record Target Gender">
-        <meta>
-          <documentation>The administrative gender of the record target (the patient for whom this data is about)</documentation>
-        </meta>
-        <hdsi>participation[RecordTarget].player@Patient.genderConcept.mnemonic</hdsi>
-      </fact>
-
-      <fact name="Record Target Date Of Birth">
-        <meta>
-          <documentation>The registered date of birth for the record target (the patient for whom this data is about)</documentation>
-        </meta>
-        <hdsi>participation[RecordTarget].player@Patient.dateOfBirth</hdsi>
-      </fact>
-
-      <fact name="Record Target Age in Days">
-        <meta>
-          <documentation>The age of the record target expressed in absolute days (the patient for whom this data is about)</documentation>
-        </meta>
-        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Record Target Date Of Birth"]).TotalDays</csharp>
-      </fact>
-
+  
       <fact name="Weight is expressed in Lbs">
         <meta>
           <documentation>For a quantity observation, indicates wether the observed value is expressed in imperial pounds</documentation>

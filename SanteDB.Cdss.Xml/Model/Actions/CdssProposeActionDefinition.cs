@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
@@ -25,7 +26,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         private static JsonViewModelSerializer s_serializer = new JsonViewModelSerializer();
 
         // Parsed model
-        private Act m_parsedModel; 
+        private Act m_parsedModel;
 
         /// <summary>
         /// Gets or sets the model 
@@ -60,7 +61,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.propose.assign", "Propose action should carry dynamic assignments", Guid.Empty, this.ToString());
             }
-            foreach (var itm in base.Validate(context).Union(this.Assignment.SelectMany(o=>o.Validate(context)) ?? new DetectedIssue[0]))
+            foreach (var itm in base.Validate(context).Union(this.Assignment.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]))
             {
                 itm.RefersTo = itm.RefersTo ?? this.ToString();
                 yield return itm;
@@ -79,57 +80,63 @@ namespace SanteDB.Cdss.Xml.Model.Actions
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-
-                if (this.m_parsedModel == null)
+                try
                 {
-                    switch (this.Model)
+                    if (this.m_parsedModel == null)
                     {
-                        case String jsonString:
-                            this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
-                            break;
-                        case Act act:
-                            this.m_parsedModel = act.DeepCopy() as Act;
-                            break;
+                        switch (this.Model)
+                        {
+                            case String jsonString:
+                                this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
+                                break;
+                            case Act act:
+                                this.m_parsedModel = act.DeepCopy() as Act;
+                                break;
+                        }
                     }
-                }
-                Act model = this.m_parsedModel.DeepCopy() as Act;
-                model.Protocols = new List<ActProtocol>();
-                // Get any protocols in the execution context hierarchy
-                var ctx = CdssExecutionStackFrame.Current;
-                var sequence = 0;
-                while (ctx != null)
-                {
-                    switch(ctx.Owner)
+                    Act model = this.m_parsedModel.DeepCopy() as Act;
+                    model.Protocols = new List<ActProtocol>();
+                    // Get any protocols in the execution context hierarchy
+                    var ctx = CdssExecutionStackFrame.Current;
+                    var sequence = 0;
+                    while (ctx != null)
                     {
-                        case CdssRepeatActionDefinition repeat:
-                            sequence = (int)ctx.GetValue(repeat.IterationVariable);
-                            break;
-                        case CdssProtocolAssetDefinition protocol:
-                            model.Protocols.Add(new ActProtocol()
-                            {
-                                ProtocolKey = protocol.Uuid,
-                                Sequence = sequence,
-                                Protocol = new Protocol()
+                        switch (ctx.Owner)
+                        {
+                            case CdssRepeatActionDefinition repeat:
+                                sequence = (int)ctx.GetValue(repeat.IterationVariable);
+                                break;
+                            case CdssProtocolAssetDefinition protocol:
+                                model.Protocols.Add(new ActProtocol()
                                 {
-                                    Oid = protocol.Oid,
-                                    Key = protocol.Uuid,
-                                    Name = protocol.Name
-                                },
-                                Version = protocol.Metadata?.Version ?? "1.0"
-                            });
-                            break;
+                                    ProtocolKey = protocol.Uuid,
+                                    Sequence = sequence,
+                                    Protocol = new Protocol()
+                                    {
+                                        Oid = protocol.Oid,
+                                        Key = protocol.Uuid,
+                                        Name = protocol.Name
+                                    },
+                                    Version = protocol.Metadata?.Version ?? "1.0"
+                                });
+                                break;
+                        }
+                        ctx = ctx.Parent;
                     }
-                    ctx = ctx.Parent;
-                }
 
-                // Set the scoped object for this and call the assign actions
-                model.Key = model.Key ?? Guid.NewGuid();
-                CdssExecutionStackFrame.Current.ScopedObject = model;
-                foreach(var asgn in this.Assignment)
-                {
-                    asgn.Execute();
+                    // Set the scoped object for this and call the assign actions
+                    model.Key = model.Key ?? Guid.NewGuid();
+                    CdssExecutionStackFrame.Current.ScopedObject = model;
+                    foreach (var asgn in this.Assignment)
+                    {
+                        asgn.Execute();
+                    }
+                    CdssExecutionStackFrame.Current.Context.PushProposal(model);
                 }
-                CdssExecutionStackFrame.Current.Context.PushProposal(model);
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
+                }
             }
         }
     }

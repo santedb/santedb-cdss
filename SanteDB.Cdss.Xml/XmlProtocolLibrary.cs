@@ -44,9 +44,6 @@ namespace SanteDB.Cdss.Xml
         public XmlProtocolLibrary(CdssLibraryDefinition library)
         {
             this.m_library = library;
-            var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
-            this.m_scopedLibraries = new List<CdssLibraryDefinition>() { library };
-            this.m_scopedLibraries.AddRange(library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<CdssLibraryDefinition>() ?? new CdssLibraryDefinition[0]);
         }
 
         /// <inheritdoc/>
@@ -68,16 +65,22 @@ namespace SanteDB.Cdss.Xml
         public string Documentation => this.m_library.Metadata?.Documentation;
 
         /// <summary>
+        /// Get the library definition
+        /// </summary>
+        public CdssLibraryDefinition Library => this.m_library;
+
+        /// <summary>
         /// Get protocols defined for patients in the library
         /// </summary>
         public IEnumerable<ICdssProtocol> GetProtocols(String forScope)
         {
+            this.InitializeLibrary();
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                     .Where(o => o.Context.Type == typeof(Patient))
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
-            if(!String.IsNullOrEmpty(forScope))
+            if (!String.IsNullOrEmpty(forScope))
             {
                 retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope));
             }
@@ -106,6 +109,19 @@ namespace SanteDB.Cdss.Xml
             this.m_library.Save(definitionStream);
         }
 
+        /// <summary>
+        /// Initialize the library for use
+        /// </summary>
+        private void InitializeLibrary()
+        {
+            if (this.m_scopedLibraries == null)
+            {
+                var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
+                this.m_scopedLibraries = new List<CdssLibraryDefinition>() { this.m_library };
+                this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o=>o.Library) ?? new CdssLibraryDefinition[0]);
+            }
+        }
+
         /// <inheritdoc/>
         public IEnumerable<DetectedIssue> Analyze(IdentifiedData analysisTarget, IDictionary<String, object> parameters = null)
         {
@@ -118,6 +134,7 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
+                this.InitializeLibrary();
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.m_scopedLibraries);
                 using (CdssExecutionStackFrame.Enter(context))
                 {
@@ -157,6 +174,7 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
+                this.InitializeLibrary();
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
 
                 using (CdssExecutionStackFrame.Enter(context))

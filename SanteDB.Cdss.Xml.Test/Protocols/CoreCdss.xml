@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="DFCFB6A1-3A77-4E83-86AB-9C3F56DFFF15" id="org.santedb.cdss.core" name="Core SanteDB CDSS Logic">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>Contains core logic used in all SanteDB CDSS protocols</documentation>
+  </meta>
+  
+  <logic id="org.santedb.cdss.core.patient" name="Core CDSS Facts for Patient">
+    <context type="Patient" />
+    <define>
+      
+      <fact name="Patient Age In Years" type="real">
+        <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
+      </fact>
+
+      <fact name="Patient Gender" type="string">
+        <hdsi>genderConcept.mnemonic</hdsi>
+      </fact>
+
+      <fact name="Patient Date of Birth" type="date">
+        <hdsi>dateOfBirth</hdsi>
+      </fact>
+
+      <fact name="Patient Age In Days" type="integer">
+        <meta>
+          <documentation>The absolute age of the patient in whole number days</documentation>
+        </meta>
+        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Patient Date of Birth"]).TotalDays</csharp>
+      </fact>
+
+      <fact name="Patient Age in Months" type="integer">
+        <meta>
+          <documentation>The absolute age of the patient expressed as a whole number of months</documentation>
+        </meta>
+        <csharp>(DateTime.Now.Year * 12 + DateTime.Now.Month) - (((DateTime)context["Patient Date of Birth"]).Year * 12 + ((DateTime)context["Patient Date of Birth"]).Month)</csharp>
+      </fact>
+    </define>
+  </logic>
+
+  <logic id="org.santedb.cdss.core.act" name="Core CDSS Facts for all Acts">
+    <context type="Act" />
+    <define>
+      <fact name="Record Target Gender" type="string">
+        <meta>
+          <documentation>Administrative gender of the record target</documentation>
+        </meta>
+        <hdsi>participation[RecordTarget].player@Person.genderConcept.mnemonic</hdsi>
+      </fact>
+
+      <fact name="Record Target Date Of Birth" type="date">
+        <meta>
+          <documentation>The date of birth of the record target expressed as the day they were born</documentation>
+        </meta>
+        <hdsi>participation[RecordTarget].player@Person.dateOfBirth</hdsi>
+      </fact>
+
+      <fact name="Record Target Age in Days" type="integer">
+        <meta>
+          <documentation>The age of the record target for this observation expressed as a whole number of days</documentation>
+        </meta>
+        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Record Target Date Of Birth"]).TotalDays</csharp>
+      </fact>
+    </define>
+  </logic>
+</CdssLibrary>

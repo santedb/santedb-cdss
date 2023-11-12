@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Core.BusinessRules;
 using System;
@@ -64,16 +65,23 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                if (this.When == null || this.When.Compute() is bool b &&  b)
+                try
                 {
-                    foreach (var act in this.Actions)
+                    if (this.When == null || this.When.Compute() is bool b && b)
                     {
-                        act.Execute();
+                        foreach (var act in this.Actions)
+                        {
+                            act.Execute();
+                        }
+                        return true;
                     }
-                    return true;
-                }
 
-                return null;
+                    return null;
+                }
+                catch (Exception e) when (!(e is CdssEvaluationException))
+                {
+                    throw new CdssEvaluationException($"Error computing {this.Name ?? this.Id}", e);
+                }
             }
 
         }
