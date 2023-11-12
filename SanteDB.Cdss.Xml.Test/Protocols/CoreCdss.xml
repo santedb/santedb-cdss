@@ -21,6 +21,19 @@
         <hdsi>genderConcept.mnemonic</hdsi>
       </fact>
 
+      <fact name="Patient Is Male" type="bool">
+        <any>
+          <hdsi>genderConcept.mnemonic=Male</hdsi>
+          <hdsi>genderConcept=f4e3a6bb-612e-46b2-9f77-ff844d971198</hdsi>
+        </any>
+      </fact>
+      
+      <fact name="Patient Is Female" type="bool">
+        <any>
+          <hdsi>genderConcept.mnemonic=Female</hdsi>
+          <hdsi>genderConcept=094941e9-a3db-48b5-862c-bc289bd7f86c</hdsi>
+        </any>
+      </fact>
       <fact name="Patient Date of Birth" type="date">
         <hdsi>dateOfBirth</hdsi>
       </fact>

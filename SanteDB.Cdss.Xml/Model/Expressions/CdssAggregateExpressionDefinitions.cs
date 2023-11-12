@@ -25,6 +25,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
+            XmlElement("none", typeof(CdssNoneExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition))]
         public List<CdssExpressionDefinition> ContainedExpressions { get; set; }
 
@@ -58,13 +59,18 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             this.ContainedExpressions = containedExpressions.ToList();
         }
 
+        /// <summary>
+        /// Allows implementers to modify any of the contained expressions
+        /// </summary>
+        protected virtual Expression ModifyContainedExpression(Expression computedContainedExpression) => computedContainedExpression;
+
         /// <inheritdoc/>
         internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
         {
             Expression currentBody = null;
             foreach (var itm in this.ContainedExpressions)
             {
-                var clause = Expression.Convert(itm.GenerateComputableExpression(cdssContext, parameters), typeof(bool));
+                var clause = this.ModifyContainedExpression(Expression.Convert(itm.GenerateComputableExpression(cdssContext, parameters), typeof(bool)));
                 if(currentBody == null)
                 {
                     currentBody = clause;
@@ -94,6 +100,27 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
         }
 
+    }
+
+
+    /// <summary>
+    /// Not any (all of the contents must be false)
+    /// </summary>
+    [XmlType(nameof(CdssNoneExpressionDefinition), Namespace = "http://santedb.org/cdss")]
+    public class CdssNoneExpressionDefinition : CdssAggregateExpressionDefinition
+    {
+        /// <inheritdoc/>
+        public CdssNoneExpressionDefinition() : base(ExpressionType.AndAlso)
+        {
+        }
+
+        /// <inheritdoc/>
+        public CdssNoneExpressionDefinition(params CdssExpressionDefinition[] contents) : base(ExpressionType.OrElse, contents)
+        {
+        }
+        
+        /// <inheritdoc/>
+        protected override Expression ModifyContainedExpression(Expression computedContainedExpression) => Expression.Not(computedContainedExpression);
     }
 
     /// <summary>

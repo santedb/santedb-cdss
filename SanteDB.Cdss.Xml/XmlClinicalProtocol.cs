@@ -131,7 +131,7 @@ namespace SanteDB.Cdss.Xml
                 // Get a clone to make decisions on
                 var targetClone = target.Clone() as Patient;
                 // Safe guard all the properties
-                targetClone.Participations = target.Participations.Select(o => o.Clone() as ActParticipation).ToList();
+                targetClone.Participations = target.Participations?.Select(o => o.Clone() as ActParticipation).ToList() ?? new List<ActParticipation>();
                 targetClone.Participations.ForEach(o => o.Act = o.Act?.Clone() as Act);
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 

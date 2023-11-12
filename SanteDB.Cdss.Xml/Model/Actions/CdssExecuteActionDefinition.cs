@@ -21,7 +21,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// <summary>
         /// The objects which are to be executed in this repeat loop
         /// </summary>
-        [XmlElement("rule", typeof(CdssRuleReferenceActionDefinition)),
+        [XmlElement("apply", typeof(CdssRuleReferenceActionDefinition)),
             XmlElement("assign", typeof(CdssPropertyAssignActionDefinition)),
             XmlElement("propose", typeof(CdssProposeActionDefinition)),
             XmlElement("raise", typeof(CdssIssueActionDefinition)),

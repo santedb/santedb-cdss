@@ -47,6 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
+            XmlElement("none", typeof(CdssNoneExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
             XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("fixed", typeof(String))]

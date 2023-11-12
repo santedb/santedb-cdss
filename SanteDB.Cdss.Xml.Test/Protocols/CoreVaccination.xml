@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.core.vaccination" name="Core Shared Vaccination Logic">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>Contains logic related to the computation of the BCG dosing schedule</documentation>
+  </meta>
+  <include>#org.santedb.cdss.core</include>
+</CdssLibrary>

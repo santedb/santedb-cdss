@@ -43,6 +43,12 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public CdssHdsiExpressionScopeType Scope { get; set; }
 
         /// <summary>
+        /// Negate the HDSI expression
+        /// </summary>
+        [XmlAttribute("negate"), JsonProperty("negate")]
+        public bool IsNegated { get; set; }
+
+        /// <summary>
         /// Gets or sets the HDSI syntax expression
         /// </summary>
         [XmlText, JsonProperty("expression")]
@@ -68,18 +74,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                 variableDictionary.Add(varRef, () => CdssExecutionStackFrame.Current?.GetValue(varRef));
             }
 
-            Expression bodyExpression = null;
-            if (this.ExpressionValue.Contains("="))
-            {
-                bodyExpression = QueryExpressionParser.BuildLinqExpression(CdssExecutionStackFrame.Current.ScopedObject.GetType(), this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
-            }
-            else
-            {
-                bodyExpression = QueryExpressionParser.BuildPropertySelector(CdssExecutionStackFrame.Current.ScopedObject.GetType(), this.ExpressionValue, true);
-            }
-
             Expression scopedObjectExpression = null;
-            switch(this.Scope)
+            switch (this.Scope)
             {
                 case CdssHdsiExpressionScopeType.Context:
                     scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Name == CdssConstants.ContextVariableName), (MemberInfo)cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
@@ -89,6 +85,21 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                     break;
 
             }
+
+            LambdaExpression bodyExpression = null;
+            if (this.ExpressionValue.Contains("="))
+            {
+                bodyExpression = QueryExpressionParser.BuildLinqExpression(scopedObjectExpression.Type, this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, forceLoad: true, lazyExpandVariables: true);
+                if(this.IsNegated)
+                {
+                    bodyExpression = Expression.Lambda(Expression.Not(bodyExpression.Body), bodyExpression.Parameters);
+                }
+            }
+            else
+            {
+                bodyExpression = QueryExpressionParser.BuildPropertySelector(scopedObjectExpression.Type, this.ExpressionValue, true);
+            }
+
             var retVal = Expression.Invoke(bodyExpression, scopedObjectExpression);
             return retVal;
         }

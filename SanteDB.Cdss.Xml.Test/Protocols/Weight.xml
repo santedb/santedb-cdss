@@ -99,7 +99,7 @@
         </when>
         <then>
           <repeat iterations="60" trackBy="index">
-            <rule ref="Should Weigh Child" />
+            <apply ref="Should Weigh Child" />
           </repeat>
         </then>
       </protocol>

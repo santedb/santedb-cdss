@@ -30,6 +30,7 @@ namespace SanteDB.Cdss.Xml.Model
          XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
          XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
          XmlElement("all", typeof(CdssAllExpressionDefinition)),
+            XmlElement("none", typeof(CdssNoneExpressionDefinition)),
          XmlElement("any", typeof(CdssAnyExpressionDefinition)),
          XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
          JsonProperty("logic")]

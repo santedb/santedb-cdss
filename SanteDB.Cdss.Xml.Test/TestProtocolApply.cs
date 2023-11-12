@@ -94,7 +94,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(1, acts.Count());

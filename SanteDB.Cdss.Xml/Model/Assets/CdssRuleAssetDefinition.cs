@@ -30,7 +30,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlArrayItem("assign", typeof(CdssPropertyAssignActionDefinition)),
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
             XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
-            XmlArrayItem("apply", typeof(CdssExecuteActionDefinition)),
+            XmlArrayItem("apply", typeof(CdssRuleReferenceActionDefinition)),
             JsonProperty("then")]
         public List<CdssActionDefinition> Actions { get; set; }
 

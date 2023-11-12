@@ -9,6 +9,8 @@
   </PropertyGroup>
 	<ItemGroup>
 	  <None Remove="Protocols\CoreCdss.xml" />
+	  <None Remove="Protocols\CoreChildcare.xml" />
+	  <None Remove="Protocols\CoreVaccination.xml" />
 	  <None Remove="TestConfig.xml" />
 	</ItemGroup>
 
@@ -55,6 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Protocols\CoreCdss.xml" />
+    <EmbeddedResource Include="Protocols\CoreChildcare.xml" />
+    <EmbeddedResource Include="Protocols\CoreVaccination.xml" />
     <EmbeddedResource Include="Protocols\OralPolioVaccine.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>

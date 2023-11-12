@@ -35,6 +35,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
+            XmlElement("none", typeof(CdssNoneExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
             JsonProperty("logic")]
         public CdssExpressionDefinition FactComputation { get; set; }
