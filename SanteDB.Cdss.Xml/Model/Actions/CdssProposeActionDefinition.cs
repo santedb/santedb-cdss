@@ -10,6 +10,7 @@ using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -99,7 +100,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                     model.Protocols = new List<ActProtocol>();
                     // Get any protocols in the execution context hierarchy
                     var ctx = CdssExecutionStackFrame.Current;
-                    var sequence = 0;
+                    int? sequence = null;
                     while (ctx != null)
                     {
                         switch (ctx.Owner)
@@ -107,11 +108,22 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             case CdssRepeatActionDefinition repeat:
                                 sequence = (int)ctx.GetValue(repeat.IterationVariable);
                                 break;
+                                
                             case CdssProtocolAssetDefinition protocol:
+                                
+                                if(!sequence.HasValue) // sequence has not been set by a repeat - so we want to set it via the position of the rule or action in the protocol
+                                {
+                                    var protocolKey = $"{protocol.Name} Sequence";
+                                    ctx.Context.Declare(protocolKey, 0);
+                                    sequence = (int?)ctx.Context[protocolKey];
+                                    sequence = sequence.GetValueOrDefault() + 1;
+                                    ctx.Context[protocolKey] = sequence;
+                                }
+
                                 model.Protocols.Add(new ActProtocol()
                                 {
                                     ProtocolKey = protocol.Uuid,
-                                    Sequence = sequence,
+                                    Sequence = sequence.Value,
                                     Protocol = new Protocol()
                                     {
                                         Oid = protocol.Oid,

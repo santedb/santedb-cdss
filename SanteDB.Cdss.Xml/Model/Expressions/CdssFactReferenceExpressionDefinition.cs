@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +24,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// </summary>
         [XmlAttribute("ref"), JsonProperty("ref")]
         public String FactName { get; set; }
+
 
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
@@ -46,9 +49,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
 
             // Determine the type of fact
             Expression retVal = Expression.Call(contextParameter, typeof(CdssExecutionContext).GetMethod(nameof(CdssExecutionContext.GetFact)), Expression.Constant(this.FactName));
-            var factType = cdssContext.TryGetFactDefinition(this.FactName, out var definition);
-
-            if (definition.ValueTypeSpecified) {
+            if(cdssContext.TryGetFactDefinition(this.FactName, out var definition) && definition.ValueTypeSpecified) {
                 switch(definition.ValueType)
                 {
                     case CdssValueType.Boolean:
@@ -73,7 +74,15 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             }
             else if(cdssContext.TryGetFact(this.FactName, out var fact))
             {
-                retVal = Expression.Convert(retVal, fact.GetType());
+                if (fact != null)
+                {
+                    retVal = Expression.Convert(retVal, fact.GetType());
+                }
+                
+            }
+            else
+            {
+                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, this.FactName));
             }
             return retVal;
         }

@@ -13,7 +13,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     /// Expression definition
     /// </summary>
     [XmlType(nameof(CdssExpressionDefinition), Namespace = "http://santedb.org/cdss")]
-    public abstract class CdssExpressionDefinition 
+    public abstract class CdssExpressionDefinition
     {
 
         /// <summary>

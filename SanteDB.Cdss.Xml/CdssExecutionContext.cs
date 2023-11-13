@@ -153,6 +153,7 @@ namespace SanteDB.Cdss.Xml
             }
 
             registration.Value = value;
+            this.ClearEvaluatedFacts();
         }
 
         /// <summary>
@@ -212,7 +213,7 @@ namespace SanteDB.Cdss.Xml
         public TValue GetValue<TValue>(String parameterOrFactName) => (TValue)this.GetValue(parameterOrFactName);
 
         /// <inheritdoc/>
-        internal void Declare(string variableName, Type variableType)
+        internal void Declare<T>(string variableName, T value)
         {
             var caseInsensitiveName = variableName.ToLowerInvariant(); // Case insensitive
 
@@ -220,13 +221,9 @@ namespace SanteDB.Cdss.Xml
             {
                 this.m_variables.Add(caseInsensitiveName, new ParameterRegistration()
                 {
-                    Type = variableType,
-                    Value = null
+                    Type = typeof(T),
+                    Value = value
                 });
-            }
-            else
-            {
-                throw new CdssEvaluationException(String.Format(ErrorMessages.DUPLICATE_OBJECT, variableName));
             }
         }
 
@@ -299,6 +296,8 @@ namespace SanteDB.Cdss.Xml
                     }
                     break;
             }
+
+            this.ClearEvaluatedFacts();
         }
 
         /// <summary>

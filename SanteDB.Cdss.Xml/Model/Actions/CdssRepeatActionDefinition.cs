@@ -80,7 +80,6 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             break;
                         }
                         iteration++;
-                        CdssExecutionStackFrame.Current.Context.ClearEvaluatedFacts();
                     }
 
                     CdssExecutionStackFrame.Current.Context.DestroyValue(this.IterationVariable);

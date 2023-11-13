@@ -19,9 +19,10 @@
  - User: fyfej
  - Date: 2023-5-19
  -->
-<CdssLibrary xmlns="http://santedb.org/cdss" uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="DTP-HepB-Hib" name="DTP-Hib-HepB Vaccine Logic">
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="org.santedb.cdss.vaccine.dtpHibHepB" name="DTP-Hib-HepB Vaccine Logic">
   <status>active</status>
   <meta>
+    
     <authors>
       <add>SanteSuite Inc. and the SanteSuite Contributors</add>
     </authors>
@@ -30,19 +31,20 @@
   </meta>
   <include>#org.santedb.cdss.core</include>
   <include>#org.santedb.cdss.core.childcare</include>
+  
   <logic id="org.santedb.cdss.vaccine.dtptrivalent.patient" name="DTP-Hib-HepB Trivalent Decision Logic">
     <context type="Patient"/>
     <define>
-      <fact name="Patient Administration of DTP-Hib-HepB Dose 1">
-        <query order-by="actTime" select="source" fn="last" source="participation[RecordTarget]">source.negationInd=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=1</query>
+      <fact name="Patient's Last Administration of DTP-Hib-HepB Dose 1">
+        <query order-by="source.actTime" select="source@SubstanceAdministration" fn="last" source="participation[RecordTarget]">source.isNegated=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=1</query>
       </fact>
 
-      <fact name="Patient Administration of DTP-Hib-HepB Dose 2">
-        <query order-by="actTime" select="source" fn="last" source="participation[RecordTarget]">source.negationInd=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=2</query>
+      <fact name="Patient's Last Administration of DTP-Hib-HepB Dose 2">
+        <query order-by="source.actTime" select="source@SubstanceAdministration" fn="last" source="participation[RecordTarget]">source.isNegated=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=2</query>
       </fact>
 
-      <fact name="Patient Administration of DTP-Hib-HepB Dose 3">
-        <query order-by="actTime" select="source" fn="last" source="participation[RecordTarget]">source.negationInd=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=3</query>
+      <fact name="Patient's Last Administration of DTP-Hib-HepB Dose 3">
+        <query order-by="source.actTime" select="source@SubstanceAdministration" fn="last" source="participation[RecordTarget]">source.isNegated=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=3</query>
       </fact>
 
       <fact name="Patient Has an AEFI to DTP-Hib-HepB Dose">
@@ -60,7 +62,7 @@
           <hdsi>
             participation[RecordTarget].source.typeConcept=0124fde0-7857-4815-b257-74acaa0dd92d&amp;
             participation[RecordTarget].source@CodedObservation.value.mnemonic=VaccineType-DTP-Hib-HepB&amp;
-            participation[RecordTarget].source.negationInd=false
+            participation[RecordTarget].source.isNegated=false
           </hdsi>
         </any>
       </fact>
@@ -70,21 +72,21 @@
           <documentation>When a patient has refused a previous dose of DTP-Hib-HepB due to personal or religious reasons </documentation>
         </meta>
         <hdsi>
-          participation[RecordTarget].source.negationInd=true&amp;
+          participation[RecordTarget].source.isNegated=true&amp;
           participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;
           participation[RecordTarget].source.reasonConcept=0D40C2B6-7CEB-4492-AB2A-6E7C730EAF22&amp;
           participation[RecordTarget].source.reasonConcept=42351A36-F60F-4687-B334-7A41B091BAE1
         </hdsi>
       </fact>
 
-      <fact name="Patient Should Receive DTP-HepB-Hib Dose 1">
+      <fact name="Patient Should Receive DTP-Hib-HepB Dose 1">
         <none>
           <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 1"/>
           <fact ref="Patient Refused Previous DTP-Hib-HepB Dose"/>
         </none>
       </fact>
 
-      <fact name="Patient Should Receive DTP-HepB-Hib Dose 2">
+      <fact name="Patient Should Receive DTP-Hib-HepB Dose 2">
         <all>
           <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 1"/>
           <none>
@@ -94,7 +96,7 @@
         </all>
       </fact>
 
-      <fact name="Patient Should Receive DTP-HepB-Hib Dose 3">
+      <fact name="Patient Should Receive DTP-Hib-HepB Dose 3">
         <all>
           <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 1"/>
           <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 2"/>
@@ -180,10 +182,10 @@
               <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
             </assign>
             <assign path="startTime">
-              <csharp>ScopedObject.ActTime</csharp>
+              <csharp>((SubstanceAdministration)scopedObject).ActTime</csharp>
             </assign>
             <assign path="stopTime">
-              <csharp>ScopedObject.ActTime.AddDays(7)</csharp>
+              <csharp>((SubstanceAdministration)scopedObject).ActTime.Value.AddDays(7)</csharp>
             </assign>
           </propose>
         </then>
@@ -191,12 +193,10 @@
 
       <rule name="Recommend DTP-Hib-HepB Dose 2">
         <when>
-          <fact ref="Patient Should Recieve DTP-Hib-HepB Dose 2"/>
+          <fact ref="Patient Should Receive DTP-Hib-HepB Dose 2"/>
         </when>
         <then>
-          <scope>
-            <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 1" />
-          </scope>
+         
           <propose>
             <json>
               <![CDATA[
@@ -249,10 +249,17 @@
 			      }
           ]]>
             </json>
-
-            <assign path="actTime">ScopedObject.ActTime.Value.AddDays(28)</assign>
-            <assign path="startTime">ScopedObject.ActTime.Value.AddDays(28)</assign>
-            <assign path="stopTime">ScopedObject.ActTime.Value.AddDays(35)</assign>
+            <assign path="actTime">
+              <csharp>
+                ((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)
+              </csharp>
+            </assign>
+            <assign path="startTime">
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
+            </assign>
+            <assign path="stopTime">
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
+            </assign>
           </propose>
 
         </then>
@@ -263,9 +270,7 @@
           <fact ref="Patient Should Receive DTP-Hib-HepB Dose 3"/>
         </when>
         <then>
-          <scope>
-            <fact ref="Patient's Last Administration of DTP-Hib-HepB Dose 2" />
-          </scope>
+          
           <propose>
             <json>
               <![CDATA[
@@ -318,19 +323,32 @@
 			      }
           ]]>
             </json>
+           
             <assign path="actTime">
-              <csharp>ScopedObject.ActTime.Value.AddDays(28)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
             </assign>
             <assign path="startTime">
-              <csharp>ScopedObject.ActTime.Value.AddDays(28)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
             </assign>
             <assign path="stopTime">
-              <csharp>ScopedObject.ActTime.Value.AddDays(35)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
             </assign>
 
           </propose>
         </then>
       </rule>
+
+      <protocol uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="org.santedb.cdss.vaccine.dtpHibHepB" name="DTP-Hib-HepB Vaccine Logic">
+        <when>
+          <fact ref="Patient Is Under 5 Years Old"/>
+        </when>
+        <then>
+          <apply ref="Recommend DTP-Hib-HepB Dose 1"/>
+          <apply ref="Recommend DTP-Hib-HepB Dose 2"/>
+          <apply ref="Recommend DTP-Hib-HepB Dose 3"/>
+        </then>
+      </protocol>
+      
     </define>
   </logic>
 </CdssLibrary>
