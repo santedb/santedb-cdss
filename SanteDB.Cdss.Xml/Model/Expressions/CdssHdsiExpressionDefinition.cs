@@ -69,7 +69,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
 
             var variableDictionary = new Dictionary<String, Func<Object>>();
-            foreach (var varRef in cdssContext.Variables.Union(cdssContext.Facts ?? new String[0]))
+            foreach (var varRef in cdssContext.Variables.Union(cdssContext.FactNames ?? new String[0]))
             {
                 variableDictionary.Add(varRef, () => CdssExecutionStackFrame.Current?.GetValue(varRef));
             }

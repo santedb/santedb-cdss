@@ -1,4 +1,5 @@
 ﻿using SanteDB.Cdss.Xml.Model;
+using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model;
 using System;
@@ -42,6 +43,39 @@ namespace SanteDB.Cdss.Xml
             return retVal;
         }
 
+
+        internal static Expression<Func<Object, Object, Object>> GenerateComputableExpression(this CdssExpressionDefinition me)
+        {
+
+            var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+            var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
+
+            var expressionForValue = me.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
+            if (!(expressionForValue is LambdaExpression))
+            {
+                expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopeParameter);
+            }
+
+            // Convert object parameters
+            var contextObjParameter = Expression.Parameter(typeof(Object));
+            var scopeObjParameter = Expression.Parameter(typeof(Object));
+            expressionForValue = Expression.Convert(Expression.Invoke(
+                    expressionForValue,
+                    Expression.Convert(contextObjParameter, contextParameter.Type),
+                    Expression.Convert(scopeObjParameter, scopeParameter.Type)
+                ), typeof(Object));
+
+            return Expression.Lambda<Func<object, object, object>>(
+                expressionForValue,
+                contextObjParameter,
+                scopeObjParameter
+            );
+
+        }
+
+        /// <summary>
+        /// Determine whether a logic block applies to an object
+        /// </summary>
         internal static IEnumerable<CdssDecisionLogicBlockDefinition> AppliesTo(this IEnumerable<CdssDecisionLogicBlockDefinition> decisionBlockDefinitions, ICdssExecutionContext contextToApply)
         {
 

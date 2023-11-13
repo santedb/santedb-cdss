@@ -21,7 +21,7 @@ namespace SanteDB.Cdss.Xml.Model
 
 
         // The expression which has been calculated
-        private Func<object, object, bool> m_compiledExpression;
+        private Func<object, object, object> m_compiledExpression;
 
         /// <summary>
         /// Gets the expression of the fact
@@ -29,8 +29,9 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("csharp", typeof(CdssCsharpExpressionDefinition)),
          XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
          XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
+         XmlElement("query", typeof(CdssQueryExpressionDefinition)),
          XmlElement("all", typeof(CdssAllExpressionDefinition)),
-            XmlElement("none", typeof(CdssNoneExpressionDefinition)),
+         XmlElement("none", typeof(CdssNoneExpressionDefinition)),
          XmlElement("any", typeof(CdssAnyExpressionDefinition)),
          XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
          JsonProperty("logic")]
@@ -64,33 +65,8 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_compiledExpression == null)
             {
-                var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                var scopedParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
+                var uncompiledExpression = this.WhenComputation.GenerateComputableExpression();
 
-                Expression bodyExpression = Expression.Lambda(this.WhenComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
-
-                // Wrap the expression, compile and set to this value
-                // We do this because calling this.m_compiledExpression(context) is faster than 
-                // (bool)this.m_compiledExpression.DynamicInvoke(context);
-                var contextObjParam = Expression.Parameter(typeof(object));
-                var scopeObjParam = Expression.Parameter(typeof(object));
-                bodyExpression = Expression.Convert(Expression.Invoke(
-                        bodyExpression,
-                        Expression.Convert(contextObjParam, contextParameter.Type),
-                        Expression.Convert(scopeObjParam, scopedParameter.Type)
-                    ), typeof(Object));
-
-
-                if (typeof(bool) != bodyExpression.Type)
-                {
-                    bodyExpression = Expression.Convert(bodyExpression, typeof(bool));
-                }
-
-                var uncompiledExpression = Expression.Lambda<Func<object, object, bool>>(
-                    bodyExpression,
-                    contextObjParam,
-                    scopeObjParam
-                );
                 this.DebugView = uncompiledExpression.ToString();
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
@@ -98,7 +74,7 @@ namespace SanteDB.Cdss.Xml.Model
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
                 var result = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
-                return result;
+                return (bool)result;
             }
         }
     }

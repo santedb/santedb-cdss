@@ -49,6 +49,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("none", typeof(CdssNoneExpressionDefinition)),
             XmlElement("any", typeof(CdssAnyExpressionDefinition)),
+            XmlElement("query", typeof(CdssQueryExpressionDefinition)),
             XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("fixed", typeof(String))]
         public Object ContainedExpression { get; set; }
@@ -86,29 +87,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                         case CdssExpressionDefinition exe:
                             if (this.m_compiledExpression == null)
                             {
-                                var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                                var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
-
-                                var expressionForValue = exe.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
-                                if (!(expressionForValue is LambdaExpression))
-                                {
-                                    expressionForValue = Expression.Lambda(expressionForValue, contextParameter, scopeParameter);
-                                }
-
-                                // Convert object parameters
-                                var contextObjParameter = Expression.Parameter(typeof(Object));
-                                var scopeObjParameter = Expression.Parameter(typeof(Object));
-                                expressionForValue = Expression.Convert(Expression.Invoke(
-                                        expressionForValue,
-                                        Expression.Convert(contextObjParameter, contextParameter.Type),
-                                        Expression.Convert(scopeObjParameter, scopeParameter.Type)
-                                    ), typeof(Object));
-
-                                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                                    expressionForValue,
-                                    contextObjParameter,
-                                    scopeObjParameter
-                                );
+                                var uncompiledExpression = exe.GenerateComputableExpression();
                                 this.DebugView = uncompiledExpression.ToString();
                                 this.m_compiledExpression = uncompiledExpression.Compile();
                             }

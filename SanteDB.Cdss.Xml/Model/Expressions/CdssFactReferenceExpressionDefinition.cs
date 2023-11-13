@@ -30,7 +30,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.missingReference", "Fact reference expressions require a @ref attribute", Guid.Empty);
             }
-            else if(!context.Facts.Contains(this.FactName.ToLowerInvariant()))
+            else if(!context.FactNames.Contains(this.FactName.ToLowerInvariant()))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.notFound", $"Could not find a fact in scope named {this.FactName}", Guid.Empty);
             }
@@ -43,7 +43,39 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             // We want to create an equivalent expression as : context[factName] call 
             var contextParameter = parameters.First(o => o.Name == CdssConstants.ContextVariableName || typeof(ICdssExecutionContext).IsAssignableFrom(o.Type));
-            return Expression.Call(contextParameter, typeof(CdssExecutionContext).GetMethod(nameof(CdssExecutionContext.GetFact)), Expression.Constant(this.FactName));
+
+            // Determine the type of fact
+            Expression retVal = Expression.Call(contextParameter, typeof(CdssExecutionContext).GetMethod(nameof(CdssExecutionContext.GetFact)), Expression.Constant(this.FactName));
+            var factType = cdssContext.TryGetFactDefinition(this.FactName, out var definition);
+
+            if (definition.ValueTypeSpecified) {
+                switch(definition.ValueType)
+                {
+                    case CdssValueType.Boolean:
+                        retVal = Expression.Convert(retVal, typeof(bool));
+                        break;
+                    case CdssValueType.Date:
+                        retVal = Expression.Convert(retVal, typeof(DateTime));
+                        break;
+                    case CdssValueType.Integer:
+                        retVal = Expression.Convert(retVal, typeof(int));
+                        break;
+                    case CdssValueType.Long:
+                        retVal = Expression.Convert(retVal, typeof(long));
+                        break;
+                    case CdssValueType.Real:
+                        retVal = Expression.Convert(retVal, typeof(double));
+                        break;
+                    case CdssValueType.String:
+                        retVal = Expression.Convert(retVal, typeof(string));
+                        break;
+                }
+            }
+            else if(cdssContext.TryGetFact(this.FactName, out var fact))
+            {
+                retVal = Expression.Convert(retVal, fact.GetType());
+            }
+            return retVal;
         }
     }
 }

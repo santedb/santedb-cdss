@@ -33,6 +33,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// </summary>
         [XmlElement("csharp", typeof(CdssCsharpExpressionDefinition)),
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
+            XmlElement("query", typeof(CdssQueryExpressionDefinition)),
             XmlElement("xml", typeof(CdssXmlLinqExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("none", typeof(CdssNoneExpressionDefinition)),
@@ -88,36 +89,13 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             if (this.m_compiledExpression == null)
             {
-                var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
-                var scopedParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
-                Expression bodyExpression = Expression.Lambda(this.FactComputation.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopedParameter), contextParameter, scopedParameter);
 
-                if (!(bodyExpression is LambdaExpression))
+                var uncompiledExpression = this.FactComputation.GenerateComputableExpression();
+
+                if (this.IsNegated)
                 {
-                    bodyExpression = Expression.Lambda(bodyExpression, contextParameter, scopedParameter);
+                    uncompiledExpression = Expression.Lambda<Func<object, object, object>>(Expression.Convert(Expression.Not(Expression.Convert(uncompiledExpression.Body, typeof(bool))), typeof(object)), uncompiledExpression.Parameters);
                 }
-
-                // Wrap the expression, compile and set to this value
-                // We do this because calling this.m_compiledExpression(context) is faster than 
-                // (bool)this.m_compiledExpression.DynamicInvoke(context);
-                var contextObjParam = Expression.Parameter(typeof(object));
-                var scopeObjParam = Expression.Parameter(typeof(object));
-                bodyExpression = Expression.Invoke(
-                        bodyExpression,
-                        Expression.Convert(contextObjParam, contextParameter.Type),
-                        Expression.Convert(scopeObjParam, scopedParameter.Type)
-                    );
-
-                if (IsNegated)
-                {
-                    bodyExpression = Expression.Not(bodyExpression);
-                }
-
-                var uncompiledExpression = Expression.Lambda<Func<object, object, object>>(
-                    Expression.Convert(bodyExpression, typeof(Object)),
-                    contextObjParam,
-                    scopeObjParam
-                );
                 this.DebugView = uncompiledExpression.ToString();
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }

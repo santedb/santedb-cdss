@@ -70,7 +70,15 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             Expression currentBody = null;
             foreach (var itm in this.ContainedExpressions)
             {
-                var clause = this.ModifyContainedExpression(Expression.Convert(itm.GenerateComputableExpression(cdssContext, parameters), typeof(bool)));
+                var clause = itm.GenerateComputableExpression(cdssContext, parameters);
+
+                // Is the clause not returning bool? If so then not null is the conversion
+                if(clause.Type != typeof(bool))
+                {
+                    clause = Expression.MakeBinary(ExpressionType.NotEqual, clause, Expression.Constant(null));
+                }
+                clause = this.ModifyContainedExpression(clause);
+
                 if(currentBody == null)
                 {
                     currentBody = clause;

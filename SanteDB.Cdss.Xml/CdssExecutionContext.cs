@@ -90,7 +90,7 @@ namespace SanteDB.Cdss.Xml
                 .SelectMany(o => o.Definitions)
                 .ToArray();
 
-            this.m_computableAssetsInScope = this.m_scopedLogicBlocks
+            this.m_computableAssetsInScope = this.m_scopedLogicBlocks?
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
             
@@ -124,7 +124,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the facts which can be referenced
         /// </summary>
-        public IEnumerable<string> Facts => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssFactAssetDefinition).Select(o=>o.Key);
+        public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssFactAssetDefinition).Select(o=>o.Key);
 
 
         /// <summary>
@@ -349,10 +349,25 @@ namespace SanteDB.Cdss.Xml
             this.m_variables.Remove(variableName);
         }
 
+
+        /// <summary>
+        /// Gets a scoped fact definition named <paramref name="factName"/>
+        /// </summary>
+        internal bool TryGetFactDefinition(string factName, out CdssFactAssetDefinition definition)
+        {
+            if (this.m_computableAssetsInScope.TryGetValue(factName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssFactAssetDefinition defn)
+            {
+                definition = defn;
+                return true;
+            }
+            definition = null;
+            return false;
+        }
+
         /// <summary>
         /// Gets a scoped rule definition named <paramref name="ruleName"/>
         /// </summary>
-        internal bool TryGetRule(string ruleName, out CdssRuleAssetDefinition definition)
+        internal bool TryGetRuleDefinition(string ruleName, out CdssRuleAssetDefinition definition)
         {
             if(this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssRuleAssetDefinition defn)
             {
@@ -367,7 +382,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Gets a scoped rule definition named <paramref name="ruleName"/>
         /// </summary>
-        internal bool TryGetProtocol(string ruleName, out CdssProtocolAssetDefinition definition)
+        internal bool TryGetProtocolDefinition(string ruleName, out CdssProtocolAssetDefinition definition)
         {
             if (this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssProtocolAssetDefinition defn)
             {

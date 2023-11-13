@@ -31,7 +31,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 try
                 {
-                    if (CdssExecutionStackFrame.Current.Context.TryGetRule(this.RuleName, out var rule))
+                    if (CdssExecutionStackFrame.Current.Context.TryGetRuleDefinition(this.RuleName, out var rule))
                     {
                         rule.Compute();
                     }
@@ -54,7 +54,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceRequired", "Rule reference @ref attribute must be present", Guid.Empty, this.ToString());
             }
-            else if (!context.TryGetRule(this.RuleName, out _))
+            else if (!context.TryGetRuleDefinition(this.RuleName, out _))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToString());
             }

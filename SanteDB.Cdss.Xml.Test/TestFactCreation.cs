@@ -70,6 +70,7 @@ namespace SanteDB.Cdss.Xml.Test
                 },
             Identifiers = new List<EntityIdentifier>()
                 {
+                    new EntityIdentifier(new IdentityDomain() { Name = "OHIPCARD", DomainName = "OHIPCARD", Oid = "1.2.3.4.5.6" }, "A2343120423"),
                     new EntityIdentifier(new IdentityDomain() { Name = "OHIPCARD", DomainName = "OHIPCARD", Oid = "1.2.3.4.5.6" }, "12343120423")
                 },
             Telecoms = new List<EntityTelecomAddress>()
@@ -95,6 +96,30 @@ namespace SanteDB.Cdss.Xml.Test
             DateOfBirthPrecision = DatePrecision.Day,
             CreationTime = DateTimeOffset.Now
         };
+
+        [Test]
+        public void TestShouldQueryParticipations()
+        {
+            CdssFactAssetDefinition when = new CdssFactAssetDefinition()
+            {
+                FactComputation = new CdssQueryExpressionDefinition()
+                {
+                    SelectHdsi = "value",
+                    FilterHdsi = "domain.name=OHIPCARD",
+                    Scope = CdssHdsiExpressionScopeType.Context,
+                    SourceCollectionHdsi = "identifier",
+                    OrderByHdsi = "value",
+                    SelectorFunction = CdssCollectionSelectorType.First
+                }
+            };
+
+            using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
+            {
+                var fact = when.Compute();
+                Assert.IsInstanceOf<string>(fact);
+                Assert.AreEqual("12343120423",fact);
+            }
+        }
 
         /// <summary>
         /// Tests the where clause matches LINQ

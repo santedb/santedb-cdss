@@ -35,7 +35,7 @@
     <context type="Patient"/>
     <define>
      
-      <fact name="Patient Has Not Received BCG Dose">
+      <fact name="Patient Has Not Received BCG Dose" type="bool">
         <hdsi negate="true">participation[RecordTarget].source@SubstanceAdministration.participation[Product].player@Material.typeConcept.mnemonic=VaccineType-BCG</hdsi>
       </fact>
 

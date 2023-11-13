@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
