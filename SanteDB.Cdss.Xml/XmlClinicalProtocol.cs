@@ -117,7 +117,7 @@ namespace SanteDB.Cdss.Xml
         //}
 
         /// <inheritdoc/>
-        public IEnumerable<Act> ComputeProposals(Patient target, IDictionary<string, object> parameters)
+        public IEnumerable<Object> ComputeProposals(Patient target, IDictionary<string, object> parameters)
         {
 #if DEBUG
             Stopwatch sw = new Stopwatch();
@@ -149,7 +149,7 @@ namespace SanteDB.Cdss.Xml
                     }
                     else
                     {
-                        foreach (var prop in context.Proposals)
+                        foreach (var prop in context.Proposals.OfType<Object>().Union(context.Issues))
                         {
                             yield return prop;
                         }
