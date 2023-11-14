@@ -31,8 +31,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
             XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
             XmlArrayItem("apply", typeof(CdssRuleReferenceActionDefinition)),
+            XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
             JsonProperty("then")]
-        public List<CdssActionDefinition> Actions { get; set; }
+        public List<CdssBaseObjectDefinition> Actions { get; set; }
 
 
         /// <inheritdoc/>
@@ -71,12 +72,20 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     {
                         foreach (var act in this.Actions)
                         {
-                            act.Execute();
+                            switch(act)
+                            {
+                                case CdssActionDefinition action:
+                                    action.Execute();
+                                    break;
+                                case CdssComputableAssetDefinition asset:
+                                    asset.Compute();
+                                    break;
+                            }
                         }
                         return true;
                     }
 
-                    return null;
+                    return false;
                 }
                 catch (Exception e) when (!(e is CdssEvaluationException))
                 {

@@ -91,5 +91,37 @@ namespace SanteDB.Cdss.Xml
                 return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !false.Equals(o.When?.Compute())).ToList();
             }
         }
+
+        /// <summary>
+        /// Return the greater of <paramref name="firstValue"/> or <paramref name="secondValue"/>
+        /// </summary>
+        public static T GreaterOf<T>(this CdssExecutionContext me, T firstValue, T secondValue)
+            where T : IComparable
+        {
+            if (firstValue.CompareTo(secondValue) > 0)
+            {
+                return firstValue;
+            }
+            else
+            {
+                return secondValue;
+            }
+        }
+
+        /// <summary>
+        /// Return the lesser of <paramref name="firstValue"/> or <paramref name="secondValue"/>
+        /// </summary>
+        public static T LesserOf<T>(this CdssExecutionContext me, T firstValue, T secondValue)
+            where T : IComparable
+        {
+            if (firstValue.CompareTo(secondValue) < 0)
+            {
+                return firstValue;
+            }
+            else
+            {
+                return secondValue;
+            }
+        }
     }
 }

@@ -188,11 +188,28 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).SelectMany(p=>p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
+
+            // The default schedule should have been applied
+            Assert.Greater(acts.First().ActTime.Value.DateTime, newborn.DateOfBirth.Value.AddDays(270));
+            Assert.Greater(acts.Last().ActTime.Value.DateTime, newborn.DateOfBirth.Value.AddMonths(17));
+            Assert.AreEqual("1.3.5.1.4.1.52820.5.3.2.3", acts.First().Protocols.First().Protocol.Oid);
+
+            // Apply the protocol - we should get the accelerated protocol
+            newborn.DateOfBirth = DateTime.Now.AddMonths(-18).AddDays(-1);
+            acts = xmlCp.GetProtocols(String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
+            Assert.AreEqual(2, acts.Count());
+
+            // The accelerated schedule should have been applied
+            Assert.AreEqual(acts.First().ActTime.Value.DateTime.Date, DateTime.Now.Date);
+            Assert.GreaterOrEqual(acts.Last().ActTime.Value.DateTime.Date, DateTime.Now.Date.AddMonths(1));
+            Assert.AreEqual("1.3.5.1.4.1.52820.5.3.2.3.1", acts.First().Protocols.First().Protocol.Oid);
+
         }
+
 
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time

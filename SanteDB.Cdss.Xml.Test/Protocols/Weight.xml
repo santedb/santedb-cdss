@@ -22,6 +22,7 @@
 
 <CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.weight" name="Childhood Healthy Weight">
   <include>#org.santedb.cdss.core</include>
+  <include>#org.santedb.cdss.core.childcare</include>
   <status>active</status>
   <meta>
     <authors>
@@ -49,9 +50,6 @@
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
       </fact>
 
-      <fact name="Patient Is Under 5 Years Old">
-        <csharp>((int)context["Patient Age In Months"]) &lt; 60</csharp>
-      </fact>
       <fact name="No Weight Has Been Proposed For Period" negate="true">
         <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Weight Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Weight Observation</hdsi>
       </fact>
@@ -67,8 +65,9 @@
                 <![CDATA[
               {
                 "$type": "QuantityObservation",
-                "template": {
-                  "mnemonic": "Act.Observation.Weight"
+                "templateModel": {
+                  "mnemonic": "org.santedb.emr.observation.weight",
+                  "oid": "1.3.6.1.4.1.52820.5.2.1.10"
                 },
                 "moodConcept": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
                 "classConcept": "28D022C6-8A8B-47C4-9E6A-2BC67308739E",
@@ -94,10 +93,11 @@
         </then>
       </rule>
 
-      <protocol uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" name="Weigh Child Every Month">
+      <protocol uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" name="Weigh Children Under 5 Years Old Every Month"
+                oid="1.3.5.1.4.1.52820.5.3.1.1">
         <!-- Entry Point into the execution -->
         <when>
-          <fact ref="Patient Is Under 5 Years Old" />
+          <fact ref="Patient Is Child" />
         </when>
         <then>
           <repeat iterations="60" trackBy="index">
@@ -175,10 +175,10 @@
                 <![CDATA[
                 {
 				            "$type": "SubstanceAdministration",
-                    template: {
-                        mnemonic: "Act.SubstanceAdmin.Supplement"
+                    "templateModel": {
+                        mnemonic: "org.santedb.emr.sbadm.supplement",
+                        "oid": "1.3.5.1.4.1.52820.5.2.3.1"
                     },
-
                     "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
                     "typeConceptModel": { "id" : "7D84A057-1FCC-4054-A51F-B77D230FC6D1", "mnemonic" : "DrugTherapy" },
 				            "doseSequence": 1,

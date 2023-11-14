@@ -38,19 +38,6 @@
         <hdsi>dateOfBirth</hdsi>
       </fact>
 
-      <fact name="Patient Age In Days" type="integer">
-        <meta>
-          <documentation>The absolute age of the patient in whole number days</documentation>
-        </meta>
-        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Patient Date of Birth"]).TotalDays</csharp>
-      </fact>
-
-      <fact name="Patient Age in Months" type="integer">
-        <meta>
-          <documentation>The absolute age of the patient expressed as a whole number of months</documentation>
-        </meta>
-        <csharp>(DateTime.Now.Year * 12 + DateTime.Now.Month) - (((DateTime)context["Patient Date of Birth"]).Year * 12 + ((DateTime)context["Patient Date of Birth"]).Month)</csharp>
-      </fact>
     </define>
   </logic>
 

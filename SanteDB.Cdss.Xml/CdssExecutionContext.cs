@@ -331,6 +331,7 @@ namespace SanteDB.Cdss.Xml
         {
             var expressionInterpreter = new Interpreter(InterpreterOptions.Default)
                                .Reference(typeof(DateTimeOffset))
+                               .Reference(typeof(ExtensionMethods))
                                .EnableAssignment(AssignmentOperators.None);
 
             // Add types

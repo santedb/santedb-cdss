@@ -81,7 +81,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                     scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Name == CdssConstants.ContextVariableName), (MemberInfo)cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
                     break;
                 default:
-                    scopedObjectExpression = parameters.First(o => o.Name == CdssConstants.ScopedObjectVariableName);
+                    var scopedObjectType = CdssExecutionStackFrame.Current.ScopedObject.GetType();
+                    scopedObjectExpression = Expression.Convert(parameters.First(o => o.Name == CdssConstants.ScopedObjectVariableName), scopedObjectType);
                     break;
 
             }
@@ -112,14 +113,14 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     public enum CdssHdsiExpressionScopeType
     {
         /// <summary>
+        /// Get the value from the proposed object
+        /// </summary>
+        [XmlEnum("scopedObject")]
+        CurrentObject = 1,
+        /// <summary>
         /// Get the value from the current context object
         /// </summary>
         [XmlEnum("context")]
-        Context = 0,
-        /// <summary>
-        /// Get the value from the proposed object
-        /// </summary>
-        [XmlEnum("scope")]
-        ScopedObject = 1
+        Context = 0
     }
 }

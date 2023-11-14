@@ -13,8 +13,32 @@
     <context type="Patient"/>
 
     <define>
-      <fact name="Patient Is Under 5 Years Old">
+      <fact name="Patient Is Child">
+        <meta>
+          <documentation>Indicates whether the patient qualifies for child care based protocols (5 years old)</documentation>
+        </meta>
         <hdsi>dateOfBirth=:(age)&lt;5y</hdsi>
+      </fact>
+
+      <fact name="Patient Age In Days" type="integer">
+        <meta>
+          <documentation>The absolute age of the patient in whole number days</documentation>
+        </meta>
+        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Patient Date of Birth"]).TotalDays</csharp>
+      </fact>
+
+      <fact name="Patient Age in Months" type="integer">
+        <meta>
+          <documentation>The absolute age of the patient expressed as a whole number of months</documentation>
+        </meta>
+        <csharp>(DateTime.Now.Year * 12 + DateTime.Now.Month) - (((DateTime)context["Patient Date of Birth"]).Year * 12 + ((DateTime)context["Patient Date of Birth"]).Month)</csharp>
+      </fact>
+
+      <fact name="Patient Age in Weeks" type="integer">
+        <meta>
+          <documentation>The absolute age of the patient expressed as a whole number of weeks</documentation>
+        </meta>
+        <csharp>DateTime.Now.Subtract((DateTime)context["Patient Date of Birth"]).TotalDays / 7f</csharp>
       </fact>
     </define>
 

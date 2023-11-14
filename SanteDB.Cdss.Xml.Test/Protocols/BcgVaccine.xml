@@ -39,10 +39,11 @@
         <hdsi negate="true">participation[RecordTarget].source@SubstanceAdministration.participation[Product].player@Material.typeConcept.mnemonic=VaccineType-BCG</hdsi>
       </fact>
 
-      <protocol name="BCG Vaccination Schedule Protocol" id="org.santedb.cdss.vaccine.bcg" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9">
+      <protocol name="BCG Vaccination Schedule Protocol" id="org.santedb.cdss.vaccine.bcg" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9"
+                oid="1.3.5.1.4.1.52820.5.3.2.1">
         <when>
           <all>
-            <fact ref="Patient Is Under 5 Years Old"/>
+            <fact ref="Patient Is Child"/>
             <fact ref="Patient Has Not Received BCG Dose"/>
           </all>
         </when>
@@ -53,6 +54,10 @@
                 <![CDATA[
             {
 				      "$type": "SubstanceAdministration",
+              "templateModel" : {
+                "mnemonic" : "org.santedb.emr.sbadm.immunization",
+                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
+              },
 				      "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
               "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "InitialImmunization" },
 				      "doseSequence": 0,

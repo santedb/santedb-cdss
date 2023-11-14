@@ -131,10 +131,10 @@
           <![CDATA[
           {
 				      "$type": "SubstanceAdministration",
-              template: {
-                  mnemonic: "act.substanceadmin.immunization"
+              "templateModel" : {
+                "mnemonic" : "org.santedb.emr.sbadm.immunization",
+                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
               },
-             
               "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
               "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "InitialImmunization" },
               "statusConceptModel" : { "id" : "c8064cbd-fa06-4530-b430-1a52f1530c27", "mnemonic" : "ACTIVE" },
@@ -254,9 +254,10 @@
         </then>
       </rule>
 
-      <protocol uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="org.santedb.cdss.vaccine.dtpHibHepB" name="DTP-Hib-HepB Vaccine Logic">
+      <protocol uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="org.santedb.cdss.vaccine.dtpHibHepB" name="DTP-Hib-HepB Vaccine Logic"
+                oid="1.3.5.1.4.1.52820.5.3.2.2">
         <when>
-          <fact ref="Patient Is Under 5 Years Old"/>
+          <fact ref="Patient Is Child"/>
         </when>
         <then>
           <apply ref="Recommend DTP-Hib-HepB Dose 1"/>
