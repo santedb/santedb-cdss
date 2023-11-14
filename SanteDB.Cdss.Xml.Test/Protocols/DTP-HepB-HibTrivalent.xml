@@ -22,7 +22,6 @@
 <CdssLibrary xmlns="http://santedb.org/cdss" uuid="F6186968-9BA7-40DE-939B-42FCC00083A3" id="org.santedb.cdss.vaccine.dtpHibHepB" name="DTP-Hib-HepB Vaccine Logic">
   <status>active</status>
   <meta>
-    
     <authors>
       <add>SanteSuite Inc. and the SanteSuite Contributors</add>
     </authors>
@@ -32,7 +31,7 @@
   <include>#org.santedb.cdss.core</include>
   <include>#org.santedb.cdss.core.childcare</include>
   
-  <logic id="org.santedb.cdss.vaccine.dtptrivalent.patient" name="DTP-Hib-HepB Trivalent Decision Logic">
+  <logic id="org.santedb.cdss.vaccine.dtptrivalent.patient" name="DTP-Hib-HepB Trivalent Decision Logic for Patient Context">
     <context type="Patient"/>
     <define>
       <fact name="Patient's Last Administration of DTP-Hib-HepB Dose 1">
@@ -109,7 +108,14 @@
 
       <rule name="Raise Alert if Active AEFI Reported for DTP-Hib-HepB">
         <when>
-          <fact ref="Patient Has an AEFI to DTP-Hib-HepB Dose"/>
+          <all>
+            <any>
+              <fact ref="Patient Should Receive DTP-Hib-HepB Dose 1"/>
+              <fact ref="Patient Should Receive DTP-Hib-HepB Dose 2"/>
+              <fact ref="Patient Should Receive DTP-Hib-HepB Dose 3"/>
+            </any>
+            <fact ref="Patient Has an AEFI to DTP-Hib-HepB Dose"/>
+          </all>
         </when>
         <then>
           <raise>
@@ -270,7 +276,6 @@
           <fact ref="Patient Should Receive DTP-Hib-HepB Dose 3"/>
         </when>
         <then>
-          
           <propose>
             <json>
               <![CDATA[
