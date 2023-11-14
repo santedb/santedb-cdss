@@ -32,7 +32,13 @@
   <include>#org.santedb.cdss.core.childcare</include>
 
   <logic id="org.santedb.cdss.vaccine.mr.patient" name="MR Decision Logic for Patient Context">
-    <context type="Patient" />
+    <context type="Patient"/>
+    <when>
+      <all>
+        <fact ref="Patient Is Child" />
+        <fact ref="Patient Is Not Deceased" />
+      </all>
+    </when>
     <define>
       <fact name="Patient's Last Administration of MR Dose 1">
         <query order-by="source.actTime" select="source@SubstanceAdministration" fn="last" source="participation[RecordTarget]">
@@ -185,7 +191,7 @@
         </json>
       </model>
 
-      <protocol id="org.santedb.cdss.vaccine.mr.regular"
+      <protocol id="org.santedb.cdss.vaccine.mr.protocol.regular"
                 name="MR Schedule - Regular"
                 uuid="D48FF086-702E-4F46-A8DE-C3FFBD02FD7C"
                 oid="1.3.5.1.4.1.52820.5.3.2.3">
@@ -245,7 +251,7 @@
         </then>
       </protocol>
 
-      <protocol id="org.santedb.cdss.vaccine.mr.accelerated"
+      <protocol id="org.santedb.cdss.vaccine.mr.protocol.accelerated"
                 name="MR Schedule - Accelerated"
                 uuid="D48FF086-702E-4F46-A8DE-F3FFBD02FDDC"
                 oid="1.3.5.1.4.1.52820.5.3.2.3.1">

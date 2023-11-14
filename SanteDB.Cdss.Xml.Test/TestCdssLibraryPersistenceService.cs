@@ -32,7 +32,7 @@ namespace SanteDB.Cdss.Xml.Test
                             return new XmlProtocolLibrary(CdssLibraryDefinition.Load(ms));
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
                         return null;
                     }

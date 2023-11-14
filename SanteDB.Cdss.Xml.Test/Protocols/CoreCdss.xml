@@ -12,7 +12,16 @@
   <logic id="org.santedb.cdss.core.patient" name="Core CDSS Facts for Patient">
     <context type="Patient" />
     <define>
-      
+
+      <fact name="Patient Is Deceased" type="bool">
+        <hdsi>deceasedDate=!null</hdsi>
+      </fact>
+
+      <fact name="Patient Is Not Deceased" type="bool">
+        <none>
+          <fact ref="Patient Is Deceased"/>
+        </none>
+      </fact>
       <fact name="Patient Age In Years" type="real">
         <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
       </fact>

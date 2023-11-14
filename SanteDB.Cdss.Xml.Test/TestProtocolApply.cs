@@ -69,7 +69,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 

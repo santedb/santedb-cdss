@@ -33,6 +33,13 @@
   <logic id="org.santedb.cdss.vaccine.bcg.patient" name="BCG Vaccination Logic">
     <status>active</status>
     <context type="Patient"/>
+    <when>
+      <all>
+        <fact ref="Patient Is Child" />
+        <fact ref="Patient Is Not Deceased" />
+      </all>
+    </when>
+
     <define>
 
       <fact name="Patient Has Not Received BCG Dose" type="bool">
