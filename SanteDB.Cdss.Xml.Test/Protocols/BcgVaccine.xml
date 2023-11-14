@@ -34,7 +34,7 @@
     <status>active</status>
     <context type="Patient"/>
     <define>
-     
+
       <fact name="Patient Has Not Received BCG Dose" type="bool">
         <hdsi negate="true">participation[RecordTarget].source@SubstanceAdministration.participation[Product].player@Material.typeConcept.mnemonic=VaccineType-BCG</hdsi>
       </fact>
@@ -48,8 +48,9 @@
         </when>
         <then>
           <propose>
-            <json>
-              <![CDATA[
+            <model>
+              <json>
+                <![CDATA[
             {
 				      "$type": "SubstanceAdministration",
 				      "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
@@ -90,7 +91,8 @@
 				      }
 			      }
           ]]>
-            </json>
+              </json>
+            </model>
             <assign path="actTime">
               <meta>
                 <documentation>Dose should be given at birth</documentation>

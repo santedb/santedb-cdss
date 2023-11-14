@@ -48,7 +48,7 @@
       <fact name="Last Date Of Weight Observation">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
       </fact>
-      
+
       <fact name="Patient Is Under 5 Years Old">
         <csharp>((int)context["Patient Age In Months"]) &lt; 60</csharp>
       </fact>
@@ -62,8 +62,9 @@
         </when>
         <then>
           <propose type="QuantityObservation">
-            <json>
-              <![CDATA[
+            <model>
+              <json>
+                <![CDATA[
               {
                 "$type": "QuantityObservation",
                 "template": {
@@ -78,7 +79,8 @@
                 "unitOfMeasure" : "a0a8d4db-db72-4bc7-9b8c-c07cef7bc796"
               }
               ]]>
-            </json>
+              </json>
+            </model>
             <assign path="actTime" >
               <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
             </assign>
@@ -118,7 +120,7 @@
       </documentation>
     </meta>
     <define>
-  
+
       <fact name="Weight is expressed in Lbs">
         <meta>
           <documentation>For a quantity observation, indicates wether the observed value is expressed in imperial pounds</documentation>
@@ -168,8 +170,9 @@
             </issue>
           </raise>
           <propose>
-            <json>
-              <![CDATA[
+            <model>
+              <json>
+                <![CDATA[
                 {
 				            "$type": "SubstanceAdministration",
                     template: {
@@ -218,7 +221,8 @@
 				            }
 			            }
               ]]>
-            </json>
+              </json>
+            </model>
             <assign path="actTime">
               <csharp>DateTimeOffset.Now</csharp>
             </assign>

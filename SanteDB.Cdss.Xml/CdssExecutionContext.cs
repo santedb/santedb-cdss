@@ -174,6 +174,20 @@ namespace SanteDB.Cdss.Xml
             return false;
         }
 
+        /// <summary>
+        /// Try to get a shared model from the CDSS execution context
+        /// </summary>
+        internal bool TryGetModel(String modelName, out object value)
+        {
+            var caseInsensitiveName = modelName.ToLowerInvariant();
+            if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssModelAssetDefinition modelDefn)
+            {
+                value = modelDefn.Compute();
+                return true;
+            }
+            value = null;
+            return false;
+        }
         /// <inheritdoc/>
         public object GetValue(String parameterOrFactName)
         {

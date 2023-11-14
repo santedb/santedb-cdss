@@ -120,15 +120,10 @@
         </then>
       </rule>
 
-      <rule name="Recommend DTP-Hib-HepB Dose 1">
-        <when>
-          <fact ref="Patient Should Receive DTP-Hib-HepB Dose 1"/>
-        </when>
-        <then>
-          <propose>
-            <json>
-              <![CDATA[
-            {
+      <model name="DTP-Hib-HepB Dose Proposal">
+        <json>
+          <![CDATA[
+          {
 				      "$type": "SubstanceAdministration",
               template: {
                   mnemonic: "act.substanceadmin.immunization"
@@ -137,7 +132,6 @@
               "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
               "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "InitialImmunization" },
               "statusConceptModel" : { "id" : "c8064cbd-fa06-4530-b430-1a52f1530c27", "mnemonic" : "ACTIVE" },
-				      "doseSequence": 1,
               "doseQuantity" : 1.0,
               "doseUnitModel" : {
                 "id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
@@ -177,7 +171,16 @@
 				      }
 			      }
           ]]>
-            </json>
+        </json>
+      </model>
+      
+      <rule name="Recommend DTP-Hib-HepB Dose 1">
+        <when>
+          <fact ref="Patient Should Receive DTP-Hib-HepB Dose 1"/>
+        </when>
+        <then>
+          <propose>
+            <model ref="DTP-Hib-HepB Dose Proposal" />
             <assign path="actTime">
               <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
             </assign>
@@ -186,6 +189,9 @@
             </assign>
             <assign path="stopTime">
               <csharp>((SubstanceAdministration)scopedObject).ActTime.Value.AddDays(7)</csharp>
+            </assign>
+            <assign overwrite="true" path="doseSequence">
+              <fixed>1</fixed>
             </assign>
           </propose>
         </then>
@@ -198,57 +204,7 @@
         <then>
          
           <propose>
-            <json>
-              <![CDATA[
-            {
-				      "$type": "SubstanceAdministration",
-              template: {
-                  mnemonic: "act.substanceadmin.immunization"
-              },
-             
-              "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-              "typeConceptModel": { "id" : "6E7A3521-2967-4C0A-80EC-6C5C197B2178", "mnemonic" : "Immunization" },
-				      "doseSequence": 2,
-              "doseQuantity" : 1.0,
-              "doseUnitModel" : {
-                "id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
-                "mnemonic" : "DOSE"
-              },
-              "routeModel" : {
-                "id": "d594f99f-0151-41a0-a359-282ab54683a1",
-                "mnemonic": "RouteOfAdministration-IM"
-              },
-              "siteModel" : {
-                "id": "dd5db8ed-0d97-4728-bd94-27aacd79ea02",
-                "mnemonic": 'Site-LeftArm'
-              },           
-				      "participation": {
-					      "Product": [{
-                  "playerModel" : {
-                    "$type" : "Material",
-                    "id" : "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
-                    "typeConceptModel": {
-                      "id" : "C20CE9A2-57FD-4FFB-9C12-04A3957D732A",
-                      "mnemonic": "VaccineType-DTP-Hib-HepB"
-                    },
-						        "name": {
-							        "OfficialRecord": [{
-								        "component": {
-									        "$other": ["DTP - Haemophilus influenzae type b conjugate and hepatitis b"]
-								        }
-							        }],
-                      "Assigned": [{
-								        "component": {
-									        "$other": ["DTP-Hib-HepB"]
-								        }
-							        }]
-						        }
-                  }
-					      }]
-				      }
-			      }
-          ]]>
-            </json>
+            <model ref="DTP-Hib-HepB Dose Proposal" />
             <assign path="actTime">
               <csharp>
                 ((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)
@@ -259,6 +215,9 @@
             </assign>
             <assign path="stopTime">
               <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
+            </assign>
+            <assign overwrite="true" path="doseSequence">
+              <fixed>2</fixed>
             </assign>
           </propose>
 
@@ -272,57 +231,7 @@
         <then>
           
           <propose>
-            <json>
-              <![CDATA[
-            {
-				      "$type": "SubstanceAdministration",
-              template: {
-                  mnemonic: "act.substanceadmin.immunization"
-              },
-             
-              "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-              "typeConceptModel": { "id" : "6E7A3521-2967-4C0A-80EC-6C5C197B2178", "mnemonic" : "Immunization" },
-				      "doseSequence": 3,
-              "doseQuantity" : 1.0,
-              "doseUnitModel" : {
-                "id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
-                "mnemonic" : "DOSE"
-              },
-              "routeModel" : {
-                "id": "d594f99f-0151-41a0-a359-282ab54683a1",
-                "mnemonic": "RouteOfAdministration-IM"
-              },
-              "siteModel" : {
-                "id": "dd5db8ed-0d97-4728-bd94-27aacd79ea02",
-                "mnemonic": 'Site-LeftArm'
-              },           
-				      "participation": {
-					      "Product": [{
-                  "playerModel" : {
-                    "$type" : "Material",
-                    "id" : "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
-                    "typeConceptModel": {
-                      "id" : "C20CE9A2-57FD-4FFB-9C12-04A3957D732A",
-                      "mnemonic": "VaccineType-DTP-Hib-HepB"
-                    },
-						        "name": {
-							        "OfficialRecord": [{
-								        "component": {
-									        "$other": ["DTP - Haemophilus influenzae type b conjugate and hepatitis b"]
-								        }
-							        }],
-                      "Assigned": [{
-								        "component": {
-									        "$other": ["DTP-Hib-HepB"]
-								        }
-							        }]
-						        }
-                  }
-					      }]
-				      }
-			      }
-          ]]>
-            </json>
+            <model ref="DTP-Hib-HepB Dose Proposal" />
            
             <assign path="actTime">
               <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
@@ -333,7 +242,9 @@
             <assign path="stopTime">
               <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
             </assign>
-
+            <assign overwrite="true" path="doseSequence">
+              <fixed>3</fixed>
+            </assign>
           </propose>
         </then>
       </rule>

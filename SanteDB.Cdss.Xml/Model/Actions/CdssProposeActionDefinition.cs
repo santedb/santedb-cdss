@@ -24,26 +24,12 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     [XmlType(nameof(CdssProposeActionDefinition), Namespace = "http://santedb.org/cdss")]
     public class CdssProposeActionDefinition : CdssActionDefinition
     {
-        // JSON Serializer
-        private static JsonViewModelSerializer s_serializer = new JsonViewModelSerializer();
-
-        // Parsed model
-        private Act m_parsedModel;
-
+        
         /// <summary>
         /// Gets or sets the model 
         /// </summary>
-        [XmlElement("json", typeof(String)),
-        XmlElement(nameof(Act), typeof(Act), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(TextObservation), typeof(TextObservation), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(SubstanceAdministration), typeof(SubstanceAdministration), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(QuantityObservation), typeof(QuantityObservation), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(CodedObservation), typeof(CodedObservation), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(PatientEncounter), typeof(PatientEncounter), Namespace = "http://santedb.org/model"),
-        XmlElement(nameof(Procedure), typeof(Procedure), Namespace = "http://santedb.org/model"),
-            XmlElement(nameof(Narrative), typeof(Narrative), Namespace = "http://santedb.org/model"),
-        JsonProperty("json")]
-        public object Model { get; set; }
+        [XmlElement("model"), JsonProperty("model")]
+        public CdssModelAssetDefinition Model { get; set; }
 
         /// <summary>
         /// Gets or sets the property to assign
@@ -84,19 +70,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 try
                 {
-                    if (this.m_parsedModel == null)
-                    {
-                        switch (this.Model)
-                        {
-                            case String jsonString:
-                                this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
-                                break;
-                            case Act act:
-                                this.m_parsedModel = act.DeepCopy() as Act;
-                                break;
-                        }
-                    }
-                    Act model = this.m_parsedModel.DeepCopy() as Act;
+                    var model = this.Model.Compute() as Act;
                     model.Protocols = new List<ActProtocol>();
                     // Get any protocols in the execution context hierarchy
                     var ctx = CdssExecutionStackFrame.Current;
