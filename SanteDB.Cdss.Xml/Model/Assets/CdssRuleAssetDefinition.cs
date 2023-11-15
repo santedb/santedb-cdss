@@ -64,6 +64,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             base.ThrowIfInvalidState();
 
+            // Has this rule already been executed? 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
                 try

@@ -53,7 +53,7 @@
         <query order-by="source.actTime" select="source@SubstanceAdministration" fn="last" source="participation[RecordTarget]">source.isNegated=false&amp;source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&amp;source@SubstanceAdministration.doseSequence=3</query>
       </fact>
 
-      <fact name="Patient Has an AEFI to DTP-Hib-HepB Dose">
+      <fact name="Patient Has an Unresolved AEFI to DTP-Hib-HepB Dose">
         <meta>
           <documentation>Patient has an active (unresolved) AEFI to a previous dose of DTP-Hib-HepB</documentation>
         </meta>
@@ -121,7 +121,7 @@
               <fact ref="Patient Should Receive DTP-Hib-HepB Dose 2"/>
               <fact ref="Patient Should Receive DTP-Hib-HepB Dose 3"/>
             </any>
-            <fact ref="Patient Has an AEFI to DTP-Hib-HepB Dose"/>
+            <fact ref="Patient Has an Unresolved AEFI to DTP-Hib-HepB Dose"/>
           </all>
         </when>
         <then>

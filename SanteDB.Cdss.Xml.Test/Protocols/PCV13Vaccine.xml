@@ -19,27 +19,104 @@
  - User: fyfej
  - Date: 2023-5-19
  -->
-<ProtocolDefinition xmlns="http://santedb.org/cdss" uuid="5DDA76D6-C192-4260-90CC-BBD96B790656" id="PCV13" name="PCV13 Immunization Schedule">
-  <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
-  </when>
-  <rule id="PCV1">
-    <when evaluation="and">
-      <!-- PCV1 is not in their file yet -->
-      <hdsiExpression negationIndicator="true">
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=1&amp;
-        participation[RecordTarget].source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13
-      </hdsiExpression>
+<CdssLibrary xmlns="http://santedb.org/cdss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd"
+             id="org.santedb.cdss.vaccine.pcv13"
+             name="PCV 13 Childhood Vaccination Schedule"
+             uuid="5DDA76D6-C192-4260-90CC-BBD96B790656">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>This library contains the dosing logic for PCV13 immunizations</documentation>
+  </meta>
+  <include>#org.santedb.cdss.core</include>
+  <include>#org.santedb.cdss.childcare</include>
+  <logic id="org.santedb.cdss.vaccine.pcv13.patient">
+    <status>active</status>
+    <context type="Patient"/>
+    <when>
+      <all>
+        <fact ref="Patient Is Child" />
+        <fact ref="Patient Is Not Deceased" />
+      </all>
     </when>
-    <then>
-      <action>
-        <jsonModel>
+
+    <define>
+      <fact name="Patient's Last Administration of PCV13 Dose 1">
+        <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
           <![CDATA[
-            {
+          source.isNegated=false&
+          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source@SubstanceAdministration.doseSequence=1
+          ]]>
+        </query>
+      </fact>
+
+      <fact name="Patient's Last Administration of PCV13 Dose 2">
+        <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
+          <![CDATA[
+          source.isNegated=false&
+          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source@SubstanceAdministration.doseSequence=2
+          ]]>
+        </query>
+      </fact>
+
+      <fact name="Patient's Last Administration of PCV13 Dose 3">
+        <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
+          <![CDATA[
+          source.isNegated=false&
+          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source@SubstanceAdministration.doseSequence=3
+          ]]>
+        </query>
+      </fact>
+
+
+      <fact name="Patient Has an Unresolved AEFI to PCV13 Dose">
+        <meta>
+          <documentation>Patient has an active (unresolved) AEFI to a previous dose of PCV13</documentation>
+        </meta>
+        <any>
+          <hdsi>
+            participation[RecordTarget].source.typeConcept=0744B6AD-BE39-4A08-B64D-F61CB8282267
+            &amp;participation[RecordTarget].source.relationship[HasSubject].target.typeConcept=0124fde0-7857-4815-b257-74acaa0dd92d
+            &amp;participation[RecordTarget].source.relationship[RefersTo].target.participation.Product.player.typeConcept.mnemonic=VaccineType-PCV13
+          </hdsi>
+          <hdsi>
+            participation[RecordTarget].source.typeConcept=0124fde0-7857-4815-b257-74acaa0dd92d&amp;
+            participation[RecordTarget].source@CodedObservation.value.mnemonic=VaccineType-PCV13&amp;
+            participation[RecordTarget].source.isNegated=false
+          </hdsi>
+        </any>
+      </fact>
+
+      <fact name="Patient Refused Previous PCV13">
+        <meta>
+          <documentation>When a patient has refused a previous dose of PCV13 due to personal or religious reasons </documentation>
+        </meta>
+        <hdsi>
+          participation[RecordTarget].source.isNegated=true&amp;
+          participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13&amp;
+          participation[RecordTarget].source.reasonConcept=0D40C2B6-7CEB-4492-AB2A-6E7C730EAF22&amp;
+          participation[RecordTarget].source.reasonConcept=42351A36-F60F-4687-B334-7A41B091BAE1
+        </hdsi>
+      </fact>
+
+      <model name="PCV Dose Administration Proposal">
+        <json>
+          <![CDATA[
+          {
 				      "$type": "SubstanceAdministration",
-				      "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
+              "templateModel": {
+                  "mnemonic" : "org.santedb.emr.sbadm.immunization",
+                  "oid": "1.3.5.1.4.1.52820.5.2.3.2"
+                },
+                "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
               "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "Immunization" },
-				      "doseSequence": 1,
               "doseQuantity" : 1.0,
               "doseUnitModel" : {
                 "id": "A77B8D83-1CC9-4806-A268-5D1738154AFA",
@@ -75,139 +152,130 @@
 				      }
 			      }
           ]]>
-        </jsonModel>
-        <assign propertyName="ActTime">_.Target.DateOfBirth.Value + new TimeSpan(42, 0, 0, 0)</assign>
-        <assign propertyName="StartTime">_.Target.DateOfBirth.Value + new TimeSpan(42,0,0,0)</assign>
-        <assign propertyName="StopTime">_.Target.DateOfBirth.Value + new TimeSpan(49, 0, 0, 0)</assign>
-      </action>
-    </then>
-  </rule>
-  <rule id="PCV2">
-    <when evaluation="and">
-      <!-- PCV 1 is in their file yet -->
-      <hdsiExpression negationIndicator="false">
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=1&amp;
-        participation[RecordTarget].source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13
-      </hdsiExpression>
-      <!-- PCV 2 is not in their file yet -->
-      <hdsiExpression negationIndicator="true">
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=2&amp;
-        participation[RecordTarget].source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13
-      </hdsiExpression>
-    </when>
-    <then>
-      <action>
-        <jsonModel>
-          <![CDATA[
-                        {
-				      "$type": "SubstanceAdministration",
-				      "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-              "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "Immunization" },
-				      "doseSequence": 2,
-              "doseQuantity" : 1.0,
-              "doseUnitModel" : {
-                "id": "A77B8D83-1CC9-4806-A268-5D1738154AFA",
-                "mnemonic" : "DOSE"
-              },
-              "routeModel" : {
-                "id": "D594F99F-0151-41A0-A359-282AB54683A1",
-                "mnemonic": "RouteOfAdministration-IM"
-              },
-				      "participation": {
-					      "Product": [{
-                  "playerModel" : {
-                    "$type" : "Material",
-                    "id" : "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
-                    "typeConceptModel": {
-                      "id" : "1185DEF1-6AD4-4995-B67A-406DB08945B5",
-                      "mnemonic": "VaccineType-PCV13"
-                    },
-						        "name": {
-							        "OfficialRecord": [{
-								        "component": {
-									        "$other": ["Pneumococcal conjugate PCV 13"]
-								        }
-							        }],
-                      "Assigned": [{
-								        "component": {
-									        "$other": ["PCV13"]
-								        }
-							        }]
-						        }
-                  }
-					      }]
-				      }
-			      }
-          ]]>
-        </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="StartTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="ActTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=1&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="StopTime">_.Act.ActTime.Value + new TimeSpan(5 * 7,0,0,0)</assign>
-      </action>
-    </then>
-  </rule>
-  <rule id="PCV3">
-    <when evaluation="and">
-      <!-- PCV 2 is in their file yet -->
-      <hdsiExpression negationIndicator="false">
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=2&amp;
-        participation[RecordTarget].source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13
-      </hdsiExpression>
-      <!-- PCV 3 is not in their file yet -->
-      <hdsiExpression negationIndicator="true">
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=3&amp;
-        participation[RecordTarget].source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13
-      </hdsiExpression>
-    </when>
-    <then>
-      <action>
-        <jsonModel>
-          <![CDATA[
-            {
-				      "$type": "SubstanceAdministration",
-				      "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-              "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "Immunization" },
-				      "doseSequence": 3,
-              "doseQuantity" : 1.0,
-              "doseUnitModel" : {
-                "id": "A77B8D83-1CC9-4806-A268-5D1738154AFA",
-                "mnemonic" : "DOSE"
-              },
-              "routeModel" : {
-                "id": "D594F99F-0151-41A0-A359-282AB54683A1",
-                "mnemonic": "RouteOfAdministration-IM"
-              },
-				      "participation": {
-					      "Product": [{
-                  "playerModel" : {
-                    "$type" : "Material",
-                    "id" : "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
-                    "typeConceptModel": {
-                      "id" : "1185DEF1-6AD4-4995-B67A-406DB08945B5",
-                      "mnemonic": "VaccineType-PCV13"
-                    },
-						        "name": {
-							        "OfficialRecord": [{
-								        "component": {
-									        "$other": ["Pneumococcal conjugate PCV 13"]
-								        }
-							        }],
-                      "Assigned": [{
-								        "component": {
-									        "$other": ["PCV13"]
-								        }
-							        }]
-						        }
-                  }
-					      }]
-				      }
-			      }
-          ]]>
-        </jsonModel>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="StartTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="ActTime">_.Act.ActTime.Value + new TimeSpan(4 * 7,0,0,0)</assign>
-        <assign scope="Participations" where="participationRole.mnemonic=RecordTarget&amp;source@SubstanceAdministration.doseSequence=2&amp;source@SubstanceAdministration.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13" propertyName="StopTime">_.Act.ActTime.Value + new TimeSpan(5 * 7,0,0,0)</assign>
-      </action>
-    </then>
-  </rule>
-</ProtocolDefinition>
+        </json>
+      </model>
+
+      <fact name="Patient Should Receive PCV13 Dose 1">
+        <none>
+          <fact ref="Patient's Last Administration of PCV13 Dose 1"/>
+          <fact ref="Patient Refused Previous PCV13" />
+        </none>
+      </fact>
+
+      <fact name="Patient Should Receive PCV13 Dose 2">
+        <all>
+          <fact ref="Patient's Last Administration of PCV13 Dose 1"/>
+          <none>
+            <fact ref="Patient's Last Administration of PCV13 Dose 2" />
+            <fact ref="Patient Refused Previous PCV13" />
+          </none>
+        </all>
+      </fact>
+
+      <fact name="Patient Should Receive PCV13 Dose 3">
+        <all>
+          <fact ref="Patient's Last Administration of PCV13 Dose 2" />
+          <none>
+            <fact ref="Patient's Last Administration of PCV13 Dose 3" />
+            <fact ref="Patient Refused Previous PCV13" />
+          </none>
+        </all>
+      </fact>
+
+      <rule name="Raise Alert when Patient is to Receive PCV13 but has an AEFI">
+        <when>
+          <all>
+            <any>
+              <fact ref="Patient Should Receive PCV13 Dose 1" />
+              <fact ref="Patient Should Receive PCV13 Dose 2"/>
+              <fact ref="Patient Should Receive PCV13 Dose 3"/>
+            </any>
+            <fact ref="Patient Has an Unresolved AEFI to PCV13 Dose"/>
+          </all>
+        </when>
+        <then>
+          <raise>
+            <issue xmlns="http://santedb.org/issue" priority="Warning" type="1a4fff6c-f54f-11e8-8eb2-f2801f1b9fd1">
+              Patient has an unresolved AEFI and/or drug allergy/intolerance to PCV13 Reported - Please consult with patient prior to administration of PCV13
+            </issue>
+          </raise>
+        </then>
+      </rule>
+
+      <rule name="Recommend PCV13 Dose 1">
+        <when>
+          <fact ref="Patient Should Receive PCV13 Dose 1"/>
+        </when>
+        <then>
+          <propose>
+            <model ref="PCV Dose Administration Proposal" />
+            <assign path="actTime">
+              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
+            </assign>
+            <assign path="startTime">
+              <hdsi scope="scopedObject">actTime</hdsi>
+            </assign>
+            <assign path="doseSequence">
+              <fixed>1</fixed>
+            </assign>
+          </propose>
+        </then>
+      </rule>
+
+      <rule name="Recommend PCV13 Dose 1">
+        <when>
+          <fact ref="Patient Should Receive PCV13 Dose 2"/>
+        </when>
+        <then>
+          <propose>
+            <model ref="PCV Dose Administration Proposal" />
+            <assign path="actTime">
+              <csharp>((Act)context["Patient's Last Administration of PCV13 Dose 1"]).ActTime.Value.AddDays(28)</csharp>
+            </assign>
+            <assign path="startTime">
+              <hdsi scope="scopedObject">actTime</hdsi>
+            </assign>
+            <assign path="doseSequence">
+              <fixed>2</fixed>
+            </assign>
+          </propose>
+        </then>
+      </rule>
+
+      <rule name="Recommend PCV13 Dose 3">
+        <when>
+          <fact ref="Patient Should Receive PCV13 Dose 3"/>
+        </when>
+        <then>
+          <propose>
+            <model ref="PCV Dose Administration Proposal" />
+            <assign path="actTime">
+              <csharp>((Act)context["Patient's Last Administration of PCV13 Dose 2"]).ActTime.Value.AddDays(28)</csharp>
+            </assign>
+            <assign path="startTime">
+              <hdsi scope="scopedObject">actTime</hdsi>
+            </assign>
+            <assign path="doseSequence">
+              <fixed>3</fixed>
+            </assign>
+          </propose>
+        </then>
+      </rule>
+
+      <protocol uuid="5DDA76D6-C192-4260-90CC-BBD96B790656" id="org.santedb.cdss.vaccine.pcv13.protocol" name="PCV13 Childhood Immunization Schedule"
+                oid="1.3.5.1.4.1.52820.5.2.3.2.4">
+        <when>
+          <fact ref="Patient Is Child" />
+        </when>
+        <scopes>
+          <add id="org.santedb.emr.encounter.childCare" oid="1.3.6.1.4.1.52820.5.2.5.1" />
+        </scopes>
+        <then>
+          <apply ref="Recommend PCV13 Dose 1" />
+          <apply ref="Recommend PCV13 Dose 2" />
+          <apply ref="Recommend PCV13 Dose 3" />
+        </then>
+      </protocol>
+    </define>
+  </logic>
+</CdssLibrary>

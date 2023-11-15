@@ -62,7 +62,7 @@
         <csharp>((int)context["Patient Age In Months"]) &lt; 18</csharp>
       </fact>
 
-      <fact name="Patient Has an AEFI to MR Dose">
+      <fact name="Patient Has an Unresolved AEFI to MR Dose">
         <meta>
           <documentation>Patient has an active, unresolved AEFI to a previous dose of MR</documentation>
         </meta>
@@ -130,7 +130,7 @@
               <fact ref="Patient Should Receive MR Dose 1"/>
               <fact ref="Patient Should Receive MR Dose 2"/>
             </any>
-            <fact ref="Patient Has an AEFI to MR Dose"/>
+            <fact ref="Patient Has an Unresolved AEFI to MR Dose"/>
           </all>
         </when>
         <then>

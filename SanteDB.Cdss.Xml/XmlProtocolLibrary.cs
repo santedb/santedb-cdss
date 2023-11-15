@@ -190,7 +190,6 @@ namespace SanteDB.Cdss.Xml
                         .Select(r => new { result = r.Compute(), rule = r.Name })
                         .ToArray();
 
-
                     return context.Proposals.OfType<Object>().Union(context.Issues);
                 }
 
