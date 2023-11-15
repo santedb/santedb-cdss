@@ -20,10 +20,12 @@
  - Date: 2023-5-19
  -->
 
-<CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.weight" name="Childhood Healthy Weight">
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.weight" name="Childhood Healthy Weight"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd">
+  <status>active</status>
   <include>#org.santedb.cdss.core</include>
   <include>#org.santedb.cdss.core.childcare</include>
-  <status>active</status>
   <meta>
     <authors>
       <add>SanteSuite Inc. and the SanteSuite Contributors</add>

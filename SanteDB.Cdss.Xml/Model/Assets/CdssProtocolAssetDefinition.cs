@@ -19,7 +19,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <summary>
         /// Gets or sets the scopes where this protocol should be applied
         /// </summary>
-        [XmlArray("scopes"), XmlArrayItem("type"), JsonProperty("scopes")]
+        [XmlArray("scopes"), XmlArrayItem("add"), JsonProperty("scopes")]
         public List<CdssProtocolGroupDefinition> Scopes { get; set; }
 
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)

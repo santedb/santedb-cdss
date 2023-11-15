@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<CdssLibrary xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.core.childcare" name="Core Shared Childhood Health Logic">
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.core.childcare" name="Core Shared Childhood Health Logic"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd">
   <status>active</status>
   <meta>
     <authors>
