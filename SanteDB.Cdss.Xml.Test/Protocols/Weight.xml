@@ -20,12 +20,10 @@
  - Date: 2023-5-19
  -->
 
-<CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.weight" name="Childhood Healthy Weight"
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="063FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.growth" name="Childhood Healthy Growth"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd">
   <status>active</status>
-  <include>#org.santedb.cdss.core</include>
-  <include>#org.santedb.cdss.core.childcare</include>
   <meta>
     <authors>
       <add>SanteSuite Inc. and the SanteSuite Contributors</add>
@@ -33,30 +31,82 @@
     <version>3.0</version>
     <documentation>
       <![CDATA[
-      Contains logic related to the computation of childhood weight schedules and analysis of childhood weights - it uses a Z-Scoring methdodology for children < 5 
+      Contains logic related to the computation of childhood weight schedules and analysis of childhood weights - it uses a Z-Scoring methdodology for children < 5 and
+      also captures growth of children.
       ]]>
     </documentation>
   </meta>
-  <logic id="org.santedb.cdss.weight.patient">
+  <include>#org.santedb.cdss.core</include>
+  <include>#org.santedb.cdss.core.childcare</include>
+  <logic id="org.santedb.cdss.growth.patient">
     <!-- Identifies the target type to which the set of rules applies -->
     <context type="Patient" />
+    <when>
+      <fact ref="Patient Is Child" />
+      <fact ref="Patient Is Not Deceased" />
+    </when>
     <status>active</status>
     <meta>
-      <documentation><![CDATA[Contains logic which computes and proposes a weight schedule]]></documentation>
+      <documentation><![CDATA[Contains logic which computes and proposes a weight and height schedule]]></documentation>
     </meta>
     <define>
-      <fact name="Earliest Date Of Weight Observation">
+      <fact name="Earliest Date Of Observation">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]))</csharp>
       </fact>
-      <fact name="Last Date Of Weight Observation">
+      <fact name="Last Date Of Observation">
         <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) + 1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59)</csharp>
       </fact>
 
       <fact name="No Weight Has Been Proposed For Period" negate="true">
-        <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Weight Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Weight Observation</hdsi>
+        <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Observation</hdsi>
       </fact>
 
-      <rule name="Should Weigh Child" id="org.santedb.cdss.weight.patient.rule.shouldWeigh">
+      <fact name="No Length Has Been Proposed for Period" negate="true">
+        <hdsi>participation[RecordTarget].source.typeConcept.mnemonic=VitalSign-Height&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime&lt;$Last Date Of Observation</hdsi>
+      </fact>
+
+      <rule name="Should Measure Child" id="org.santedb.cdss.growth.patient.rule.height">
+        <when>
+          <fact ref="No Height Has Been Proposed for Period" />
+        </when>
+        <then>
+          <propose type="QuantityObservation">
+            <model>
+              <json>
+                <![CDATA[
+                {
+              "$type": "QuantityObservation",              
+              "templateModel": {
+                "mnemonic": "org.santedb.emr.observation.heightLying",
+                  "oid": "1.3.6.1.4.1.52820.5.2.1.6"
+              },
+              "moodConcept": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+              "classConcept": "28D022C6-8A8B-47C4-9E6A-2BC67308739E",
+              "statusConceptModel" : { "id" : "c8064cbd-fa06-4530-b430-1a52f1530c27", "mnemonic" : "ACTIVE" },
+              "typeConcept" : "850ca898-c656-4ba2-a7c1-ff74e3331396",
+              "typeConceptModel": {
+                "id":"850ca898-c656-4ba2-a7c1-ff74e3331396",
+                "mnemonic":"VitalSign-Height"
+              },
+			        "value" : 0,
+              "unitOfMeasure" : "eeefb6bb-18b1-478d-9cc5-575325b947a8"
+            }
+                ]]>
+              </json>
+            </model>
+            <assign path="actTime" >
+              <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
+            </assign>
+            <assign path="startTime">
+              <fact ref="Earliest Date Of Observation" />
+            </assign>
+            <assign path="stopTime">
+              <fact ref="Last Date Of Observation" />
+            </assign>
+          </propose>
+        </then>
+      </rule>
+      <rule name="Should Weigh Child" id="org.santedb.cdss.growth.patient.rule.weight">
         <when>
           <fact ref="No Weight Has Been Proposed For Period" />
         </when>
@@ -86,10 +136,10 @@
               <csharp>context.Target.DateOfBirth.Value.Date.AddMonths((int)context["index"])</csharp>
             </assign>
             <assign path="startTime">
-              <fact ref="Earliest Date Of Weight Observation" />
+              <fact ref="Earliest Date Of Observation" />
             </assign>
             <assign path="stopTime">
-              <fact ref="Last Date Of Weight Observation" />
+              <fact ref="Last Date Of Observation" />
             </assign>
           </propose>
         </then>
@@ -104,6 +154,7 @@
         <then>
           <repeat iterations="60" trackBy="index">
             <apply ref="Should Weigh Child" />
+            <apply ref="Should Measure Child" />
           </repeat>
         </then>
       </protocol>
@@ -111,11 +162,11 @@
     </define>
   </logic>
   <logic id="org.santedb.cdss.weight.observation">
+    <status>active</status>
     <context type="QuantityObservation"/>
     <when>
       <hdsi>typeConcept=a261f8cd-69b0-49aa-91f4-e6d3e5c612ed</hdsi>
     </when>
-    <status>active</status>
     <meta>
       <documentation>
         <![CDATA[Analyse a weight collected]]>
@@ -241,7 +292,7 @@
           </assign>
           <raise>
             <issue xmlns="http://santedb.org/issue" priority="Warning" id="org.santedb.cdss.weight.issue.counsel">
-              Patient abnormally high - Please provide appropriate nutritional counseling
+              Patient weight abnormally high - Please provide appropriate nutritional counseling
             </issue>
           </raise>
         </then>
