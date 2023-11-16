@@ -66,7 +66,22 @@ namespace SanteDB.Cdss.Xml
         private CdssProtocolAssetDefinition m_definition;
 
         /// <inheritdoc/>
-        public Guid Uuid => this.m_definition.Uuid;
+        public Guid Uuid
+        {
+            get => this.m_definition.Uuid;
+            set
+            {
+                if(this.m_definition.Uuid != Guid.Empty || 
+                    value != this.m_definition.Uuid)
+                {
+                    throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
+                }
+                else
+                {
+                    this.m_definition.Uuid = value;
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public String Id => this.m_definition.Id;

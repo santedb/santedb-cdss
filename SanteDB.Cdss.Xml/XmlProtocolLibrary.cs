@@ -6,6 +6,7 @@ using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Roles;
 using SharpCompress;
@@ -47,8 +48,22 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <inheritdoc/>
-        public Guid Uuid => this.m_library.Uuid;
-
+        public Guid Uuid
+        {
+            get => this.m_library.Uuid;
+            set
+            {
+                if (this.m_library.Uuid != Guid.Empty ||
+                    value != this.m_library.Uuid)
+                {
+                    throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
+                }
+                else
+                {
+                    this.m_library.Uuid = value;
+                }
+            }
+        }
         /// <inheritdoc/>
         public string Id => this.m_library.Id;
 
@@ -119,6 +134,10 @@ namespace SanteDB.Cdss.Xml
                 var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
                 this.m_scopedLibraries = new List<CdssLibraryDefinition>() { this.m_library };
                 this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o=>o.Library) ?? new CdssLibraryDefinition[0]);
+                if(this.m_scopedLibraries.Any(o=>o.Status == CdssObjectState.DontUse))
+                {
+                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
+                }
             }
         }
 
@@ -132,6 +151,13 @@ namespace SanteDB.Cdss.Xml
 #endif
             try
             {
+                // Is the library not active?
+                if (this.m_library.Status == CdssObjectState.DontUse)
+                {
+                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
+                }
+
+
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
                 this.InitializeLibrary();
@@ -172,6 +198,12 @@ namespace SanteDB.Cdss.Xml
 #endif
             try
             {
+                // Is the library not active?
+                if (this.m_library.Status == CdssObjectState.DontUse)
+                {
+                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
+                }
+
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
                 this.InitializeLibrary();
