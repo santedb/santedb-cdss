@@ -8,6 +8,7 @@ using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SharpCompress;
 using System;
@@ -161,6 +162,12 @@ namespace SanteDB.Cdss.Xml
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
                 this.InitializeLibrary();
+
+                if (analysisTarget is Entity ent) // HACK: Participations need to be reverse loaded
+                {
+                    ent.Participations = ent.GetParticipations().ToList();
+                }
+
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.m_scopedLibraries);
                 using (CdssExecutionStackFrame.Enter(context))
                 {
@@ -207,6 +214,11 @@ namespace SanteDB.Cdss.Xml
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
                 this.InitializeLibrary();
+                if(target is Entity ent) // HACK: Participations need to be reverse loaded
+                {
+                    ent.Participations = ent.GetParticipations().ToList();
+                }
+
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
 
                 using (CdssExecutionStackFrame.Enter(context))
