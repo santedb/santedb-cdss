@@ -21,7 +21,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// <summary>
         /// Reference data
         /// </summary>
-        [XmlText, JsonProperty("csv")]
+        [XmlText(), JsonProperty("csv")]
         public string RawData { get; set; }
 
         /// <inheritdoc/>

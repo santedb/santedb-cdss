@@ -44,8 +44,23 @@
     <Compile Remove="Model.old\ProtocolWhenClauseCollection.cs" />
     <Compile Remove="Model.old\RulesetLibrary.cs" />
     <Compile Remove="Model.old\Types.cs" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Antlr4 Include="Antlr\CdssLibrary.g4">
+      <Visitor>true</Visitor>
+      <Listener>false</Listener>
+      <GAtn>true</GAtn>
+      <Package>SanteDB.Cdss.Xml.Antlr</Package>
+      <Error>true</Error>
+    </Antlr4>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Antlr\CdssLibrary.g4" />
   </ItemGroup>  
   <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.4.0" PrivateAssets="all" />
     <PackageReference Include="DynamicExpresso.Core" Version="2.16.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>    
@@ -154,6 +169,19 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="i18n\CdssTranspileErrors.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CdssTranspileErrors.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="i18n\CdssTranspileErrors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CdssTranspileErrors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="Schema\SanteDBCdss.xsd">

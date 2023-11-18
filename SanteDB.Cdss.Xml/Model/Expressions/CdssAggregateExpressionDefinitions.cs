@@ -49,6 +49,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         protected CdssAggregateExpressionDefinition(ExpressionType binaryOperator)
         {
             this.m_operator = binaryOperator;
+            this.ContainedExpressions = new List<CdssExpressionDefinition>();
         }
 
         /// <summary>

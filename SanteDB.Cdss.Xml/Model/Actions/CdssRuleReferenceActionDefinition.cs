@@ -16,6 +16,19 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     public class CdssRuleReferenceActionDefinition : CdssActionDefinition
     {
 
+        public CdssRuleReferenceActionDefinition()
+        {
+            
+        }
+
+        /// <summary>
+        /// Creates a new rule reference action
+        /// </summary>
+        public CdssRuleReferenceActionDefinition(string ruleName)
+        {
+            this.RuleName = ruleName;
+        }
+
         /// <summary>
         /// Gets the rule 
         /// </summary>

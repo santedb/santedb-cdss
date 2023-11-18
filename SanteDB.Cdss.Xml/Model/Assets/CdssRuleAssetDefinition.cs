@@ -13,7 +13,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     /// CDSS rule asset definition
     /// </summary>
     [XmlType(nameof(CdssRuleAssetDefinition), Namespace = "http://santedb.org/cdss")]
-    public class CdssRuleAssetDefinition : CdssComputableAssetDefinition
+    public class CdssRuleAssetDefinition : CdssComputableAssetDefinition, IHasCdssActions
     {
 
         /// <summary>
@@ -25,15 +25,8 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <summary>
         /// Action definition
         /// </summary>
-        [XmlArray("then"),
-            XmlArrayItem("propose", typeof(CdssProposeActionDefinition)),
-            XmlArrayItem("assign", typeof(CdssPropertyAssignActionDefinition)),
-            XmlArrayItem("raise", typeof(CdssIssueActionDefinition)),
-            XmlArrayItem("repeat", typeof(CdssRepeatActionDefinition)),
-            XmlArrayItem("apply", typeof(CdssRuleReferenceActionDefinition)),
-            XmlArrayItem("rule", typeof(CdssRuleAssetDefinition)),
-            JsonProperty("then")]
-        public List<CdssBaseObjectDefinition> Actions { get; set; }
+        [XmlElement("then"), JsonProperty("then")]
+        public CdssActionCollectionDefinition Actions { get; set; }
 
 
         /// <inheritdoc/>
@@ -43,12 +36,12 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.rule.whenRecommended", "Rules should carry a WHEN condition unless they are globally applied", Guid.Empty, this.ToString());
             }
-            if (this.Actions?.Any() != true)
+            if (this.Actions == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.thenRequired", "Rules must carry a THEN block", Guid.Empty, this.ToString());
             }
             foreach(var itm in base.Validate(context)
-                .Union(this.Actions?.SelectMany(o=>o.Validate(context) ?? new DetectedIssue[0]))
+                .Union(this.Actions?.Validate(context) ?? new DetectedIssue[0])
                 .Union(this.When?.Validate(context) ?? new DetectedIssue[0]))
             {
                 itm.RefersTo = itm.RefersTo ?? this.ToString();
@@ -71,18 +64,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 {
                     if (this.When == null || this.When.Compute() is bool b && b)
                     {
-                        foreach (var act in this.Actions)
-                        {
-                            switch(act)
-                            {
-                                case CdssActionDefinition action:
-                                    action.Execute();
-                                    break;
-                                case CdssComputableAssetDefinition asset:
-                                    asset.Compute();
-                                    break;
-                            }
-                        }
+                        this.Actions.Execute();
                         return true;
                     }
 

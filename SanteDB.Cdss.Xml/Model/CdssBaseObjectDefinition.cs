@@ -33,16 +33,34 @@ namespace SanteDB.Cdss.Xml.Model
         public Guid Uuid { get; set; }
 
         /// <summary>
+        /// True if UUID is specified
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool UuidSpecified { get; set; }
+
+        /// <summary>
         /// Gets or sets the status for the CDSS object
         /// </summary>
         [XmlElement("status"), JsonProperty("status")]
         public CdssObjectState Status { get; set; }
 
         /// <summary>
+        /// True if status has been specified
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool StatusSpecified { get; set; }
+
+        /// <summary>
         /// Gets or sets the metadata related to the cdss object
         /// </summary>
         [XmlElement("meta"), JsonProperty("meta")]
         public CdssObjectMetadata Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or sets the transpiled metadata
+        /// </summary>
+        [XmlElement("source"), JsonProperty("source")]
+        public CdssTranspileMapMetaData TranspileSourceReference { get; set; }
 
         /// <summary>
         /// Gets or sets the object identifier

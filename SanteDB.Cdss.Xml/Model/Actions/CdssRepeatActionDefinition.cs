@@ -14,7 +14,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     /// Represents a repetition of any action
     /// </summary>
     [XmlType(nameof(CdssRepeatActionDefinition), Namespace = "http://santedb.org/cdss")]
-    public class CdssRepeatActionDefinition : CdssExecuteActionDefinition
+    public class CdssRepeatActionDefinition : CdssActionDefinition, IHasCdssActions
     {
 
         /// <summary>
@@ -41,6 +41,12 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         [XmlElement("until"), JsonProperty("until")]
         public CdssWhenDefinition Until { get; set; }
 
+        /// <summary>
+        /// The objects which are to be executed in this repeat loop
+        /// </summary>
+        [XmlElement("execute"),
+            JsonProperty("execute")]
+        public CdssActionCollectionDefinition Actions { get; set; }
 
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
@@ -49,11 +55,18 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.repeat.infinite", "Either @iterations or <until> are required, otherwise repeat action will be infinite", Guid.Empty, this.ToString());
             }
-            foreach (var itm in base.Validate(context).Union(this.Until?.Validate(context) ?? new DetectedIssue[0]))
+            if(this.Actions == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.execute.statement", "Execute block must carry at least one instruction", Guid.Empty, this.ToString());
+            }
+            foreach (var itm in base.Validate(context)
+                .Union(this.Until?.Validate(context) ?? new DetectedIssue[0])
+                .Union(this.Actions?.Validate(context) ?? new DetectedIssue[0]))
             {
                 itm.RefersTo = itm.RefersTo ?? this.ToString();
                 yield return itm;
             }
+
         }
 
         /// <inheritdoc/>
@@ -71,7 +84,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                     {
 
                         CdssExecutionStackFrame.Current.Context.SetValue(this.IterationVariable ?? "index", iteration);
-                        base.Execute();
+                        this.Actions.Execute();
 
                         // If there is an UNTIL clause evaluate it
                         var untilResult = this.Until?.Compute();

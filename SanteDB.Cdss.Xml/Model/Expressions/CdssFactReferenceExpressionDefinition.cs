@@ -20,6 +20,22 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     {
 
         /// <summary>
+        /// Serializer CTOR
+        /// </summary>
+        public CdssFactReferenceExpressionDefinition()
+        {
+                
+        }
+
+        /// <summary>
+        /// Create new reference to <paramref name="factName"/>
+        /// </summary>
+        public CdssFactReferenceExpressionDefinition(String factName)
+        {
+            this.FactName = factName;
+        }
+
+        /// <summary>
         /// Reference to the fact name
         /// </summary>
         [XmlAttribute("ref"), JsonProperty("ref")]
