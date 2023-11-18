@@ -53,7 +53,8 @@ namespace SanteDB.Cdss.Xml.Antlr
                 retVal.TranspileSourceReference = new CdssTranspileMapMetaData(context.Start.Line, context.Start.Column, context.Stop.Line, context.Stop.Column);
                 if(retVal is CdssLibraryDefinition)
                 {
-                    retVal.TranspileSourceReference.SourceFile = this.m_sourcePath;
+                    retVal.TranspileSourceReference.SourceFileName = this.m_sourcePath;
+                    
                 };
             }
             return retVal;

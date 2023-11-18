@@ -62,44 +62,41 @@ namespace SanteDB.Cdss.Xml
             this.m_scopedLibraries = scopedLibraries;
         }
 
-        // Definition
-        private CdssProtocolAssetDefinition m_definition;
-
         /// <inheritdoc/>
         public Guid Uuid
         {
-            get => this.m_definition.Uuid;
+            get => this.m_protocol.Uuid;
             set
             {
-                if(this.m_definition.Uuid != Guid.Empty || 
-                    value != this.m_definition.Uuid)
+                if(this.m_protocol.Uuid != Guid.Empty || 
+                    value != this.m_protocol.Uuid)
                 {
                     throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
                 }
                 else
                 {
-                    this.m_definition.Uuid = value;
+                    this.m_protocol.Uuid = value;
                 }
             }
         }
 
         /// <inheritdoc/>
-        public String Id => this.m_definition.Id;
+        public String Id => this.m_protocol.Id;
 
         /// <inheritdoc/>
-        public string Name => this.m_definition?.Name;
+        public string Name => this.m_protocol?.Name;
 
         /// <inheritdoc/>
-        public string Oid => this.m_definition?.Oid;
+        public string Oid => this.m_protocol?.Oid;
 
         /// <inheritdoc/>
-        public string Version => this.m_definition?.Metadata?.Version;
+        public string Version => this.m_protocol?.Metadata?.Version;
 
         /// <inheritdoc/>
-        public string Documentation => this.m_definition?.Metadata?.Documentation;
+        public string Documentation => this.m_protocol?.Metadata?.Documentation;
 
         /// <inheritdoc/>
-        public IEnumerable<ICdssProtocolScope> Scopes => this.m_definition.Scopes.Select(o => new XmlProtocolAssetGroup(o));
+        public IEnumerable<ICdssProtocolScope> Scopes => this.m_protocol.Scopes.Select(o => new XmlProtocolAssetGroup(o));
 
         ///// <summary>
         ///// Initialize the patient

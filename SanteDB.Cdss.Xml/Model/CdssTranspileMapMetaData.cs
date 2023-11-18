@@ -13,7 +13,9 @@ namespace SanteDB.Cdss.Xml.Model
         {
             
         }
-
+        /// <summary>
+        /// Creates a new transpilation metadata for original source
+        /// </summary>
         public CdssTranspileMapMetaData(int startLine, int startColumn, int stopLine, int stopColumn)
         {
             this.StartPosition = $"{startLine},{startColumn}";
@@ -24,7 +26,7 @@ namespace SanteDB.Cdss.Xml.Model
         /// Source file
         /// </summary>
         [XmlAttribute("source"), JsonProperty("source")]
-        public string SourceFile { get; set; }
+        public string SourceFileName { get; set; }
 
         /// <summary>
         /// Gets or sets the line
@@ -37,5 +39,6 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         [XmlAttribute("stop"), JsonProperty("stop")]
         public string EndPoisition { get; set; }
+
     }
 }

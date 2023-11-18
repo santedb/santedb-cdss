@@ -21,7 +21,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
             using(var stream = typeof(TestDoesTranspile).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BCG.cdss"))
             {
-                var transpiledLibrary = CdssLibraryTranspiler.TranspileCdss(stream, true);
+                var transpiledLibrary = CdssLibraryTranspiler.Transpile(stream, true);
                 using(var ms = new MemoryStream())
                 {
                     transpiledLibrary.Save(ms);
@@ -38,7 +38,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
             using (var stream = typeof(TestDoesTranspile).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.cdss"))
             {
-                var transpiledLibrary = CdssLibraryTranspiler.TranspileCdss(stream, true);
+                var transpiledLibrary = CdssLibraryTranspiler.Transpile(stream, true);
                 using (var ms = new MemoryStream())
                 {
                     transpiledLibrary.Save(ms);

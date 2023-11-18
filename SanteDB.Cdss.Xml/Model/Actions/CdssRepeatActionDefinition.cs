@@ -84,7 +84,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                     {
 
                         CdssExecutionStackFrame.Current.Context.SetValue(this.IterationVariable ?? "index", iteration);
-                        this.Actions.Execute();
+                        this.Actions?.Execute();
 
                         // If there is an UNTIL clause evaluate it
                         var untilResult = this.Until?.Compute();

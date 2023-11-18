@@ -61,8 +61,8 @@
         <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Observation</hdsi>
       </fact>
 
-      <fact name="No Length Has Been Proposed for Period" negate="true">
-        <hdsi>participation[RecordTarget].source.typeConcept.mnemonic=VitalSign-Height&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime&lt;$Last Date Of Observation</hdsi>
+      <fact name="No Height Has Been Proposed for Period" negate="true">
+        <hdsi>participation[RecordTarget].source.typeConcept.mnemonic=VitalSign-Height&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Observation</hdsi>
       </fact>
 
       <rule name="Should Measure Child" id="org.santedb.cdss.growth.patient.rule.height">
@@ -153,8 +153,10 @@
         </when>
         <then>
           <repeat iterations="60" trackBy="index">
-            <apply ref="Should Weigh Child" />
-            <apply ref="Should Measure Child" />
+            <execute>
+              <apply ref="Should Weigh Child" />
+              <apply ref="Should Measure Child" />
+            </execute>
           </repeat>
         </then>
       </protocol>
