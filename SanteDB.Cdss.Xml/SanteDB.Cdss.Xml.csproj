@@ -184,6 +184,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Schema\SanteDBCdss.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
