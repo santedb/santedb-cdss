@@ -103,7 +103,6 @@
       <add type="SanteDB.Persistence.Data.Services.AdoPersistenceService, SanteDB.Persistence.Data" />
       <add type="SanteDB.Persistence.Data.Services.AdoPersistenceService, SanteDB.Persistence.Data" />
       <add type="SanteDB.Core.Security.Privacy.DataPolicyFilterService, SanteDB.Core.Api" />
-      <add type="SanteDB.Cdss.Xml.Test.DummyProtocolRepository, SanteDB.Cdss.Xml.Test"/>
     </serviceProviders>
   </section>
   

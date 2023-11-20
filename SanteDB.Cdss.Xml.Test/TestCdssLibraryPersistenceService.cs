@@ -29,7 +29,7 @@ namespace SanteDB.Cdss.Xml.Test
                     {
                         using (var ms = asm.GetManifestResourceStream(o))
                         {
-                            return new XmlProtocolLibrary(CdssLibraryDefinition.Load(ms));
+                            return new XmlProtocolLibrary(CdssLibraryDefinition.Load(ms)) as ICdssLibrary;
                         }
                     }
                     catch (Exception e)
@@ -37,7 +37,6 @@ namespace SanteDB.Cdss.Xml.Test
                         return null;
                     }
                 })
-                .OfType<ICdssLibrary>()
                 .ToList();
         }
 
@@ -46,7 +45,7 @@ namespace SanteDB.Cdss.Xml.Test
         public IQueryResultSet<ICdssLibrary> Find(Expression<Func<ICdssLibrary, bool>> filter)
             => this.m_libraries.Where(filter.Compile()).AsResultSet();
 
-        public ICdssLibrary Get(Guid libraryUuid) => this.m_libraries.Find(o => o.Uuid == libraryUuid);
+        public ICdssLibrary Get(Guid libraryUuid, Guid? version) => this.m_libraries.Find(o => o.Uuid == libraryUuid);
 
         public ICdssLibrary InsertOrUpdate(ICdssLibrary libraryToInsert)
         {

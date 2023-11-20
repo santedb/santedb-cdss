@@ -34,6 +34,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using SanteDB.Core.Applets;
+using SanteDB.Cdss.Xml.Antlr;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -98,7 +99,7 @@ namespace SanteDB.Cdss.Xml
                 using (AuthenticationContext.EnterSystemContext())
                 {
                     var solutions = this.m_appletSolutionManager?.Solutions.ToList();
-                    if(solutions == null)
+                    if (solutions == null)
                     {
                         this.ProcessApplet(this.m_appletManager.Applets); // no solution manager
                     }
@@ -133,7 +134,17 @@ namespace SanteDB.Cdss.Xml
                     {
                         try
                         {
-                            var library = CdssLibraryDefinition.Load(sourceReader);
+                            CdssLibraryDefinition library = null;
+                            if (f.Name.EndsWith(".cdss"))
+                            {
+                                library = CdssLibraryTranspiler.Transpile(sourceReader, false);
+                            }
+                            else
+                            {
+                                library = CdssLibraryDefinition.Load(sourceReader);
+                            }
+
+                            this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
                             this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
                         }
                         catch (Exception e)
@@ -143,7 +154,7 @@ namespace SanteDB.Cdss.Xml
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this.m_tracer.TraceWarning("Cannot process applet {0} for protocols - {1}", appletCollection, e.ToHumanReadableString());
             }

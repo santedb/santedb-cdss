@@ -69,7 +69,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(String.Empty).Last().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -418,47 +418,4 @@ namespace SanteDB.Cdss.Xml.Test
         }
     }
 
-    /// <summary>
-    /// Dummy clinical repository
-    /// </summary>
-    [ExcludeFromCodeCoverage]
-    internal class DummyProtocolRepository : ICdssLibraryRepository
-    {
-        public String ServiceName => "Fake Repository";
-
-
-        public IQueryResultSet<ICdssLibrary> Find(Expression<Func<ICdssLibrary, bool>> filter)
-        {
-            return new MemoryQueryResultSet<ICdssLibrary>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
-            {
-                var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
-                return new XmlProtocolLibrary(definition);
-            })).Where(filter);
-        }
-
-        public ICdssLibrary Get(Guid protocolUuid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICdssLibrary GetByOid(String protocolOid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICdssLibrary InsertOrUpdate(ICdssLibrary data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICdssLibrary InsertProtocol(ICdssLibrary data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICdssLibrary Remove(Guid protocolUuid)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

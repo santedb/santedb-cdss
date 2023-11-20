@@ -49,7 +49,7 @@ namespace SanteDB.Cdss.Xml.Ami
                 throw new ArgumentOutOfRangeException(nameof(scopingKey));
             }
 
-            var cdssLibrary = this.m_cdssLibrary.Get(uuid);
+            var cdssLibrary = this.m_cdssLibrary.Get(uuid, null);
             if(cdssLibrary != null)
             {
                 return this.ExecuteCdssLibrary(cdssLibrary, parameters);

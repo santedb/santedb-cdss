@@ -36,6 +36,7 @@ namespace SanteDB.Cdss.Xml.Antlr
         private static readonly Regex s_extractNamedIdentifier = new Regex(@"^\<([a-z][0-9a-z\._]+?)\>$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex s_extractStringContents = new Regex(@"^""((?:\.|(\""\"")|[^\""""\n])*)""$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex s_extractMultilineString = new Regex(@"\$\$((.|\r|\n)*)\$\$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
         private readonly bool m_includeMap;
         private readonly string m_sourcePath;
 
@@ -182,9 +183,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(m_currentObject)));
             }
 
-            ITerminalNode uuidToken = context.UUIDV4() ?? context.STRING();
-
-            if (this.TryExtractString(uuidToken, out var uuidString) && Guid.TryParse(uuidString, out var uuid))
+            if (this.TryExtractString(context.STRING(), out var uuidString) && Guid.TryParse(uuidString, out var uuid) || this.TryExtractUuid(context.UUIDV4(), out uuid))
             {
                 this.m_currentObject.Peek().Uuid = uuid;
                 this.m_currentObject.Peek().UuidSpecified = true;
@@ -952,6 +951,14 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new InvalidOperationException(CdssTranspileErrors.MULTI_EXPRESSION_MUST_BE_AGGREGATE);
             }
 
+        }
+
+        /// <summary>
+        /// Try to extract uuid in {UUID} format
+        /// </summary>
+        private bool TryExtractUuid(ITerminalNode uuidToken, out Guid result)
+        {
+            return Guid.TryParse(uuidToken?.GetText(), out result);
         }
 
         private bool TryExtractString(ITerminalNode stringToken, out string result)

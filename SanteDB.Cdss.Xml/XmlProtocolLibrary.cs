@@ -32,6 +32,7 @@ namespace SanteDB.Cdss.Xml
         // definition loaded from XML
         private CdssLibraryDefinition m_library;
         private IList<CdssLibraryDefinition> m_scopedLibraries;
+        private ICdssLibraryRepositoryMetadata m_storageMetadata;
 
         /// <summary>
         /// Creates a new protocol library
@@ -84,6 +85,25 @@ namespace SanteDB.Cdss.Xml
         /// Get the library definition
         /// </summary>
         public CdssLibraryDefinition Library => this.m_library;
+
+        /// <summary>
+        /// Storage metadata
+        /// </summary>
+        public ICdssLibraryRepositoryMetadata StorageMetadata
+        {
+            get => this.m_storageMetadata;
+            set
+            {
+                if (this.m_storageMetadata != null)
+                {
+                    throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(StorageMetadata)));
+                }
+                else
+                {
+                    this.m_storageMetadata = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Get protocols defined for patients in the library

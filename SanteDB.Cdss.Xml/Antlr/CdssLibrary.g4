@@ -37,21 +37,21 @@ protocol_having_statements:
     having_oid
     (having_scope)*;
     
-having_id: HAVING ID NAMED_ID;
-having_uuid: HAVING UUID (UUIDV4|STRING);
-having_oid: HAVING OID OID_DOTTED;
-having_status: HAVING STATUS STATUS_VAL;
-having_type: HAVING TYPE PRIMITIVE_TYPE;
-having_negation: HAVING NEGATION BOOL_VAL;
-having_context: HAVING CONTEXT CLASS_TYPE (when_guard_condition);
-having_model: HAVING MODEL (
+having_id: (HAVING)?ID NAMED_ID;
+having_uuid: (HAVING)?UUID (UUIDV4|STRING);
+having_oid: (HAVING)?OID OID_DOTTED;
+having_status: (HAVING)?STATUS STATUS_VAL;
+having_type: (HAVING)?TYPE PRIMITIVE_TYPE;
+having_negation: (HAVING)?NEGATION BOOL_VAL;
+having_context: (HAVING)?CONTEXT CLASS_TYPE (when_guard_condition)?;
+having_model: (HAVING)?MODEL (
     STRING |
     AS
     (HAVING FORMAT FORMAT_REF)?
     MULTILINE_STRING
     END (MODEL)?
 );
-having_scope: HAVING SCOPE (STRING|NAMED_ID);
+having_scope: (HAVING)?SCOPE (STRING|NAMED_ID);
 
 library_definitions: 
     logic_block | 
@@ -184,10 +184,10 @@ inline_rule_definition: RULE (metadata_statement)? AS
     THEN (then_action_statements)*
     END RULE;
 
-metadata_statement: WITH METADATA
-    (metadata_author_statement)*
-    (metadata_version_statement)?
-    (metadata_documentation_statement)*
+metadata_statement: (WITH)?METADATA
+    (metadata_author_statement|
+    metadata_version_statement|
+    metadata_documentation_statement)*
     END (METADATA)?;
 
 metadata_author_statement:

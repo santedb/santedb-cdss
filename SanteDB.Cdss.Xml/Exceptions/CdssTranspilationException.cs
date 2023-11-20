@@ -24,11 +24,11 @@ namespace SanteDB.Cdss.Xml.Exceptions
         /// <summary>
         /// Creates a new transpilation exception
         /// </summary>
-        public CdssTranspilationException(IToken position, String errorMessage) : base(errorMessage)
+        public CdssTranspilationException(IToken position, String errorMessage) : base($"{errorMessage} @ {position.Line}:{position.Column}")
         {
             this.Line = position.Line;
             this.Column = position.Column;
-
         }
+
     }
 }
