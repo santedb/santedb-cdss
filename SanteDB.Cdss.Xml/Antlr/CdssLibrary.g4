@@ -25,7 +25,8 @@ having_statements:
 fact_having_statements: 
     (having_id |
     having_type |
-    having_negation);
+    having_negation)
+    (having_priority)?;
 
 logic_having_statements:
     (having_statements | 
@@ -35,6 +36,7 @@ protocol_having_statements:
     having_id
     having_uuid
     having_oid
+    (having_priority)?
     (having_scope)*;
     
 having_id: (HAVING)?ID NAMED_ID;
@@ -51,6 +53,7 @@ having_model: (HAVING)?MODEL (
     MULTILINE_STRING
     END (MODEL)?
 );
+having_priority: (HAVING)?PRIORITY (INTEGER)?;
 having_scope: (HAVING)?SCOPE (STRING|NAMED_ID);
 
 library_definitions: 
@@ -129,6 +132,7 @@ define_model: (DEFINE)?MODEL STRING
 
 define_rule: (DEFINE)?RULE STRING
     (having_statements)*
+    (having_priority)?
     (metadata_statement)?
     AS
     (when_guard_condition)?

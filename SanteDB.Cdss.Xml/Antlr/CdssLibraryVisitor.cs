@@ -919,6 +919,24 @@ namespace SanteDB.Cdss.Xml.Antlr
             return retVal;
         }
 
+        public override CdssLibraryDefinition VisitHaving_priority([NotNull] CdssLibraryParser.Having_priorityContext context)
+        {
+            if (!(m_currentObject.Peek() is CdssComputableAssetDefinition assetCollection))
+            {
+                throw new CdssTranspilationException(context.Start, String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
+            }
+
+            if (Int32.TryParse(context.INTEGER()?.GetText(), out var pri))
+            {
+                assetCollection.Priority = pri;
+            }
+            else
+            {
+                assetCollection.Priority = Int32.MaxValue;
+            }
+
+            return base.VisitHaving_priority(context);
+        }
         private void AddComputation(CdssExpressionDefinition expressionDefinition)
         {
             // Are we in an aggregate method?

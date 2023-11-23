@@ -90,7 +90,7 @@ namespace SanteDB.Cdss.Xml.Ami
                 throw new ArgumentOutOfRangeException(nameof(id), String.Format(ErrorMessages.INVALID_FORMAT, id, Guid.Empty));
             }
 
-            var retVal = this.m_cdssLibraryRepository.Get(uuid, Guid.Empty) as XmlProtocolLibrary;
+            var retVal = this.m_cdssLibraryRepository.Get(uuid, versionUuid) as XmlProtocolLibrary;
             if (retVal == null)
             {
                 throw new KeyNotFoundException(id.ToString());

@@ -16,6 +16,12 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     {
 
         /// <summary>
+        /// Gets or sets the priority for overridding default
+        /// </summary>
+        [XmlAttribute("priority"), JsonProperty("priority")]
+        public int Priority { get; set; }
+
+        /// <summary>
         /// Gets the debug view
         /// </summary>
         [XmlIgnore, JsonProperty("debug")]

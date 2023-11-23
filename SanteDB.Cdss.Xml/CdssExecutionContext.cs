@@ -82,7 +82,10 @@ namespace SanteDB.Cdss.Xml
         public CdssExecutionContext(IdentifiedData scopedObject, IEnumerable<CdssLibraryDefinition> scopedLibraries = null)
         {
             this.m_target = scopedObject;
-            this.m_datasets = scopedLibraries?.SelectMany(o => o.Definitions).OfType<CdssDatasetDefinition>().ToCdssReferenceDictionary(o => new CdssReferenceDataset(o));
+            this.m_datasets = scopedLibraries?
+                .SelectMany(o => o.Definitions)
+                .OfType<CdssDatasetDefinition>()
+                .ToCdssReferenceDictionary(o => new CdssReferenceDataset(o));
             // Temporarily assign all assets for any context as in scope
             this.m_computableAssetsInScope = scopedLibraries
                 .SelectMany(o => o.Definitions)

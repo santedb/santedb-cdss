@@ -1,4 +1,5 @@
 ﻿using SanteDB.Cdss.Xml.Model;
+using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model;
@@ -31,13 +32,33 @@ namespace SanteDB.Cdss.Xml
             foreach(var itm in me)
             {
                 var value = valueSelector(itm);
+                int priority = 0;
+                if(value is CdssComputableAssetDefinition ccad)
+                {
+                    priority = ccad.Priority;
+                }
+
                 if(!String.IsNullOrEmpty(itm.Name))
                 {
-                    retVal.Add(itm.Name.ToLowerInvariant(), value);
+                    var key = itm.Name.ToLowerInvariant();
+                    if(!retVal.TryGetValue(key, out var existing) ||
+                        existing is CdssComputableAssetDefinition ccad2 && ccad2.Priority < priority)
+                    {
+                        retVal.Remove(key);
+                        retVal.Add(key, value);
+
+                    }
                 }
                 if(!String.IsNullOrEmpty(itm.Id))
                 {
-                    retVal.Add($"#{itm.Id.ToLowerInvariant()}", value);
+                    var key = $"#{itm.Id.ToLowerInvariant()}";
+                    if (!retVal.TryGetValue(key, out var existing) ||
+                        existing is CdssComputableAssetDefinition ccad2 && ccad2.Priority < priority)
+                    {
+                        retVal.Remove(key);
+                        retVal.Add(key, value);
+
+                    }
                 }
             }
             return retVal;
