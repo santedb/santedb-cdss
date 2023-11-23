@@ -48,13 +48,13 @@ namespace SanteDB.Cdss.Xml.Ami
         public override Type Scope => Type.GetType("SanteDB.Rest.AMI.IAmiServiceContract, SanteDB.Rest.AMI");
 
         /// <inheritdoc/>
-        public override ResourceCapabilityType Capabilities => ResourceCapabilityType.Get | 
+        public override ResourceCapabilityType Capabilities => ResourceCapabilityType.Get |
             ResourceCapabilityType.GetVersion |
             ResourceCapabilityType.History |
-            ResourceCapabilityType.Search | 
-            ResourceCapabilityType.Create | 
-            ResourceCapabilityType.CreateOrUpdate | 
-            ResourceCapabilityType.Update | 
+            ResourceCapabilityType.Search |
+            ResourceCapabilityType.Create |
+            ResourceCapabilityType.CreateOrUpdate |
+            ResourceCapabilityType.Update |
             ResourceCapabilityType.Delete;
 
         /// <inheritdoc/>
@@ -75,38 +75,37 @@ namespace SanteDB.Cdss.Xml.Ami
                         var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
                         return new CdssLibraryDefinitionInfo(retVal, true);
                     }
-
-            }
-            e
-            else if(data is IEnumerable<MultiPartFormData> multiForm)
-            {
-                var sourceFile = multiForm.FirstOrDefault(o => o.IsFile);
-                using (var ms = new MemoryStream(sourceFile.Data)) {
-
-                    try
+                case IEnumerable<MultiPartFormData> multiForm:
                     {
-                        CdssLibraryDefinition library = null;
-                        bool fromSource = sourceFile.FileName.EndsWith(".cdss");
-                        if (fromSource)
+                        var sourceFile = multiForm.FirstOrDefault(o => o.IsFile);
+                        using (var ms = new MemoryStream(sourceFile.Data))
                         {
-                            library = CdssLibraryTranspiler.Transpile(ms, true);
+
+                            try
+                            {
+                                CdssLibraryDefinition library = null;
+                                bool fromSource = sourceFile.FileName.EndsWith(".cdss");
+                                if (fromSource)
+                                {
+                                    library = CdssLibraryTranspiler.Transpile(ms, true);
+                                }
+                                else
+                                {
+                                    library = CdssLibraryDefinition.Load(ms);
+                                }
+                                var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                                return new CdssLibraryDefinitionInfo(retVal, fromSource);
+                            }
+                            catch (CdssTranspilationException e)
+                            {
+                                throw new DetectedIssueException(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty, e);
+                            }
                         }
-                        else
-                        {
-                            library = CdssLibraryDefinition.Load(ms);
-                        }
-                        var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
-                        return new CdssLibraryDefinitionInfo(retVal, fromSource);
                     }
-                    catch(CdssTranspilationException e)
+                default:
                     {
-                        throw new DetectedIssueException(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty, e);
+                        throw new ArgumentOutOfRangeException(nameof(data), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(CdssLibraryDefinition), data.GetType()));
                     }
-                }
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(data), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(CdssLibraryDefinition), data.GetType()));
             }
         }
 
@@ -151,7 +150,7 @@ namespace SanteDB.Cdss.Xml.Ami
         public override IQueryResultSet Query(NameValueCollection queryParameters)
         {
             var query = QueryExpressionParser.BuildLinqExpression<ICdssLibrary>(queryParameters);
-            return new TransformQueryResultSet<ICdssLibrary, CdssLibraryDefinitionInfo>(this.m_cdssLibraryRepository.Find(query), (a) =>new CdssLibraryDefinitionInfo(a, true));
+            return new TransformQueryResultSet<ICdssLibrary, CdssLibraryDefinitionInfo>(this.m_cdssLibraryRepository.Find(query), (a) => new CdssLibraryDefinitionInfo(a, true));
         }
 
         /// <inheritdoc/>
