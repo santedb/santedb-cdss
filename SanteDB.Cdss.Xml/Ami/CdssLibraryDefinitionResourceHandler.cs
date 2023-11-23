@@ -1,6 +1,11 @@
-﻿using RestSrvr.Attributes;
+﻿using Newtonsoft.Json.Serialization;
+using RestSrvr.Attributes;
+using SanteDB.Cdss.Xml.Antlr;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Exceptions;
+using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Model.Attributes;
@@ -12,6 +17,8 @@ using SanteDB.Rest.Common.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace SanteDB.Cdss.Xml.Ami
@@ -54,11 +61,48 @@ namespace SanteDB.Cdss.Xml.Ami
         [Demand(PermissionPolicyIdentifiers.CreateClinicalProtocolConfigurationDefinition)]
         public override object Create(object data, bool updateIfExists)
         {
-            if (data is CdssLibraryDefinition definition)
+            switch (data)
             {
-                var xmlLibrary = new XmlProtocolLibrary(definition);
-                var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
-                return xmlLibrary.Library;
+                case CdssLibraryDefinition definition:
+                    {
+                        var xmlLibrary = new XmlProtocolLibrary(definition);
+                        var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
+                        return new CdssLibraryDefinitionInfo(retVal, true);
+                    }
+                case CdssLibraryDefinitionInfo definitionInfo:
+                    {
+                        var xmlLibrary = new XmlProtocolLibrary(definitionInfo.Library);
+                        var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
+                        return new CdssLibraryDefinitionInfo(retVal, true);
+                    }
+
+            }
+            e
+            else if(data is IEnumerable<MultiPartFormData> multiForm)
+            {
+                var sourceFile = multiForm.FirstOrDefault(o => o.IsFile);
+                using (var ms = new MemoryStream(sourceFile.Data)) {
+
+                    try
+                    {
+                        CdssLibraryDefinition library = null;
+                        bool fromSource = sourceFile.FileName.EndsWith(".cdss");
+                        if (fromSource)
+                        {
+                            library = CdssLibraryTranspiler.Transpile(ms, true);
+                        }
+                        else
+                        {
+                            library = CdssLibraryDefinition.Load(ms);
+                        }
+                        var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                        return new CdssLibraryDefinitionInfo(retVal, fromSource);
+                    }
+                    catch(CdssTranspilationException e)
+                    {
+                        throw new DetectedIssueException(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty, e);
+                    }
+                }
             }
             else
             {

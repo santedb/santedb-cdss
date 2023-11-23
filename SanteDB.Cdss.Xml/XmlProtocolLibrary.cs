@@ -18,6 +18,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -55,7 +56,7 @@ namespace SanteDB.Cdss.Xml
             get => this.m_library.Uuid;
             set
             {
-                if (this.m_library.Uuid != Guid.Empty ||
+                if (this.m_library.Uuid != Guid.Empty &&
                     value != this.m_library.Uuid)
                 {
                     throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
@@ -112,9 +113,10 @@ namespace SanteDB.Cdss.Xml
         {
             this.InitializeLibrary();
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                    .Where(o => o.Context.Type == typeof(Patient))
+                    .Where(o => o.Context.Type == typeof(Patient) && o.Status == CdssObjectState.Active)
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
+                    .Where(o=>o.Status == CdssObjectState.Active)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
             if (!String.IsNullOrEmpty(forScope))
             {
@@ -173,7 +175,8 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
-                if (this.m_library.Status == CdssObjectState.DontUse)
+                if (this.m_library.Status == CdssObjectState.DontUse ||
+                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out var dbg) != true || !XmlConvert.ToBoolean(dbg.ToString()))))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
@@ -226,7 +229,8 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
-                if (this.m_library.Status == CdssObjectState.DontUse)
+                if (this.m_library.Status == CdssObjectState.DontUse ||
+                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out var dbg)!= true || !XmlConvert.ToBoolean(dbg.ToString()))))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
