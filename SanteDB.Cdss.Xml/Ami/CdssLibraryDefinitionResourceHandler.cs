@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Serialization;
+using RestSrvr;
 using RestSrvr.Attributes;
 using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Exceptions;
@@ -19,6 +20,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace SanteDB.Cdss.Xml.Ami
@@ -80,7 +83,6 @@ namespace SanteDB.Cdss.Xml.Ami
                         var sourceFile = multiForm.FirstOrDefault(o => o.IsFile);
                         using (var ms = new MemoryStream(sourceFile.Data))
                         {
-
                             try
                             {
                                 CdssLibraryDefinition library = null;
@@ -138,7 +140,16 @@ namespace SanteDB.Cdss.Xml.Ami
             {
                 throw new KeyNotFoundException(id.ToString());
             }
-            return new CdssLibraryDefinitionInfo(retVal, false);
+
+            switch(RestOperationContext.Current.IncomingRequest.QueryString["_format"])
+            {
+                case "xml":
+                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.xml\"");
+                    RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
+                    return retVal.Library;
+                default:
+                   return new CdssLibraryDefinitionInfo(retVal, false);
+            }
         }
 
         /// <inheritdoc/>
