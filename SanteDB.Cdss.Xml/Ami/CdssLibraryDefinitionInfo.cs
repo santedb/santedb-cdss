@@ -13,10 +13,18 @@ namespace SanteDB.Cdss.Xml.Ami
     /// A REST based wrapper for the <see cref="CdssLibraryDefinition"/>
     /// </summary>
     [XmlType(nameof(CdssLibraryDefinitionInfo), Namespace = "http://santedb.org/cdss")]
+    [XmlRoot(nameof(CdssLibraryDefinitionInfo), Namespace = "http://santedb.org/cdss")]
     public class CdssLibraryDefinitionInfo : IVersionedData, IBaseData
     {
 
-        
+        /// <summary>
+        /// Serializer CTOR
+        /// </summary>
+        public CdssLibraryDefinitionInfo()
+        {
+            
+        }
+
         /// <summary>
         /// Create a cdss library definition info
         /// </summary>
@@ -36,7 +44,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     Oid = libraryEntry.Oid,
                     Name = libraryEntry.Name,
                     UuidSpecified = true,
-                    Metadata = new CdssObjectMetadata() { Documentation =  libraryEntry.Documentation }
+                    Metadata = new CdssObjectMetadata() { Documentation =  libraryEntry.Documentation, Version = libraryEntry.Version }
                 } : (libraryEntry as XmlProtocolLibrary)?.Library;
             this.ObsoletedByKey = libraryEntry.StorageMetadata?.ObsoletedByKey;
             this.ObsoletionTime = libraryEntry.StorageMetadata?.ObsoletionTime;
