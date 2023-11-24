@@ -39,11 +39,11 @@ namespace SanteDB.Cdss.Xml.Model
         {
             get
             {
-                if(string.IsNullOrEmpty(this.XmlData))
+                if (string.IsNullOrEmpty(this.XmlData))
                 {
                     return null;
                 }
-                else if(this.CompressionScheme == Core.Http.Description.HttpCompressionAlgorithm.None)
+                else if (this.CompressionScheme == Core.Http.Description.HttpCompressionAlgorithm.None)
                 {
                     return Encoding.UTF8.GetBytes(this.XmlData);
                 }
@@ -53,7 +53,7 @@ namespace SanteDB.Cdss.Xml.Model
                     {
                         using (var cs = CompressionUtil.GetCompressionScheme(this.CompressionScheme).CreateDecompressionStream(ms))
                         {
-                            using(var oms = new MemoryStream())
+                            using (var oms = new MemoryStream())
                             {
                                 cs.CopyTo(oms);
                                 return oms.ToArray();
@@ -64,25 +64,26 @@ namespace SanteDB.Cdss.Xml.Model
             }
             set
             {
-                if(value == null)
+                if (value == null)
                 {
                     this.XmlData = null;
                 }
-                else if(this.CompressionScheme == Core.Http.Description.HttpCompressionAlgorithm.None)
+                else if (this.CompressionScheme == Core.Http.Description.HttpCompressionAlgorithm.None)
                 {
                     this.XmlData = Encoding.UTF8.GetString(value);
                 }
                 else
                 {
-                    using(var ms = new MemoryStream(value))
+                    using (var ms = new MemoryStream(value))
                     {
-                        using(var cs = CompressionUtil.GetCompressionScheme(this.CompressionScheme).CreateCompressionStream(ms))
+                        using (var oms = new MemoryStream())
                         {
-                            using(var oms = new MemoryStream())
+                            using (var cs = CompressionUtil.GetCompressionScheme(this.CompressionScheme).CreateCompressionStream(oms))
                             {
-                                cs.CopyTo(oms);
-                                this.XmlData = Convert.ToBase64String(oms.ToArray());
+                                ms.CopyTo(cs);
                             }
+                            this.XmlData = Convert.ToBase64String(oms.ToArray());
+
                         }
                     }
                 }
@@ -92,11 +93,11 @@ namespace SanteDB.Cdss.Xml.Model
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if(String.IsNullOrEmpty(this.XmlData))
+            if (String.IsNullOrEmpty(this.XmlData))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.dataset.dataMissing", "Reference data provided in a CDSS library must contain CSV data", Guid.Empty, this.ToString());
             }
-            if(String.IsNullOrEmpty(this.Id) || string.IsNullOrEmpty(this.Name))
+            if (String.IsNullOrEmpty(this.Id) || string.IsNullOrEmpty(this.Name))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.dataset.unidentified", "Reference data sets provided in CDSS libraries must contain a name", Guid.Empty, this.ToString());
             }

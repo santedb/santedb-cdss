@@ -62,19 +62,33 @@ namespace SanteDB.Cdss.Xml.Ami
 
         /// <inheritdoc/>
         [Demand(PermissionPolicyIdentifiers.CreateClinicalProtocolConfigurationDefinition)]
-        public override object Create(object data, bool updateIfExists)
+        public override object Create(object data, bool updateIfExists) => this.InsertOrUpdateCdssLibrary(data);
+
+        /// <summary>
+        /// Perform the insert or update on the CDSS library
+        /// </summary>
+        private object InsertOrUpdateCdssLibrary(object data, Func<ICdssLibrary, bool> validator = null)
         {
             switch (data)
             {
                 case CdssLibraryDefinition definition:
                     {
                         var xmlLibrary = new XmlProtocolLibrary(definition);
+                        if (validator?.Invoke(xmlLibrary) == false)
+                        {
+                            throw new ArgumentOutOfRangeException();
+                        }
                         var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
                         return new CdssLibraryDefinitionInfo(retVal, true);
                     }
                 case CdssLibraryDefinitionInfo definitionInfo:
                     {
                         var xmlLibrary = new XmlProtocolLibrary(definitionInfo.Library);
+                        if (validator?.Invoke(xmlLibrary) == false)
+                        {
+                            throw new ArgumentOutOfRangeException();
+                        }
+
                         var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
                         return new CdssLibraryDefinitionInfo(retVal, true);
                     }
@@ -95,8 +109,14 @@ namespace SanteDB.Cdss.Xml.Ami
                                 {
                                     library = CdssLibraryDefinition.Load(ms);
                                 }
-                                var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
-                                return new CdssLibraryDefinitionInfo(retVal, fromSource);
+                                var xmlLibrary = new XmlProtocolLibrary(library);
+                                if (validator?.Invoke(xmlLibrary) == false)
+                                {
+                                    throw new ArgumentOutOfRangeException();
+                                }
+
+                                var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
+                                return new CdssLibraryDefinitionInfo(xmlLibrary, fromSource);
                             }
                             catch (CdssTranspilationException e)
                             {
@@ -129,7 +149,7 @@ namespace SanteDB.Cdss.Xml.Ami
         public override object Get(object id, object versionId)
         {
             var keyIsUuid = id is Guid uuid || Guid.TryParse(id.ToString(), out uuid);
-            var versionIdSpecified = versionId is Guid versionUuid || Guid.TryParse(versionId?.ToString(), out versionUuid);
+            var versionIdSpecified = (versionId is Guid versionUuid || Guid.TryParse(versionId?.ToString(), out versionUuid)) && versionUuid != Guid.Empty;
             if (!keyIsUuid)
             {
                 throw new ArgumentOutOfRangeException(nameof(id), String.Format(ErrorMessages.INVALID_FORMAT, id, Guid.Empty));
@@ -148,7 +168,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
                     return retVal.Library;
                 default:
-                   return new CdssLibraryDefinitionInfo(retVal, false);
+                   return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
             }
         }
 
@@ -168,14 +188,12 @@ namespace SanteDB.Cdss.Xml.Ami
         [Demand(PermissionPolicyIdentifiers.AlterClinicalProtocolConfigurationDefinition)]
         public override object Update(object data)
         {
-            if (data is CdssLibraryDefinition definition)
+            return this.InsertOrUpdateCdssLibrary(data, (lib) =>
             {
-                return (this.m_cdssLibraryRepository.InsertOrUpdate(new XmlProtocolLibrary(definition)) as XmlProtocolLibrary).Library;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(data), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(CdssLibraryDefinition), data.GetType()));
-            }
+
+                return lib.Uuid == Guid.Empty || RestOperationContext.Current.IncomingRequest.RawUrl.Contains(lib.Uuid.ToString());
+                return true;
+            });
         }
     }
 }

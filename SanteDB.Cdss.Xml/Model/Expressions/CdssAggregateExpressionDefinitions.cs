@@ -1,4 +1,5 @@
-﻿using SanteDB.Cdss.Xml.Model.Assets;
+﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
             XmlElement("all", typeof(CdssAllExpressionDefinition)),
             XmlElement("none", typeof(CdssNoneExpressionDefinition)),
-            XmlElement("any", typeof(CdssAnyExpressionDefinition))]
+            XmlElement("any", typeof(CdssAnyExpressionDefinition)),
+            JsonProperty("expressions")]
         public List<CdssExpressionDefinition> ContainedExpressions { get; set; }
 
         /// <inheritdoc/>

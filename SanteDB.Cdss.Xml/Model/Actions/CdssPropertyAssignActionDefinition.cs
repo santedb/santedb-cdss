@@ -47,7 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("hdsi", typeof(CdssHdsiExpressionDefinition)),
             XmlElement("query", typeof(CdssQueryExpressionDefinition)),
             XmlElement("fact", typeof(CdssFactReferenceExpressionDefinition)),
-            XmlElement("fixed", typeof(String))]
+            XmlElement("fixed", typeof(String)), JsonProperty("expression")]
         public Object ContainedExpression { get; set; }
 
 
