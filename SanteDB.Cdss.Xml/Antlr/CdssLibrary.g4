@@ -258,7 +258,7 @@ OID_DOTTED: '"' ([0-9]+ '.'?)+? '"';
 HEX_4: [0-9a-f][0-9a-f][0-9a-f][0-9a-f];
 
 BOOL_VAL: ('true'|'false');
-STATUS_VAL: ('active'|'trial'|'dont-use');
+STATUS_VAL: ('active'|'trial-use'|'dont-use'|'retired');
 
 PRIMITIVE_TYPE: (BOOL_TYPE|STRING_TYPE|DATE_TYPE|LONG_TYPE|REAL_TYPE|INTEGER_TYPE);
 CLASS_TYPE: ('Patient'|'Person'|'Material'|'Place'|'ManufacturedMaterial'|'Entity'|'Act'|'QuantityObservation'|'TextObservation'|'CodedObservation'|'Procedure'|'SubstanceAdministration');
