@@ -21,6 +21,7 @@
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Data.Import;
 using SanteDB.Core.Data.Import.Format;
+using SanteDB.Core.Http.Compression;
 using SanteDB.Core.Model.Map;
 using System;
 using System.Collections;
@@ -78,9 +79,9 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Select the value in the specified column
         /// </summary>
-        public object Select(String columnName) 
+        public object Select(String columnName)
         {
-            foreach(var itm in this)
+            foreach (var itm in this)
             {
                 return itm[columnName];
             }
@@ -102,10 +103,11 @@ namespace SanteDB.Cdss.Xml
             }
             else if (this.m_datasetData != null)
             {
-                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(this.m_datasetData.RawData))) {
+                using (var ms = new MemoryStream(this.m_datasetData.RawData))
+                {
                     using (var fdr = new CsvForeignDataFormat().Open(ms).CreateReader())
                     {
-                        while(fdr.MoveNext())
+                        while (fdr.MoveNext())
                         {
                             yield return fdr;
                         }

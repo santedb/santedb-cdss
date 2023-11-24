@@ -9,6 +9,7 @@ using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.Http;
+using SanteDB.Core.Http.Compression;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
@@ -49,13 +50,13 @@ namespace SanteDB.Cdss.Xml.Antlr
         private TCdssBaseObject CreateCdssObject<TCdssBaseObject>(ParserRuleContext context) where TCdssBaseObject : CdssBaseObjectDefinition, new()
         {
             var retVal = new TCdssBaseObject();
-            if(this.m_includeMap)
+            if (this.m_includeMap)
             {
                 retVal.TranspileSourceReference = new CdssTranspileMapMetaData(context.Start.Line, context.Start.Column, context.Stop.Line, context.Stop.Column);
-                if(retVal is CdssLibraryDefinition)
+                if (retVal is CdssLibraryDefinition)
                 {
                     retVal.TranspileSourceReference.SourceFileName = this.m_sourcePath;
-                    
+
                 };
             }
             return retVal;
@@ -224,7 +225,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(m_currentObject)));
             }
-            this.m_currentObject.Peek().Metadata =  new CdssObjectMetadata();
+            this.m_currentObject.Peek().Metadata = new CdssObjectMetadata();
             return base.VisitMetadata_statement(context);
         }
 
@@ -292,7 +293,8 @@ namespace SanteDB.Cdss.Xml.Antlr
 
             if (this.TryExtractMultilineString(context.GetToken(CdssLibraryLexer.MULTILINE_STRING, 0), out var data))
             {
-                dataBlock.RawData = data;
+                dataBlock.CompressionScheme = Core.Http.Description.HttpCompressionAlgorithm.Gzip;
+                dataBlock.RawData = Encoding.UTF8.GetBytes(data);
             }
             else
             {
@@ -864,7 +866,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
 
             var raiseAlert = this.CreateCdssObject<CdssIssueActionDefinition>(context);
-            raiseAlert.IssueToRaise =  new Core.BusinessRules.DetectedIssue();
+            raiseAlert.IssueToRaise = new Core.BusinessRules.DetectedIssue();
             actionCollection.Actions.Add(raiseAlert);
             if (this.TryExtractString(context.STRING()[0], out var issueText) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out issueText))
             {
@@ -892,7 +894,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                     throw new CdssTranspilationException(context.Start, CdssTranspileErrors.UNKNOWN_ISSUE_PRIORITY);
             }
 
-            if(this.TryExtractString(context.UUIDV4(), out var uuidString) && Guid.TryParse(uuidString, out var uuid))
+            if (this.TryExtractString(context.UUIDV4(), out var uuidString) && Guid.TryParse(uuidString, out var uuid))
             {
                 raiseAlert.IssueToRaise.TypeKey = uuid;
             }

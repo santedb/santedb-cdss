@@ -68,7 +68,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             }
             else
             {
-                var identifiers = new Interpreter(InterpreterOptions.Default)
+                var identifiers = context.GetExpressionInterpreter()
                   .SetVariable("context", null, typeof(CdssExecutionContext))
                   .SetVariable("value", null, typeof(object))
                   .SetVariable("scopedObject", null, typeof(IdentifiedData))

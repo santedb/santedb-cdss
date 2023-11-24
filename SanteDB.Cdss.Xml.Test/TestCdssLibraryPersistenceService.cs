@@ -37,6 +37,7 @@ namespace SanteDB.Cdss.Xml.Test
                         return null;
                     }
                 })
+                .OfType<ICdssLibrary>()
                 .ToList();
         }
 
