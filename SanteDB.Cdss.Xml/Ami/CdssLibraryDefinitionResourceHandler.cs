@@ -180,8 +180,24 @@ namespace SanteDB.Cdss.Xml.Ami
         [UrlParameter("id", typeof(String), "The logical CDSS identifier for the library")]
         public override IQueryResultSet Query(NameValueCollection queryParameters)
         {
+            var originalQuery = new NameValueCollection(queryParameters);
+            queryParameters.Remove("modifiedOn");
+            queryParameters.Remove("creationTime");
+            queryParameters.Remove("obsoletionTime");
+
             var query = QueryExpressionParser.BuildLinqExpression<ICdssLibrary>(queryParameters);
-            return new TransformQueryResultSet<ICdssLibrary, CdssLibraryDefinitionInfo>(this.m_cdssLibraryRepository.Find(query), (a) => new CdssLibraryDefinitionInfo(a, true));
+            var repositoryResult = this.m_cdssLibraryRepository.Find(query);
+
+            var storageFilter = originalQuery
+                    .ToDictionary()
+                    .Where(o => o.Key == "modifiedOn" || o.Key == "obsoletionTime" || o.Key == "creationTime")
+                    .ToDictionary(o => o.Key == "modifiedOn" ? "creationTime" : o.Key, o => (object)o.Value);
+            if (storageFilter.Any())
+            {
+                var filter = QueryExpressionParser.BuildLinqExpression<ICdssLibraryRepositoryMetadata>(storageFilter.ToNameValueCollection()).Compile();
+                repositoryResult = repositoryResult.OfType<ICdssLibrary>().ToArray().Where(o => filter(o.StorageMetadata)).AsResultSet();
+            }
+            return new TransformQueryResultSet<ICdssLibrary, CdssLibraryDefinitionInfo>(repositoryResult, (a) => new CdssLibraryDefinitionInfo(a, true));
         }
 
         /// <inheritdoc/>
