@@ -36,7 +36,7 @@ namespace SanteDB.Cdss.Xml.Ami
         /// <summary>
         /// DI constructor
         /// </summary>
-        public CdssLibraryDefinitionResourceHandler(ICdssLibraryRepository cdssLibraryRepository, ILocalizationService localizationService) : base(localizationService)
+        public CdssLibraryDefinitionResourceHandler(ICdssLibraryRepository cdssLibraryRepository, ILocalizationService localizationService = null) : base(localizationService)
         {
             this.m_cdssLibraryRepository = cdssLibraryRepository;
         }

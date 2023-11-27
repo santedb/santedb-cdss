@@ -177,8 +177,9 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
+                object debugParameterValue = null;
                 if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out var dbg) != true || !XmlConvert.ToBoolean(dbg.ToString()))))
+                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
@@ -231,8 +232,10 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
+                object debugParameterValue = null;
+
                 if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out var dbg)!= true || !XmlConvert.ToBoolean(dbg.ToString()))))
+                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
