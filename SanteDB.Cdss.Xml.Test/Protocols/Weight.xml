@@ -208,7 +208,7 @@
 
       <rule name="Default Interpretation of Weight - Normal">
         <then>
-          <assign path="interpretation">
+          <assign path="interpretationConcept">
             <fixed>41D42ABF-17AD-4144-BF97-EC3FD907F57D</fixed>
           </assign>
         </then>
@@ -219,7 +219,7 @@
           <fact ref="Patient Is Underweight" />
         </when>
         <then>
-          <assign path="interpretation">
+          <assign path="interpretationConcept">
             <fixed>6188F821-261F-420C-9520-0DE240A05661</fixed>
           </assign>
           <raise>
@@ -292,7 +292,7 @@
           <fact ref="Patient Is Overweight" />
         </when>
         <then>
-          <assign path="interpretation">
+          <assign path="interpretationConcept">
             <fixed>3C4D6579-7496-4B44-AAC1-18A714FF7A05</fixed>
           </assign>
           <raise>

@@ -164,13 +164,13 @@ library "Childhood Healthy Growth"
 			// This rule will always fire since it has no WHEN condition and sets the default interpretation concept to normal
 			rule "Set Default Interpretation of Weight to Normal" as
 				then
-					assign const "41D42ABF-17AD-4144-BF97-EC3FD907F57D" to interpretation
+					assign const "41D42ABF-17AD-4144-BF97-EC3FD907F57D" to interpretationConcept
 			end
 
 			rule "When Patient is Underweight - Set Interpretation to Low and Propose Vitamin Supplement" as
 				when "Patient Is Underweight"
 				then 
-					assign const "6188F821-261F-420C-9520-0DE240A05661" to interpretation
+					assign const "6188F821-261F-420C-9520-0DE240A05661" to interpretationConcept
 					raise "Patient weight is abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, cholera, etc."
 						having priority warn
 					propose
@@ -205,7 +205,7 @@ library "Childhood Healthy Growth"
 			as
 				when "Patient Is Overweight"
 				then 
-					assign const "3C4D6579-7496-4B44-AAC1-18A714FF7A05" to interpretation
+					assign const "3C4D6579-7496-4B44-AAC1-18A714FF7A05" to interpretationConcept
 					raise "Patient weight abnormally high - Please provide appropriate nutritional counseling" having priority warn
 			end 
 		end logic // observation

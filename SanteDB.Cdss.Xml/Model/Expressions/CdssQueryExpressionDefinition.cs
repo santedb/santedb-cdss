@@ -103,7 +103,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
 
             // Build a linq expression for our filter
             var elementType = sourceCollectionExpression.ReturnType.GetGenericArguments()[0];
-            var sourceFilterExpression = QueryExpressionParser.BuildLinqExpression(elementType, this.FilterHdsi.ParseQueryString());
+            var sourceFilterExpression = QueryExpressionParser.BuildLinqExpression(elementType, this.FilterHdsi.ParseQueryString(), "p", variables: variableDictionary, alwaysCoalesce: true, lazyExpandVariables: true, forceLoad: true, safeNullable: true);
 
             // Now we want to invoke WHERE on the collection
             var argType = typeof(Func<,>).MakeGenericType(elementType, typeof(bool));
