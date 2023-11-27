@@ -129,7 +129,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
             CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                FactComputation = new CdssCsharpExpressionDefinition("!scopedObject.DeceasedDate.HasValue")
+                FactComputation = new CdssCsharpExpressionDefinition("!((Patient)scopedObject).DeceasedDate.HasValue")
             };
 
             using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
@@ -148,7 +148,7 @@ namespace SanteDB.Cdss.Xml.Test
         {
             CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
-                FactComputation = new CdssCsharpExpressionDefinition("scopedObject.DateOfBirth")
+                FactComputation = new CdssCsharpExpressionDefinition("((Patient)scopedObject).DateOfBirth")
             };
 
             using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
@@ -228,7 +228,7 @@ namespace SanteDB.Cdss.Xml.Test
             var factComputation = new CdssAllExpressionDefinition(
                     new CdssXmlLinqExpressionDefinition(filterCondition),
                     new CdssHdsiExpressionDefinition("tag[hasBirthCertificate].value=true"),
-                    new CdssCsharpExpressionDefinition($"scopedObject.StatusConceptKey.Value == Guid.Parse(\"{StatusKeys.Active}\")")
+                    new CdssCsharpExpressionDefinition($"((Patient)scopedObject).StatusConceptKey.Value == Guid.Parse(\"{StatusKeys.Active}\")")
                 );
             CdssFactAssetDefinition when = new CdssFactAssetDefinition()
             {
@@ -240,7 +240,7 @@ namespace SanteDB.Cdss.Xml.Test
                 Assert.IsTrue((bool)when.Compute());
             }
 
-            factComputation.ContainedExpressions.Add(new CdssCsharpExpressionDefinition("scopedObject.Tags.Count == 0"));
+            factComputation.ContainedExpressions.Add(new CdssCsharpExpressionDefinition("((Entity)scopedObject).Tags.Count == 0"));
             when = new CdssFactAssetDefinition() { FactComputation = factComputation };
             using (CdssExecutionStackFrame.Enter(new CdssExecutionContext<Patient>(this.m_patientUnderTest)))
             {

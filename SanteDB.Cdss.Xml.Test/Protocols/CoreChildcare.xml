@@ -15,11 +15,19 @@
     <context type="Patient"/>
 
     <define>
+
+      <fact name="Patient Is Infant">
+        <meta>
+          <documentation>Indicates whether the patient qualifies for infant care based protocols (18 months old)</documentation>
+        </meta>
+        <hdsi>dateOfBirth=:(age)&lt;P18M</hdsi>
+      </fact>
+
       <fact name="Patient Is Child">
         <meta>
-          <documentation>Indicates whether the patient qualifies for child care based protocols (5 years old)</documentation>
+          <documentation>Indicates whether the patient qualifies for child care based protocols (12 years old)</documentation>
         </meta>
-        <hdsi>dateOfBirth=:(age)&lt;5y</hdsi>
+        <hdsi>dateOfBirth=:(age)&lt;P12Y</hdsi>
       </fact>
 
       <fact name="Patient Age In Days" type="integer">

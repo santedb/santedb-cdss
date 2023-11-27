@@ -690,7 +690,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             switch (this.m_currentObject.Peek())
             {
                 case IHasCdssActions cdssActionContainer:
-                    cdssActionContainer.Actions = this.CreateCdssObject<CdssActionCollectionDefinition>(context);
+                    cdssActionContainer.Actions = cdssActionContainer.Actions?? this.CreateCdssObject<CdssActionCollectionDefinition>(context);
                     this.m_currentObject.Push(cdssActionContainer.Actions);
                     var retVal = base.VisitThen_action_statements(context);
                     this.m_currentObject.Pop();

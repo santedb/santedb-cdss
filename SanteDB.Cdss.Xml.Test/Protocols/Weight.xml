@@ -42,8 +42,10 @@
     <!-- Identifies the target type to which the set of rules applies -->
     <context type="Patient" />
     <when>
+      <all>
       <fact ref="Patient Is Child" />
       <fact ref="Patient Is Not Deceased" />
+      </all>
     </when>
     <status>active</status>
     <meta>
@@ -58,11 +60,11 @@
       </fact>
 
       <fact name="No Weight Has Been Proposed For Period" negate="true">
-        <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Observation</hdsi>
+        <hdsi>participation[RecordTarget].source.typeConcept?.mnemonic=VitalSign-Weight&amp;participation[RecordTarget].source.actTime=>%3D$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;%3D$Last Date Of Observation</hdsi>
       </fact>
 
       <fact name="No Height Has Been Proposed for Period" negate="true">
-        <hdsi>participation[RecordTarget].source.typeConcept.mnemonic=VitalSign-Height&amp;participation[RecordTarget].source.actTime=>$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;$Last Date Of Observation</hdsi>
+        <hdsi>participation[RecordTarget].source.typeConcept.mnemonic=VitalSign-Height&amp;participation[RecordTarget].source.actTime=>%3D$Earliest Date Of Observation&amp;participation[RecordTarget].source.actTime=&lt;%3D$Last Date Of Observation</hdsi>
       </fact>
 
       <rule name="Should Measure Child" id="org.santedb.cdss.growth.patient.rule.height">
@@ -123,6 +125,7 @@
                 },
                 "moodConcept": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
                 "classConcept": "28D022C6-8A8B-47C4-9E6A-2BC67308739E",
+                "typeConcept":"a261f8cd-69b0-49aa-91f4-e6d3e5c612ed",
                 "typeConceptModel" : {
                   "id": "a261f8cd-69b0-49aa-91f4-e6d3e5c612ed",
                   "mnemonic":"VitalSign-Weight"

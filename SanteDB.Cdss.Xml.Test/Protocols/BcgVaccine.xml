@@ -41,7 +41,6 @@
         <fact ref="Patient Is Not Deceased" />
       </all>
     </when>
-
     <define>
 
       <fact name="Patient Has Not Received BCG Dose" type="bool">

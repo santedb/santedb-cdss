@@ -19,77 +19,111 @@
  - User: fyfej
  - Date: 2023-5-19
  -->
-<ProtocolDefinition xmlns="http://santedb.org/cdss" id="zz_VITA" name="Vitamin A Supplement" uuid="D743E71F-86BD-4992-A50B-4FF05838095C">
-  <when evaluation="and">
-    <linqExpression>DateTime.Now.Subtract(_.Target.DateOfBirth.Value.Date).TotalDays &lt;= 1825</linqExpression>
-  </when>
-  <rule id="VITA" repeat="9">
-    <when evaluation="and">
-      <!-- Vitamin A not set yet -->
-      <hdsiExpression negationIndicator="true">
-        participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=Supplement-VitaminA&amp;
-        participation[RecordTarget].source@SubstanceAdministration.doseSequence=$index
-      </hdsiExpression>
-      <linqExpression>_.Get("index", Types.Integer) > 0</linqExpression>
+<CdssLibrary xmlns="http://santedb.org/cdss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd"
+             id="org.santedb.cdss.supplement.vita"
+             name="Vitamin A Schedule Logic"
+             uuid="D743E71F-86BD-4992-A50B-4FF05838095C">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>This library contains the necessary logic for the Vitamin A logic</documentation>
+  </meta>
+  <include>#org.santedb.cdss.core</include>
+  <include>#org.santedb.cdss.core.childcare</include>
+  <logic id="org.santedb.cdss.supplement.vita">
+    <status>active</status>
+    <context type="Patient"/>
+    <when>
+      <all>
+        <fact ref="Patient Is Child" />
+        <fact ref="Patient Is Not Deceased" />
+      </all>
     </when>
-    <then>
-      <action>
-        <jsonModel>
-          <![CDATA[
-          {
-				      "$type": "SubstanceAdministration",
-              template: {
-                  mnemonic: "Act.SubstanceAdmin.Supplement"
-              },
+    <define>
+      <fact name="Vitamin A Supplement has not been performed">
+        <all>
+          <hdsi negate="true">
+            <![CDATA[participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=Supplement-VitaminA&
+          participation[RecordTarget].source@SubstanceAdministration.doseSequence=$index]]>
+          </hdsi>
+          <csharp><![CDATA[((int)context["index"]) > 0]]></csharp>
+        </all>
+      </fact>
 
-              "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-              "typeConceptModel": { "id" : "7D84A057-1FCC-4054-A51F-B77D230FC6D1", "mnemonic" : "DrugTherapy" },
-				      "doseSequence": 1,
-              "doseQuantity" : 1.0,
-              "doseUnitModel" : {
-                "id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
-                "mnemonic" : "DOSE"
-              },
-              "routeModel" : {
-                "id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
-                "mnemonic": "RouteOfAdministration-PO"
-              },
-              "siteModel" : {
-                "id": "e5b6847e-91e0-4fca-ac2e-753962008080",
-                "mnemonic": 'Site-Oral'
-              },
-				      "participation": {
-					      "Product": [{
-                  "playerModel" : {
-                    "$type" : "Material",
-                    "id" : "7D80E518-6E04-4091-8D19-7265BB09BC1F",
-                    "typeConceptModel": {
-                      "id" : "3023bad7-8c16-49ea-81fc-eee6232b80e7",
-                      "mnemonic": "Supplement-VitaminA"
+      <rule name="Should Administer Vitamin A supplement on routine schedule">
+        <when>
+          <fact ref="Vitamin A Supplement has not been performed" />
+        </when>
+        <then>
+          <propose>
+            <model>
+              <json>
+                <![CDATA[
+                {
+                    "$type": "SubstanceAdministration",
+                    "template": {
+                        "mnemonic": "org.santedb.emr.sbadm.supplement"
                     },
-						        "name": {
-							        "OfficialRecord": [{
-								        "component": {
-									        "$other": ["Vitamin A Supplement"]
-								        }
-							        }],
-                      "Assigned": [{
-								        "component": {
-									        "$other": ["Vitamin A"]
-								        }
-							        }]
-						        }
-                  }
-					      }]
-				      }
-			      }
-        ]]>
-        </jsonModel>
-        <assign propertyName="SequenceId">(int)_.Get("index", Types.Integer)</assign>
-        <assign propertyName="ActTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Get("index", Types.Integer) * 6)</assign>
-        <assign propertyName="StartTime">_.Target.DateOfBirth.Value.Date.AddMonths((int)_.Get("index", Types.Integer) * 6).AddDays(-_.Target.DateOfBirth.Value.Day + 1)</assign>
-        <assign propertyName="StopTime">_.Target.DateOfBirth.Value.Date.AddMonths(((int)_.Get("index", Types.Integer)+1) * 6).AddDays(-_.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)</assign>
-      </action>
-    </then>
-  </rule>
-</ProtocolDefinition>
+                    "moodConcept": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+                    "typeConcept": "7D84A057-1FCC-4054-A51F-B77D230FC6D1",
+                    "doseQuantity": 1.0,
+                    "doseUnit": "a77b8d83-1cc9-4806-a268-5d1738154afa",
+                    "route": "0a1388b0-66fb-4063-bfe3-151dd8442838",
+                    "site": "e5b6847e-91e0-4fca-ac2e-753962008080",
+                    "participation": {
+                        "Product": [
+                            {
+                                "playerModel": {
+                                    "$type": "Material",
+                                    "id": "7D80E518-6E04-4091-8D19-7265BB09BC1F",
+                                    "typeConcept": "3023bad7-8c16-49ea-81fc-eee6232b80e7"
+                                }
+                            }
+                        ]
+                    }
+                }
+                ]]>
+              </json>
+            </model>
+            <assign path="doseSequence">
+              <csharp>(int)context["index"]</csharp>
+            </assign>
+            <assign path="actTime">
+              <csharp>context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) * 6)</csharp>
+            </assign>
+            <assign path="startTime">
+              <hdsi scope="scopedObject">actTime</hdsi>
+            </assign>
+            <assign path="stopTime">
+              <csharp>
+                <![CDATA[context.Target.DateOfBirth.Value.Date.AddMonths((((int)context["index"]) + 1) * 6).AddDays(-context.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)]]>
+              </csharp>
+            </assign>
+          </propose>
+        </then>
+      </rule>
+
+      <protocol  id="org.santedb.cdss.supplement.vita.protocol"
+             name="Vitamin A Dose Administration Protocol"
+             uuid="D743E71F-86BD-4992-A50B-4FF05838095C">
+        <when>
+          <all>
+            <fact ref="Patient Is Child" />
+            <fact ref="Patient Is Not Deceased" />
+          </all>
+        </when>
+        <then>
+          <repeat iterations="9" trackBy="index">
+            <execute>
+            <apply ref="Should Administer Vitamin A supplement on routine schedule" />
+            </execute>
+          </repeat>
+        </then>
+      </protocol>
+    </define>
+  </logic>
+</CdssLibrary>

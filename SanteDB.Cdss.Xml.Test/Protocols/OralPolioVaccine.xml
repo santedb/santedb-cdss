@@ -31,7 +31,7 @@
     <version>3.0</version>
     <documentation>Contains the core decision logic for the Oral Polio Vaccination programme</documentation>
   </meta>
-  <include>#org.santedb.cdss.core</include>
+ <include>#org.santedb.cdss.core</include>
   <include>#org.santedb.cdss.core.childcare</include>
   <logic id="org.santedb.cdss.vaccine.opv.patient" name="OPV Vaccination Logic for Patient Context">
     <status>active</status>
@@ -310,7 +310,12 @@
       <protocol uuid="D3A628F3-DB52-45ED-B863-0FB4B1B8E77C" id="org.santedb.cdss.vaccine.opv.protocol.bdl"
                 name="OPV Administration Protocol for Birth Delivery Encounter">
         <when>
-          <fact ref="Patient is Child"/>
+          <all>
+            <fact ref="Patient is Infant"/>
+            <csharp>
+              ((int)context["Patient Age In Days"]) &lt; 5
+            </csharp>
+          </all>
         </when>
         <then>
           <apply ref="Recommend Administration of OPV Birth Dose" />

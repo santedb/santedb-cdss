@@ -87,13 +87,14 @@ namespace SanteDB.Cdss.Xml
                 .OfType<CdssDatasetDefinition>()
                 .ToCdssReferenceDictionary(o => new CdssReferenceDataset(o));
             // Temporarily assign all assets for any context as in scope
-            this.m_computableAssetsInScope = scopedLibraries
+            scopedLibraries = scopedLibraries ?? new CdssLibraryDefinition[0];
+            this.m_computableAssetsInScope = scopedLibraries?
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()) && d.When == null)
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssComputableAssetDefinition>()
-                .ToCdssReferenceDictionary(o=>o);
+                .ToCdssReferenceDictionary(o => o);
 
             this.m_scopedLogicBlocks = scopedLibraries?
                 .SelectMany(o => o.Definitions)

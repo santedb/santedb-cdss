@@ -82,7 +82,7 @@
         </any>
       </fact>
 
-      <fact name="Patient Refused Previous ROTA">
+      <fact name="Patient Refused Previous ROTA Dose">
         <meta>
           <documentation>When a patient has refused a previous dose of ROTA due to personal or religious reasons </documentation>
         </meta>

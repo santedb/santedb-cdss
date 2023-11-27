@@ -33,7 +33,7 @@
     <documentation>This library contains the dosing logic for PCV13 immunizations</documentation>
   </meta>
   <include>#org.santedb.cdss.core</include>
-  <include>#org.santedb.cdss.childcare</include>
+  <include>#org.santedb.cdss.core.childcare</include>
   <logic id="org.santedb.cdss.vaccine.pcv13.patient">
     <status>active</status>
     <context type="Patient"/>
@@ -49,7 +49,7 @@
         <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
           <![CDATA[
           source.isNegated=false&
-          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13&
           source@SubstanceAdministration.doseSequence=1
           ]]>
         </query>
@@ -59,7 +59,7 @@
         <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
           <![CDATA[
           source.isNegated=false&
-          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13&
           source@SubstanceAdministration.doseSequence=2
           ]]>
         </query>
@@ -69,7 +69,7 @@
         <query fn="last" order-by="source.actTime" source="participation[RecordTarget]" select="source@SubstanceAdministration">
           <![CDATA[
           source.isNegated=false&
-          source.participation[Product].player.typeConceptModel=VaccineType-PCV13&
+          source.participation[Product].player.typeConcept.mnemonic=VaccineType-PCV13&
           source@SubstanceAdministration.doseSequence=3
           ]]>
         </query>
@@ -221,7 +221,7 @@
         </then>
       </rule>
 
-      <rule name="Recommend PCV13 Dose 1">
+      <rule name="Recommend PCV13 Dose 2">
         <when>
           <fact ref="Patient Should Receive PCV13 Dose 2"/>
         </when>

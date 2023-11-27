@@ -8,6 +8,7 @@ using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SharpCompress;
@@ -109,14 +110,15 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get protocols defined for patients in the library
         /// </summary>
-        public IEnumerable<ICdssProtocol> GetProtocols(String forScope)
+        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, String forScope)
         {
             this.InitializeLibrary();
+            var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
-                    .Where(o => o.Context.Type == typeof(Patient) && o.Status == CdssObjectState.Active)
+                    .AppliesTo(context)
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
-                    .Where(o=>o.Status == CdssObjectState.Active)
+                    .Where(o=>o.Status != CdssObjectState.DontUse)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
             if (!String.IsNullOrEmpty(forScope))
             {
@@ -188,7 +190,7 @@ namespace SanteDB.Cdss.Xml
 
                 if (analysisTarget is Entity ent) // HACK: Participations need to be reverse loaded
                 {
-                    ent.Participations = ent.GetParticipations().ToList();
+                    ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
                 }
 
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.m_scopedLibraries);
@@ -240,7 +242,7 @@ namespace SanteDB.Cdss.Xml
                 this.InitializeLibrary();
                 if(target is Entity ent) // HACK: Participations need to be reverse loaded
                 {
-                    ent.Participations = ent.GetParticipations().ToList();
+                    ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
                 }
 
                 var context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
