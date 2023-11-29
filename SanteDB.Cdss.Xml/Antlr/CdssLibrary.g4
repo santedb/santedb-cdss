@@ -48,8 +48,8 @@ having_negation: (HAVING)?NEGATION BOOL_VAL;
 having_context: (HAVING)?CONTEXT CLASS_TYPE (when_guard_condition)?;
 having_model: (HAVING)?MODEL (
     STRING |
-    AS
     (HAVING FORMAT FORMAT_REF)?
+    AS
     MULTILINE_STRING
     END (MODEL)?
 );
@@ -88,7 +88,7 @@ define_fact: (DEFINE)?FACT STRING
     (fact_normalization)*
     END (FACT)?;
 
-fact_normalization: NORMALIZE (when_guard_condition)? COMPUTEDBY
+fact_normalization: NORMALIZE (when_guard_condition)? COMPUTEDBY (AS)?
     csharp_logic;
 
 fact_computation:
@@ -136,7 +136,7 @@ define_rule: (DEFINE)?RULE STRING
     (metadata_statement)?
     AS
     (when_guard_condition)?
-    THEN (then_action_statements)*
+    THEN (then_action_statements)+
     END (RULE)?;
 
 then_action_statements: (
@@ -163,14 +163,15 @@ propose_action_statement:
     END (PROPOSE)?;
 
 raise_action_statement:
-    RAISE (STRING|MULTILINE_STRING)
-        (HAVING PRIORITY ISSUE_PRIORITY_VAL)?
+    RAISE (HAVING PRIORITY ISSUE_PRIORITY_VAL)?
         (HAVING TYPE (STRING|UUIDV4))?
+        (having_id)?
         (metadata_statement)?
+      (STRING|MULTILINE_STRING)
     ;
 
 assign_action_statement:
-    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO LITERAL;
+    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO LITERAL (OVERWRITE)?;
 
 apply_action_statement: APPLY STRING;
 
@@ -206,6 +207,7 @@ metadata_version_statement:
 when_guard_condition:
     WHEN fact_reference_or_computation;
 
+OVERWRITE: 'overwrite';
 REPEAT: 'repeat';
 UNTIL: 'until';
 TRACKBY: 'track-by';
@@ -270,7 +272,7 @@ DATE_TYPE: 'date';
 LONG_TYPE: 'long';
 REAL_TYPE: 'real';
 INTEGER_TYPE: 'int';
-ISSUE_PRIORITY_VAL: ('error'|'warn'|'info');
+ISSUE_PRIORITY_VAL: ('error'|'danger'|'warn'|'info');
 
 UUIDV4:
     '{' HEX_4 HEX_4 '-' HEX_4 '-' HEX_4 '-' HEX_4 '-' HEX_4 HEX_4 HEX_4 '}'

@@ -669,6 +669,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
 
             var repeatDefinition = this.CreateCdssObject<CdssRepeatActionDefinition>(context);
+            collectionDefinition.Actions.Add(repeatDefinition);
             repeatDefinition.Actions = new CdssActionCollectionDefinition();
             if (context.FOR() != null && Int32.TryParse(context.INTEGER().GetText(), out var reps))
             {
