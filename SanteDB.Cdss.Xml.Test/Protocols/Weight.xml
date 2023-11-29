@@ -200,10 +200,10 @@
       </fact>
 
       <fact name="Patient Is Underweight">
-        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) < (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zMinus2").First()]]></csharp>
+        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) < (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select<Double>("zMinus2").First()]]></csharp>
       </fact>
       <fact name="Patient Is Overweight">
-        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) > (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select("zPlus2").First()]]></csharp>
+        <csharp><![CDATA[((double)context["Observed Weight Expressed in Kgs"]) > (double)context.DataSets["#org.santedb.cdss.weight.zscores"].Lookup("gender", context["Record Target Gender"]).Lookup("age", context["Record Target Age in Days"]).Select<Double>("zPlus2").First()]]></csharp>
       </fact>
 
       <rule name="Default Interpretation of Weight - Normal">

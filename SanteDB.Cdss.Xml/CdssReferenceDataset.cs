@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Text;
@@ -86,6 +87,21 @@ namespace SanteDB.Cdss.Xml
                 yield return itm[columnName];
             }
         }
+
+        /// <summary>
+        /// Select values of a particular type
+        /// </summary>
+        public IEnumerable<double> SelectReal(string columnName) => this.Select(columnName).OfType<double>();
+
+        /// <summary>
+        /// Select values of a particular type
+        /// </summary>
+        public IEnumerable<int> SelectInt(string columnName) => this.Select(columnName).OfType<int>();
+
+        /// <summary>
+        /// Select values of a particular type
+        /// </summary>
+        public IEnumerable<long> SelectLong(string columnName) => this.Select(columnName).OfType<long>();
 
         /// <inheritdoc/>
         public IEnumerator<IForeignDataRecord> GetEnumerator()
