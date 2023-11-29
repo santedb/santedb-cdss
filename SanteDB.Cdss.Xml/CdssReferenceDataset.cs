@@ -87,33 +87,6 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
-        /// <summary>
-        /// Returns the first instance of the column
-        /// </summary>
-        public Object First(String columnName)
-        {
-            foreach(var itm in this)
-            {
-                if (itm != null)
-                {
-                    return itm;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Returns the last column
-        /// </summary>
-        public Object Last(String columnName)
-        {
-            object lastItm = null;
-            foreach(var itm in this)
-            {
-                lastItm = itm ?? lastItm;
-            }
-            return lastItm;
-        }
         /// <inheritdoc/>
         public IEnumerator<IForeignDataRecord> GetEnumerator()
         {
