@@ -24,6 +24,7 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
@@ -36,6 +37,7 @@ using SharpCompress;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SanteDB.Cdss.Xml
@@ -345,6 +347,7 @@ namespace SanteDB.Cdss.Xml
             var expressionInterpreter = new Interpreter(InterpreterOptions.Default)
                                .Reference(typeof(DateTimeOffset))
                                .Reference(typeof(ExtensionMethods))
+                               .Reference(typeof(Trace))
                                .EnableAssignment(AssignmentOperators.None);
 
             // Add types
@@ -431,6 +434,27 @@ namespace SanteDB.Cdss.Xml
                 throw new DetectedIssueException(issues);
             }
         }
+
+        /// <summary>
+        /// Get data from the context as a date
+        /// </summary>
+        public DateTime Date(string name) => this[name] is DateTime dt ? dt : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(DateTime), this[name].GetType()));
+        /// <summary>
+        /// Get data from the context as a string
+        /// </summary>
+        public String String(string name) => this[name]?.ToString();
+        /// <summary>
+        /// Get data from the context as a int
+        /// </summary>
+        public int Int(string name) => this[name] is int i ? i : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(int), this[name].GetType()));
+        /// <summary>
+        /// Get data from the context as a real
+        /// </summary>
+        public double Real(string name) => this[name] is double d ? d : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(double), this[name].GetType()));
+        /// <summary>
+        /// Get data from the context as a bool
+        /// </summary>
+        public bool Bool(string name) => this[name] is bool b ? b : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(bool), this[name].GetType()));
     }
     /// <summary>
     /// Parameter manager for the CDSS
