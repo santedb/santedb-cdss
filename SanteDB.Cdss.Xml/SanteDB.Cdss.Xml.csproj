@@ -53,6 +53,7 @@
       <GAtn>true</GAtn>
       <Package>SanteDB.Cdss.Xml.Antlr</Package>
       <Error>true</Error>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>

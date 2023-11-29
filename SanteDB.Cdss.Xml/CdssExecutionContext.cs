@@ -218,7 +218,7 @@ namespace SanteDB.Cdss.Xml
             }
             else
             {
-                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, parameterOrFactName));
+                throw new CdssEvaluationException(string.Format(ErrorMessages.REFERENCE_NOT_FOUND, parameterOrFactName));
             }
         }
 
@@ -234,7 +234,7 @@ namespace SanteDB.Cdss.Xml
             }
             else
             {
-                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, factName));
+                throw new CdssEvaluationException(string.Format(ErrorMessages.REFERENCE_NOT_FOUND, factName));
             }
         }
 
@@ -259,11 +259,11 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         internal void Declare(CdssComputableAssetDefinition fact)
         {
-            if (!String.IsNullOrEmpty(fact.Name))
+            if (!string.IsNullOrEmpty(fact.Name))
             {
                 this.m_computableAssetsInScope.Add(fact.Name.ToLowerInvariant(), fact);
             }
-            if (!String.IsNullOrEmpty(fact.Id))
+            if (!string.IsNullOrEmpty(fact.Id))
             {
                 this.m_computableAssetsInScope.Add($"#{fact.Id.ToLowerInvariant()}", fact);
             }

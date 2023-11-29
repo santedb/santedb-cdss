@@ -79,15 +79,41 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Select the value in the specified column
         /// </summary>
-        public object Select(String columnName)
+        public IEnumerable<Object> Select(String columnName) 
         {
             foreach (var itm in this)
             {
-                return itm[columnName];
+                yield return itm[columnName];
+            }
+        }
+
+        /// <summary>
+        /// Returns the first instance of the column
+        /// </summary>
+        public Object First(String columnName)
+        {
+            foreach(var itm in this)
+            {
+                if (itm != null)
+                {
+                    return itm;
+                }
             }
             return null;
         }
 
+        /// <summary>
+        /// Returns the last column
+        /// </summary>
+        public Object Last(String columnName)
+        {
+            object lastItm = null;
+            foreach(var itm in this)
+            {
+                lastItm = itm ?? lastItm;
+            }
+            return lastItm;
+        }
         /// <inheritdoc/>
         public IEnumerator<IForeignDataRecord> GetEnumerator()
         {
