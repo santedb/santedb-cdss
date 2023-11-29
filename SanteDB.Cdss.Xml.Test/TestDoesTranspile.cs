@@ -49,6 +49,8 @@ namespace SanteDB.Cdss.Xml.Test
                     Assert.AreEqual(7, transpiledLibrary.Definitions.OfType<CdssDecisionLogicBlockDefinition>().Last().Definitions.Count());
                     Assert.AreEqual(1, transpiledLibrary.Definitions.OfType<CdssDatasetDefinition>().Count());
                 }
+
+                var detranspile = CdssLibraryTranspiler.UnTranspile(transpiledLibrary);
             }
         }
 

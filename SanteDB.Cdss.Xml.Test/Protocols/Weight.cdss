@@ -171,8 +171,7 @@ library "Childhood Healthy Growth"
 				when "Patient Is Underweight"
 				then 
 					assign const "6188F821-261F-420C-9520-0DE240A05661" to interpretationConcept
-					raise "Patient weight is abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, cholera, etc."
-						having priority warn
+					raise having priority warn "Patient weight is abnormally low - Please provide appropriate nutritional counseling and check for conditions such as ringworm, cholera, etc."
 					propose
 						having model as
 						$$
@@ -206,7 +205,7 @@ library "Childhood Healthy Growth"
 				when "Patient Is Overweight"
 				then 
 					assign const "3C4D6579-7496-4B44-AAC1-18A714FF7A05" to interpretationConcept
-					raise "Patient weight abnormally high - Please provide appropriate nutritional counseling" having priority warn
+					raise having priority warn "Patient weight abnormally high - Please provide appropriate nutritional counseling" 
 			end 
 		end logic // observation
 

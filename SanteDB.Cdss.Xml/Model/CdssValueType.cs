@@ -9,6 +9,8 @@ namespace SanteDB.Cdss.Xml.Model
     [XmlType(nameof(CdssValueType), Namespace = "http://santedb.org/cdss")]
     public enum CdssValueType
     {
+        [XmlEnum("auto")]
+        Unspecified = 0,
         /// <summary>
         /// The CDSS value type is <see cref="DateTimeOffset"/>
         /// </summary>

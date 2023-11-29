@@ -2,6 +2,7 @@
 using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -75,5 +76,6 @@ namespace SanteDB.Cdss.Xml.Model
         /// Validate the object definition
         /// </summary>
         public abstract IEnumerable<DetectedIssue> Validate(CdssExecutionContext context);
+
     }
 }

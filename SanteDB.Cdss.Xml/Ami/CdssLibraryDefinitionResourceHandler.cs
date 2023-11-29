@@ -9,6 +9,7 @@ using SanteDB.Core.Exceptions;
 using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Interop;
+using SanteDB.Core.Model;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
@@ -116,7 +117,7 @@ namespace SanteDB.Cdss.Xml.Ami
                                 }
 
                                 var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
-                                return new CdssLibraryDefinitionInfo(xmlLibrary, fromSource);
+                                return new CdssLibraryDefinitionInfo(retVal, fromSource);
                             }
                             catch (CdssTranspilationException e)
                             {
@@ -167,6 +168,10 @@ namespace SanteDB.Cdss.Xml.Ami
                     RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.xml\"");
                     RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
                     return retVal.Library;
+                case "txt":
+                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.cdss\"");
+                    RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
+                    return new MemoryStream(Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
                 default:
                    return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
             }
