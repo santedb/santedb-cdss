@@ -50,7 +50,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if(string.IsNullOrEmpty(this.Id) && string.IsNullOrEmpty(this.Name))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.asset.identification", "CDSS logic asset definitions must carry either a @name or @id attribute", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.asset.identification", "CDSS logic asset definitions must carry either a @name or @id attribute", Guid.Empty, this.ToReferenceString());
             }
         }
     }

@@ -16,7 +16,7 @@ library "Childhood Healthy Growth"
 		logic "Childhood Growth Patient Logic"
 			having id <org.santedb.cdss.growth.patient>
 			having status active
-			having context Patient when all("Patient Is Child", "Patient Is Not Deceased")
+			having context Patient when all("Patient Is a Child", "Patient Is Not Deceased")
 			with metadata
 				doc Contains logic related to a patient who is a child - proposes weight and height measurements once per month until the child reaches 5 years old
 			end

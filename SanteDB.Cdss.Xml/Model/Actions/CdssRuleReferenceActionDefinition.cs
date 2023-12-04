@@ -65,14 +65,15 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             if (string.IsNullOrEmpty(this.RuleName))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceRequired", "Rule reference @ref attribute must be present", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceRequired", "Rule reference @ref attribute must be present", Guid.Empty, this.ToReferenceString());
             }
             else if (!context.TryGetRuleDefinition(this.RuleName, out _))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context))
             {
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

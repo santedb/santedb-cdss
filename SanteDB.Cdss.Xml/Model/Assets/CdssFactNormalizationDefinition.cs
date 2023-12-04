@@ -50,11 +50,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if (this.When == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.fact.normalize.when", "Normalization instructions should carry a when condition", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.fact.normalize.when", "Normalization instructions should carry a when condition", Guid.Empty, this.ToReferenceString());
             }
             if (this.EmitExpression == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.normalize.emit", "Normalization instructions must carry a computation", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.normalize.emit", "Normalization instructions must carry a computation", Guid.Empty, this.ToReferenceString());
             }
 
         }

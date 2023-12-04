@@ -79,7 +79,23 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if (String.IsNullOrEmpty(this.ReferencedModel) && this.Model == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.missing", "Model element must either reference a shared model or must provide a model", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.missing", "Model element must either reference a shared model or must provide a model", Guid.Empty, this.ToReferenceString());
+            }
+            else if (this.Model is String jsonStr) // Try parse JSON
+            {
+                JsonException je = null;
+                try
+                {
+                    JsonConvert.DeserializeObject(jsonStr);
+                }
+                catch (JsonException e)
+                {
+                    je = e;
+                }
+                if(je != null)
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.invalid", $"JSON model does not appear to be valid JSON {je.Message}", Guid.Empty, this.ToReferenceString());
+                }
             }
         }
 

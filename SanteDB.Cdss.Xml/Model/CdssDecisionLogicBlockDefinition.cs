@@ -44,26 +44,26 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if(this.Context == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.contextMissing", "CDSS logic blocks must declare a context (type of data) to which the logic block applies", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.contextMissing", "CDSS logic blocks must declare a context (type of data) to which the logic block applies", Guid.Empty, this.ToReferenceString());
             }
             if(this.When == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Information, "cdss.logic.globalLogic", $"CDSS logic block will be applied to all instances of {this.Context}", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Information, "cdss.logic.globalLogic", $"CDSS logic block will be applied to all instances of {this.Context}", Guid.Empty, this.ToReferenceString());
+            }
+            if (String.IsNullOrEmpty(this.Name))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.nameRequired", "CDSS logic block should carry a name", Guid.Empty, this.ToReferenceString());
             }
             if (this.Definitions?.Any() != true)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.definitionsMissing", "CDSS logic block should contain at least one definition", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.logic.definitionsMissing", "CDSS logic block should contain at least one definition", Guid.Empty, this.ToReferenceString());
             }
             else {
                 foreach (var itm in this.Definitions.SelectMany(o => o.Validate(context)).Union(this.When?.Validate(context) ?? new DetectedIssue[0]))
                 {
-                    itm.RefersTo = itm.RefersTo ?? this.ToString();
+                    itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                     yield return itm;
                 }
-            }
-            if(String.IsNullOrEmpty(this.Name) && string.IsNullOrEmpty(this.Id))
-            {
-
             }
         }
 

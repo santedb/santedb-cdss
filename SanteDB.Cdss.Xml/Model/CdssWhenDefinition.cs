@@ -48,7 +48,7 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.WhenComputation == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.when.definitionMissing", "When condition block is missing logic", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.when.definitionMissing", "When condition block is missing logic", Guid.Empty, this.ToReferenceString());
             }
             else
             {

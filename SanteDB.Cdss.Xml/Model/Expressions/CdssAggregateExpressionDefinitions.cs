@@ -36,10 +36,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             if(this.ContainedExpressions?.Any() != true)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.aggregate.missingInstructions", "<any> or <all> missing contained expressions", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.aggregate.missingInstructions", "<any> or <all> missing contained expressions", Guid.Empty, this.ToReferenceString());
             }
             foreach(var itm in this.ContainedExpressions?.SelectMany(o=>o.Validate(context)))
             {
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

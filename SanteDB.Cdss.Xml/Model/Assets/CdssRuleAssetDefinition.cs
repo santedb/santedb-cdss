@@ -34,17 +34,17 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if (this.When == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.rule.whenRecommended", "Rules should carry a WHEN condition unless they are globally applied", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.rule.whenRecommended", "Rules should carry a WHEN condition unless they are globally applied", Guid.Empty, this.ToReferenceString());
             }
             if (this.Actions == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.thenRequired", "Rules must carry a THEN block", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.thenRequired", "Rules must carry a THEN block", Guid.Empty, this.ToReferenceString());
             }
             foreach(var itm in base.Validate(context)
                 .Union(this.Actions?.Validate(context) ?? new DetectedIssue[0])
                 .Union(this.When?.Validate(context) ?? new DetectedIssue[0]))
             {
-                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

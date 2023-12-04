@@ -18,8 +18,8 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public CdssTranspileMapMetaData(int startLine, int startColumn, int stopLine, int stopColumn)
         {
-            this.StartPosition = $"{startLine},{startColumn}";
-            this.EndPoisition = $"{stopLine},{stopColumn}";
+            this.StartPosition = $"{startLine}:{startColumn}";
+            this.EndPoisition = $"{stopLine}:{stopColumn}";
         }
 
         /// <summary>
@@ -39,6 +39,12 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         [XmlAttribute("stop"), JsonProperty("stop")]
         public string EndPoisition { get; set; }
+
+        /// <summary>
+        /// Represents the original source code
+        /// </summary>
+        [XmlElement("src"), JsonProperty("src")]
+        public byte[] OriginalSource { get; set; }
 
     }
 }

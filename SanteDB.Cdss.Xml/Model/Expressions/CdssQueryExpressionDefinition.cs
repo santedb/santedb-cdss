@@ -63,11 +63,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             if (String.IsNullOrEmpty(this.SourceCollectionHdsi))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.query.missingSource", "Source from which query should be executed is missing", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.query.missingSource", "Source from which query should be executed is missing", Guid.Empty, this.ToReferenceString());
             }
             if (String.IsNullOrEmpty(this.FilterHdsi))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.query.missingFilter", "Filter expression must be provided for query statement", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.query.missingFilter", "Filter expression must be provided for query statement", Guid.Empty, this.ToReferenceString());
             }
         }
 

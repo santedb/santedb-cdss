@@ -100,16 +100,18 @@ namespace SanteDB.Cdss.Xml
         internal static IEnumerable<CdssDecisionLogicBlockDefinition> AppliesTo(this IEnumerable<CdssDecisionLogicBlockDefinition> decisionBlockDefinitions, ICdssExecutionContext contextToApply)
         {
 
+            bool isForValidationOnly = contextToApply is CdssExecutionContext exe && exe.IsForValidation;
+
             if (CdssExecutionStackFrame.Current == null)
             {
                 using (CdssExecutionStackFrame.Enter(contextToApply))
                 {
-                    return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !false.Equals(o.When?.Compute()) && o.Status != CdssObjectState.DontUse).ToList();
+                    return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !isForValidationOnly.Equals(o.When?.Compute()) && o.Status != CdssObjectState.DontUse).ToList();
                 }
             }
             else
             {
-                return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !false.Equals(o.When?.Compute()) && o.Status != CdssObjectState.DontUse).ToList();
+                return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && !isForValidationOnly.Equals(o.When?.Compute()) && o.Status != CdssObjectState.DontUse).ToList();
             }
         }
 

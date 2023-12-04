@@ -75,15 +75,15 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                   .DetectIdentifiers(this.ExpressionValue);
                 if (identifiers.UnknownIdentifiers.Any())
                 {
-                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.unknownId", $"Unknown identifiers {String.Join(",", identifiers.UnknownIdentifiers.Select(o => o.ToString()))} in C# expression {this.ExpressionValue}", Guid.Empty, this.ToString());
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.unknownId", $"Unknown identifiers {String.Join(",", identifiers.UnknownIdentifiers.Select(o => o.ToString()))} in C# expression {this.ExpressionValue}", Guid.Empty, this.ToReferenceString());
                 }
                 else if (this.ExpressionValue.Count(o => o == '[') != this.ExpressionValue.Count(o => o == ']'))
                 {
-                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.bracketMismatch", $"Missing indexer close/open bracket in {this.ExpressionValue}", Guid.Empty, this.ToString());
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.bracketMismatch", $"Missing indexer close/open bracket in {this.ExpressionValue}", Guid.Empty, this.ToReferenceString());
                 }
                 else if (this.ExpressionValue.Count(o => o == '(') != this.ExpressionValue.Count(o => o == ')'))
                 {
-                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.bracketMismatch", $"Missing parentheses close/open in {this.ExpressionValue}", Guid.Empty, this.ToString());
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.bracketMismatch", $"Missing parentheses close/open in {this.ExpressionValue}", Guid.Empty, this.ToReferenceString());
                 }
             }
         }

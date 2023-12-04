@@ -1,4 +1,5 @@
-﻿using SanteDB.Core.BusinessRules;
+﻿using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model;
 using System;
@@ -17,6 +18,12 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     {
 
         /// <summary>
+        /// Gets or sets the transpiled metadata
+        /// </summary>
+        [XmlElement("source"), JsonProperty("source")]
+        public CdssTranspileMapMetaData TranspileSourceReference { get; set; }
+
+        /// <summary>
         /// Generate the LINQ expression so it can be computed
         /// </summary>
         /// <param name="cdssContext">The CDSS context</param>
@@ -29,5 +36,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// </summary>
         /// <param name="context">The context in which the validation is occurring</param>
         public abstract IEnumerable<DetectedIssue> Validate(CdssExecutionContext context);
+
+        /// <summary>
+        /// Represent this as a source code reference string
+        /// </summary>
+        /// <returns></returns>
+        public string ToReferenceString() => $"{this.GetType().Name} {this.TranspileSourceReference?.SourceFileName} @{this.TranspileSourceReference?.StartPosition}";
     }
 }

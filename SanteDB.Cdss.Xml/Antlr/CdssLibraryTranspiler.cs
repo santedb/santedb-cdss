@@ -27,22 +27,34 @@ namespace SanteDB.Cdss.Xml.Antlr
         /// </summary>
         /// <param name="inputStream">The input stream containing the plain text CDSS definition</param>
         /// <param name="includeSourceMap">True if the output should include the source map</param>
+        /// <param name="sourceName">The name of the source to place on the file</param>
         /// <returns>The transpiled CDSS library</returns>
-        public static CdssLibraryDefinition Transpile(Stream inputStream, bool includeSourceMap)
+        public static CdssLibraryDefinition Transpile(Stream inputStream, bool includeSourceMap, string sourceName = null)
         {
-            var antlrStream = new AntlrInputStream(inputStream);
-            var lexer = new CdssLibraryLexer(antlrStream);
-            var processedTokens = new CommonTokenStream(lexer);
-            var parser = new CdssLibraryParser(processedTokens);
-            parser.RemoveErrorListeners();
-            lexer.RemoveErrorListeners();
-            var errorListener = new CdssTranspileErrorListener();
-            parser.AddErrorListener(errorListener);
-            var result = parser.library();
 
-            // Process
-            var visitor = new CdssLibraryVisitor(includeSourceMap, (inputStream as FileStream)?.Name ?? ":memory:");
-            return visitor.VisitLibrary(result);
+            using (var ms = new MemoryStream())
+            {
+                inputStream.CopyTo(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                var antlrStream = new AntlrInputStream(ms);
+                var lexer = new CdssLibraryLexer(antlrStream);
+                var processedTokens = new CommonTokenStream(lexer);
+                var parser = new CdssLibraryParser(processedTokens);
+                parser.RemoveErrorListeners();
+                lexer.RemoveErrorListeners();
+                var errorListener = new CdssTranspileErrorListener();
+                parser.AddErrorListener(errorListener);
+                var result = parser.library();
+                errorListener.ThrowIfHasErrors();
+                // Process
+                var visitor = new CdssLibraryVisitor(includeSourceMap, (inputStream as FileStream)?.Name ?? sourceName ?? ":memory:");
+                var library = visitor.VisitLibrary(result);
+                if(includeSourceMap)
+                {
+                    library.TranspileSourceReference.OriginalSource = ms.ToArray();
+                }
+                return library;
+            }
         }
 
         /// <summary>

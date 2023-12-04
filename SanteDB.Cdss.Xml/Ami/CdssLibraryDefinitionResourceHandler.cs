@@ -74,6 +74,7 @@ namespace SanteDB.Cdss.Xml.Ami
             {
                 case CdssLibraryDefinition definition:
                     {
+                        
                         var xmlLibrary = new XmlProtocolLibrary(definition);
                         if (validator?.Invoke(xmlLibrary) == false)
                         {
@@ -92,6 +93,28 @@ namespace SanteDB.Cdss.Xml.Ami
 
                         var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
                         return new CdssLibraryDefinitionInfo(retVal, true);
+                    }
+                case String stringData:
+                    {
+                        using(var ms = new MemoryStream(Encoding.UTF8.GetBytes(stringData)))
+                        {
+                            try
+                            {
+                                var library = CdssLibraryTranspiler.Transpile(ms, true);
+                                var xmlLibrary = new XmlProtocolLibrary(library);
+                                if (validator?.Invoke(xmlLibrary) == false)
+                                {
+                                    throw new ArgumentOutOfRangeException();
+                                }
+
+                                var retVal = this.m_cdssLibraryRepository.InsertOrUpdate(xmlLibrary);
+                                return new CdssLibraryDefinitionInfo(retVal, true);
+                            }
+                            catch (CdssTranspilationException e)
+                            {
+                                throw new DetectedIssueException(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty, e);
+                            }
+                        }
                     }
                 case IEnumerable<MultiPartFormData> multiForm:
                     {
@@ -165,13 +188,15 @@ namespace SanteDB.Cdss.Xml.Ami
             switch(RestOperationContext.Current.IncomingRequest.QueryString["_format"])
             {
                 case "xml":
+                    var library = retVal.Library.Clone();
+                    library.TranspileSourceReference = null;
                     RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.xml\"");
                     RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
-                    return retVal.Library;
+                    return library;
                 case "txt":
                     RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.cdss\"");
                     RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
-                    return new MemoryStream(Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
+                    return new MemoryStream(retVal.Library.TranspileSourceReference?.OriginalSource ?? Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
                 default:
                    return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
             }
@@ -211,9 +236,7 @@ namespace SanteDB.Cdss.Xml.Ami
         {
             return this.InsertOrUpdateCdssLibrary(data, (lib) =>
             {
-
                 return lib.Uuid == Guid.Empty || RestOperationContext.Current.IncomingRequest.RawUrl.Contains(lib.Uuid.ToString());
-                return true;
             });
         }
     }

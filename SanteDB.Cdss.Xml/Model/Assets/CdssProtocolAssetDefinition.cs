@@ -26,18 +26,19 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if(String.IsNullOrEmpty(this.Oid))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.oidMissing", "CDSS Protocols must carry an OID", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.oidMissing", "CDSS Protocols must carry an OID", Guid.Empty, this.ToReferenceString());
             }
             if(String.IsNullOrEmpty(this.Name))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.nameMissing", "CDSS Protocols must carry a NAME", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.nameMissing", "CDSS Protocols must carry a NAME", Guid.Empty, this.ToReferenceString());
             }
             if(this.Uuid == Guid.Empty)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.uuidMissing", "CDSS Protocols must carry a UUID", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.uuidMissing", "CDSS Protocols must carry a UUID", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context))
             {
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

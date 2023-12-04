@@ -51,19 +51,19 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if (!this.IterationsSpecified && this.Until == null)
+            if (!(this.IterationsSpecified || this.Iterations > 0) && this.Until == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.repeat.infinite", "Either @iterations or <until> are required, otherwise repeat action will be infinite", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.repeat.infinite", "Either @iterations or <until> are required, otherwise repeat action will be infinite", Guid.Empty, this.ToReferenceString());
             }
             if(this.Actions == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.execute.statement", "Execute block must carry at least one instruction", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.execute.statement", "Execute block must carry at least one instruction", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context)
                 .Union(this.Until?.Validate(context) ?? new DetectedIssue[0])
                 .Union(this.Actions?.Validate(context) ?? new DetectedIssue[0]))
             {
-                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
 

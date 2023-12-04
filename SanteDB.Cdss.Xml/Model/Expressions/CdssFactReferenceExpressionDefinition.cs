@@ -47,11 +47,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             if(String.IsNullOrEmpty(this.FactName))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.missingReference", "Fact reference expressions require a @ref attribute", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.missingReference", "Fact reference expressions require a @ref attribute", Guid.Empty, this.ToReferenceString());
             }
             else if(!context.FactNames.Contains(this.FactName.ToLowerInvariant()))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.notFound", $"Could not find a fact in scope named {this.FactName}", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.notFound", $"Could not find a fact in scope named {this.FactName}", Guid.Empty, this.ToReferenceString());
             }
         }
 

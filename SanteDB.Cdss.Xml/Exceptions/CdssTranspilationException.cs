@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SanteDB.Cdss.Xml.Exceptions
@@ -11,24 +12,54 @@ namespace SanteDB.Cdss.Xml.Exceptions
     public class CdssTranspilationException : Exception
     {
 
-        /// <summary>
-        /// Gets the line number
-        /// </summary>
-        public int Line { get; }
+        public class CdssTranspileError
+        {
+
+            /// <summary>
+            /// Gets the line number
+            /// </summary>
+            public int Line { get; }
+
+            /// <summary>
+            /// Gets the column
+            /// </summary>
+            public int Column { get; }
+
+            /// <summary>
+            /// Gets the message
+            /// </summary>
+            public string Message { get; }
+
+            /// <summary>
+            /// Create a new transpile rror
+            /// </summary>
+            public CdssTranspileError(IToken position, String errorMessage)
+            {
+                this.Line = position.Line;
+                this.Column = position.Column;
+                this.Message = errorMessage;
+            }
+        }
+
 
         /// <summary>
-        /// Gets the column
+        /// Get the errors
         /// </summary>
-        public int Column { get; }
+        public IEnumerable<CdssTranspileError> Errors { get; }
 
         /// <summary>
         /// Creates a new transpilation exception
         /// </summary>
-        public CdssTranspilationException(IToken position, String errorMessage) : base($"{errorMessage} @ {position.Line}:{position.Column}")
+        public CdssTranspilationException(IEnumerable<CdssTranspileError> errors) : base($"Error Transpiling Library")
         {
-            this.Line = position.Line;
-            this.Column = position.Column;
+            this.Errors = errors.ToList();    
         }
 
+        /// <summary>
+        /// Create a new transpilation exception
+        /// </summary>
+        public CdssTranspilationException(IToken token, string errorMessage) : this(new CdssTranspileError[] { new CdssTranspileError(token, errorMessage) })
+        {
+        }
     }
 }

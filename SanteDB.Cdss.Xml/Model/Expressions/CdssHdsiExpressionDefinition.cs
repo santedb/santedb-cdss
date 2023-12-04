@@ -59,7 +59,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             if(String.IsNullOrEmpty(this.ExpressionValue))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.hdsi.missingExpression", "HDSI expression require a property selector or binary expression", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.hdsi.missingExpression", "HDSI expression require a property selector or binary expression", Guid.Empty, this.ToReferenceString());
             }
             
         }

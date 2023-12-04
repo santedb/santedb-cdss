@@ -40,7 +40,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             if(this.Actions?.Any() != true)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.actionCollection.actionsMissing", "CDSS Action collection must carry at least one action", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.actionCollection.actionsMissing", "CDSS Action collection must carry at least one action", Guid.Empty, this.ToReferenceString());
             }
             else
             {

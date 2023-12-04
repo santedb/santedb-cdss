@@ -77,5 +77,15 @@ namespace SanteDB.Cdss.Xml.Model
         /// </summary>
         public abstract IEnumerable<DetectedIssue> Validate(CdssExecutionContext context);
 
+        /// <summary>
+        /// Represent this as a source code reference string
+        /// </summary>
+        /// <returns></returns>
+        public string ToReferenceString() => $"{this.GetType().Name} {this.TranspileSourceReference?.SourceFileName ?? this.Name} @{this.TranspileSourceReference?.StartPosition}";
+
+        /// <summary>
+        /// Creat a shallow clone
+        /// </summary>
+        public CdssBaseObjectDefinition Clone() => (CdssBaseObjectDefinition)this.MemberwiseClone();
     }
 }

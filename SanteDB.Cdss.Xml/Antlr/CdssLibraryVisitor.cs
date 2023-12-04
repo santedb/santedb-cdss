@@ -53,11 +53,18 @@ namespace SanteDB.Cdss.Xml.Antlr
             if (this.m_includeMap)
             {
                 retVal.TranspileSourceReference = new CdssTranspileMapMetaData(context.Start.Line, context.Start.Column, context.Stop.Line, context.Stop.Column);
-                if (retVal is CdssLibraryDefinition)
-                {
-                    retVal.TranspileSourceReference.SourceFileName = this.m_sourcePath;
+                retVal.TranspileSourceReference.SourceFileName = this.m_sourcePath;
+            }
+            return retVal;
+        }
 
-                };
+        private TCdssExpression CreateCdssExpression<TCdssExpression>(ParserRuleContext context) where TCdssExpression : CdssExpressionDefinition, new()
+        {
+            var retVal = new TCdssExpression();
+            if (this.m_includeMap)
+            {
+                retVal.TranspileSourceReference = new CdssTranspileMapMetaData(context.Start.Line, context.Start.Column, context.Stop.Line, context.Stop.Column);
+                retVal.TranspileSourceReference.SourceFileName = this.m_sourcePath;
             }
             return retVal;
         }
@@ -327,11 +334,15 @@ namespace SanteDB.Cdss.Xml.Antlr
             // Is this just a reference - if so just reference the type
             if (this.TryExtractString(context.GetToken(CdssLibraryLexer.STRING, 0), out var reference))
             {
-                this.AddComputation(new CdssFactReferenceExpressionDefinition(reference));
+                var refr = this.CreateCdssExpression<CdssFactReferenceExpressionDefinition>(context);
+                refr.FactName = reference;
+                this.AddComputation(refr);
             }
             else if (this.TryExtractIdentifier(context.GetToken(CdssLibraryLexer.NAMED_ID, 0), out reference))
             {
-                this.AddComputation(new CdssFactReferenceExpressionDefinition($"#{reference}"));
+                var refr = this.CreateCdssExpression<CdssFactReferenceExpressionDefinition>(context);
+                refr.FactName = $"#{reference}";
+                this.AddComputation(refr);
             }
             else if (context.children.OfType<CdssLibraryParser.Fact_computationContext>().SingleOrDefault() == null)
             {
@@ -349,7 +360,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new CdssTranspilationException(context.Start, CdssTranspileErrors.COMPUTATION_MISSING);
             }
 
-            var expression = new CdssAllExpressionDefinition();
+            var expression = this.CreateCdssExpression<CdssAllExpressionDefinition>(context);
             this.AddComputation(expression);
             this.m_currentComputationStack.Push(expression);
             var retVal = base.VisitAll_logic(context);
@@ -364,7 +375,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new CdssTranspilationException(context.Start, CdssTranspileErrors.COMPUTATION_MISSING);
             }
 
-            var expression = new CdssAnyExpressionDefinition();
+            var expression = this.CreateCdssExpression<CdssAnyExpressionDefinition>(context);
             this.AddComputation(expression);
             this.m_currentComputationStack.Push(expression);
             var retVal = base.VisitAny_logic(context);
@@ -379,7 +390,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new CdssTranspilationException(context.Start, CdssTranspileErrors.COMPUTATION_MISSING);
             }
 
-            var expression = new CdssNoneExpressionDefinition();
+            var expression = this.CreateCdssExpression<CdssNoneExpressionDefinition>(context);
             this.AddComputation(expression);
             this.m_currentComputationStack.Push(expression);
             var retVal = base.VisitNone_logic(context);
@@ -395,11 +406,11 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
             else if (this.TryExtractString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
             {
-                this.AddComputation(new CdssHdsiExpressionDefinition(hdsi)
-                {
-                    Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : CdssHdsiExpressionScopeType.Context,
-                    IsNegated = context.NEGATED() != null
-                });
+                var hdsiExpr = this.CreateCdssExpression<CdssHdsiExpressionDefinition>(context);
+                hdsiExpr.ExpressionValue = hdsi;
+                hdsiExpr.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : CdssHdsiExpressionScopeType.Context;
+                hdsiExpr.IsNegated = context.NEGATED() != null;
+                this.AddComputation(hdsiExpr);
             }
             else
             {
@@ -412,7 +423,9 @@ namespace SanteDB.Cdss.Xml.Antlr
         {
             if (this.TryExtractString(context.STRING(), out var csharp) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out csharp))
             {
-                this.AddComputation(new CdssCsharpExpressionDefinition(csharp));
+                var cshrp = this.CreateCdssExpression<CdssCsharpExpressionDefinition>(context);
+                cshrp.ExpressionValue = csharp;
+                this.AddComputation(cshrp);
             }
             else
             {
@@ -507,7 +520,7 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         public override CdssLibraryDefinition VisitHaving_negation([NotNull] CdssLibraryParser.Having_negationContext context)
         {
-            if (m_currentObject.Peek() is CdssFactAssetDefinition cdssFactAssetDefinition && Boolean.TryParse(context.BOOL_VAL().GetText(), out var negated))
+            if (m_currentObject.Peek() is CdssFactAssetDefinition cdssFactAssetDefinition && Boolean.TryParse(context.BOOL_VAL()?.GetText() ?? "true", out var negated))
             {
                 cdssFactAssetDefinition.IsNegated = negated;
             }
@@ -691,7 +704,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             switch (this.m_currentObject.Peek())
             {
                 case IHasCdssActions cdssActionContainer:
-                    cdssActionContainer.Actions = cdssActionContainer.Actions?? this.CreateCdssObject<CdssActionCollectionDefinition>(context);
+                    cdssActionContainer.Actions = cdssActionContainer.Actions ?? this.CreateCdssObject<CdssActionCollectionDefinition>(context);
                     this.m_currentObject.Push(cdssActionContainer.Actions);
                     var retVal = base.VisitThen_action_statements(context);
                     this.m_currentObject.Pop();
@@ -747,7 +760,9 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
             else if (this.TryExtractString(context.STRING(), out var reference))
             {
-                assignAction.ContainedExpression = new CdssFactReferenceExpressionDefinition(reference);
+                var fr = this.CreateCdssExpression<CdssFactReferenceExpressionDefinition>(context);
+                fr.FactName = reference;
+                assignAction.ContainedExpression = fr;
             }
 
 
@@ -869,7 +884,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             var raiseAlert = this.CreateCdssObject<CdssIssueActionDefinition>(context);
             raiseAlert.IssueToRaise = new Core.BusinessRules.DetectedIssue();
             actionCollection.Actions.Add(raiseAlert);
-            if (this.TryExtractString(context.STRING()[0], out var issueText) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out issueText))
+            if (context.STRING().Length > 0 && this.TryExtractString(context.STRING()[0], out var issueText) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out issueText))
             {
                 raiseAlert.IssueToRaise.Text = issueText;
             }

@@ -45,7 +45,17 @@ namespace SanteDB.Cdss.Xml.Ami
                     Name = libraryEntry.Name,
                     UuidSpecified = true,
                     Metadata = new CdssObjectMetadata() { Documentation =  libraryEntry.Documentation, Version = libraryEntry.Version }
-                } : (libraryEntry as XmlProtocolLibrary)?.Library;
+                } : (libraryEntry as XmlProtocolLibrary)?.Library.Clone() as CdssLibraryDefinition;
+            if (this.Library.TranspileSourceReference != null)
+            {
+                this.Library.TranspileSourceReference = new CdssTranspileMapMetaData()
+                {
+                    SourceFileName = this.Library.TranspileSourceReference.SourceFileName,
+                    StartPosition = this.Library.TranspileSourceReference.StartPosition,
+                    EndPoisition = this.Library.TranspileSourceReference.EndPoisition
+                };
+            }
+
             this.ObsoletedByKey = libraryEntry.StorageMetadata?.ObsoletedByKey;
             this.ObsoletionTime = libraryEntry.StorageMetadata?.ObsoletionTime;
             this.PreviousVersionKey = libraryEntry.StorageMetadata?.PreviousVersionKey;

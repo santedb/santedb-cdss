@@ -19,7 +19,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if(string.IsNullOrEmpty(this.Oid) && string.IsNullOrEmpty(this.Name))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.group.unidentified", "CDSS protocol groups must carry either OID or Name (or both)", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.protocol.group.unidentified", "CDSS protocol groups must carry either OID or Name (or both)", Guid.Empty, this.ToReferenceString());
             }
         }
     }

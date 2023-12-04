@@ -66,6 +66,11 @@ namespace SanteDB.Cdss.Xml
 
         protected readonly IdentifiedData m_target;
 
+        /// <summary>
+        /// True if the context is for validation purposes
+        /// </summary>
+        public bool IsForValidation { get; }
+
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
@@ -81,9 +86,10 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         /// <param name="scopedLibraries">The libraries which are in scope of this context</param>
         /// <param name="scopedObject">The primary focal object for which decision support is being executed</param>
-        public CdssExecutionContext(IdentifiedData scopedObject, IEnumerable<CdssLibraryDefinition> scopedLibraries = null)
+        protected CdssExecutionContext(IdentifiedData scopedObject, IEnumerable<CdssLibraryDefinition> scopedLibraries = null, bool validationContext = false)
         {
             this.m_target = scopedObject;
+            this.IsForValidation = validationContext;
             this.m_datasets = scopedLibraries?
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDatasetDefinition>()
@@ -93,7 +99,7 @@ namespace SanteDB.Cdss.Xml
             this.m_computableAssetsInScope = scopedLibraries?
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
-                .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()) && d.When == null)
+                .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()))
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
@@ -139,7 +145,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the facts which can be referenced
         /// </summary>
-        public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssFactAssetDefinition).Select(o=>o.Key);
+        public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssComputableAssetDefinition).Select(o=>o.Key);
 
 
         /// <summary>
@@ -368,7 +374,22 @@ namespace SanteDB.Cdss.Xml
                 throw new ArgumentNullException(nameof(forObject));
             }
             var cdssType = typeof(CdssExecutionContext<>).MakeGenericType(forObject.GetType());
-            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries);
+            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries, false);
+        }
+
+        /// <summary>
+        /// Create a context for the provided object
+        /// </summary>
+        /// <param name="forObject">The object which the context should be created for</param>
+        /// <returns>The constructed context</returns>
+        public static CdssExecutionContext CreateValidationContext(IdentifiedData forObject, IEnumerable<CdssLibraryDefinition> scopedLibraries)
+        {
+            if (forObject == null)
+            {
+                throw new ArgumentNullException(nameof(forObject));
+            }
+            var cdssType = typeof(CdssExecutionContext<>).MakeGenericType(forObject.GetType());
+            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries, true);
         }
 
         /// <summary>
@@ -465,7 +486,7 @@ namespace SanteDB.Cdss.Xml
        
         
         /// <inheritdoc/>
-        public CdssExecutionContext(TTarget target, IEnumerable<CdssLibraryDefinition> scopedLibraries = null) : base(target, scopedLibraries)
+        public CdssExecutionContext(TTarget target, IEnumerable<CdssLibraryDefinition> scopedLibraries = null, bool validationContext = false) : base(target, scopedLibraries, validationContext)
         {
         }
 

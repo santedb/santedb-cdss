@@ -58,7 +58,7 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if(this.Definitions?.Any() != true)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.library.empty", "CDSS library must contain at least one logic or data block", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.library.empty", "CDSS library must contain at least one logic or data block", Guid.Empty, this.ToReferenceString());
             }
             else
             {
@@ -69,5 +69,6 @@ namespace SanteDB.Cdss.Xml.Model
                 }
             }
         }
+
     }
 }

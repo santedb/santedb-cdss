@@ -43,15 +43,15 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             if (this.Model == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.propose.model", "Propose action requires a model", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.propose.model", "Propose action requires a model", Guid.Empty, this.ToReferenceString());
             }
             if (this.Assignment?.Any() != true)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.propose.assign", "Propose action should carry dynamic assignments", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.propose.assign", "Propose action should carry dynamic assignments", Guid.Empty, this.ToReferenceString());
             }
-            foreach (var itm in base.Validate(context).Union(this.Assignment.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]))
+            foreach (var itm in base.Validate(context).Union(this.Assignment.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]).Union(this.Model?.Validate(context) ?? new DetectedIssue[0]))
             {
-                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

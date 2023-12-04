@@ -70,13 +70,13 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if (this.FactComputation == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.definition", "Fact assets must have a definition in csharp, hdsi, xml", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.definition", "Fact assets must have a definition in csharp, hdsi, xml", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context)
                 .Union(this.FactComputation?.Validate(context) ?? new DetectedIssue[0])
-                .Union(this.Normalize.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]))
+                .Union(this.Normalize?.SelectMany(o => o.Validate(context)) ?? new DetectedIssue[0]))
             {
-                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

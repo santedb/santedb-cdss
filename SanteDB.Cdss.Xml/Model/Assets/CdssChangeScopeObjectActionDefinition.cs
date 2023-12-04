@@ -42,10 +42,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         {
             if (this.ScopeComputation == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.scopeChange.computationMissing", "Scoped object change requires a computation (one of hdsi, query, fact, or csharp)", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.scopeChange.computationMissing", "Scoped object change requires a computation (one of hdsi, query, fact, or csharp)", Guid.Empty, this.ToReferenceString());
             }
             else {
                 foreach (var itm in base.Validate(context).Union(this.ScopeComputation.Validate(context))) {
+                    itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                     yield return itm;
                 }
             }

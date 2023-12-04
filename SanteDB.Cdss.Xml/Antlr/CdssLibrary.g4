@@ -39,22 +39,22 @@ protocol_having_statements:
     (having_priority)?
     (having_scope)*;
     
-having_id: (HAVING)?ID NAMED_ID;
-having_uuid: (HAVING)?UUID (UUIDV4|STRING);
-having_oid: (HAVING)?OID OID_DOTTED;
-having_status: (HAVING)?STATUS STATUS_VAL;
-having_type: (HAVING)?TYPE PRIMITIVE_TYPE;
-having_negation: (HAVING)?NEGATION BOOL_VAL;
-having_context: (HAVING)?CONTEXT CLASS_TYPE (when_guard_condition)?;
-having_model: (HAVING)?MODEL (
+having_id: (HAVING)? ID NAMED_ID;
+having_uuid: (HAVING)? UUID (UUIDV4|STRING);
+having_oid: (HAVING)? OID OID_DOTTED;
+having_status: (HAVING)? STATUS STATUS_VAL;
+having_type: (HAVING)? TYPE PRIMITIVE_TYPE;
+having_negation: (HAVING)? NEGATION BOOL_VAL;
+having_context: (HAVING)? CONTEXT CLASS_TYPE (when_guard_condition)?;
+having_model: (HAVING)? MODEL (
     STRING |
     (HAVING FORMAT FORMAT_REF)?
     AS
     MULTILINE_STRING
     END (MODEL)?
 );
-having_priority: (HAVING)?PRIORITY (INTEGER)?;
-having_scope: (HAVING)?SCOPE (STRING|NAMED_ID);
+having_priority: (HAVING)? PRIORITY (INTEGER)?;
+having_scope: (HAVING)? SCOPE (STRING|NAMED_ID);
 
 library_definitions: 
     logic_block | 
@@ -218,8 +218,6 @@ METADATA: 'metadata';
 DOCUMENTATION: 'doc' (~[\r\n\u2028\u2029])*;
 AUTHOR: 'author' (~[\r\n\u2028\u2029])*;
 VERSION: 'version';
-TRUE: 'true';
-FALSE: 'false';
 ITERATIONS: 'iterations';
 INCLUDE: 'include';
 LIBRARY: 'library';

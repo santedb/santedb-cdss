@@ -47,7 +47,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             if(this.ExpressionDefinition == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.xml.missingExpression", "XML LINQ expression statement required LINQ expression to be present", Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.xml.missingExpression", "XML LINQ expression statement required LINQ expression to be present", Guid.Empty, this.ToReferenceString());
             }
 
         }

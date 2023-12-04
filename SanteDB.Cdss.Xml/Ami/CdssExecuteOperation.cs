@@ -1,4 +1,5 @@
-﻿using SanteDB.Cdss.Xml.Model;
+﻿using SanteDB.Cdss.Xml.Antlr;
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
@@ -10,6 +11,7 @@ using SanteDB.Core.Model.Roles;
 using SanteDB.Rest.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -35,21 +37,33 @@ namespace SanteDB.Cdss.Xml.Ami
         public string Name => "execute";
 
         /// <inheritdoc/>
-        public ChildObjectScopeBinding ScopeBinding => ChildObjectScopeBinding.Instance;
+        public ChildObjectScopeBinding ScopeBinding => ChildObjectScopeBinding.Instance | ChildObjectScopeBinding.Class;
 
         /// <inheritdoc/>
-        public Type[] ParentTypes => new Type[] { typeof(CdssLibraryDefinition) };
+        public Type[] ParentTypes => new Type[] { typeof(ICdssLibraryRepositoryMetadata) };
 
         /// <inheritdoc/>
         public object Invoke(Type scopingType, object scopingKey, ParameterCollection parameters)
         {
             var scoperIsUuid = scopingKey is Guid uuid || Guid.TryParse(scopingKey?.ToString(), out uuid);
-            if(!scoperIsUuid)
+            var definition = String.Empty;
+            if(!scoperIsUuid && !parameters.TryGet("definition", out definition))
             {
                 throw new ArgumentOutOfRangeException(nameof(scopingKey));
             }
 
-            var cdssLibrary = this.m_cdssLibrary.Get(uuid, null);
+            ICdssLibrary cdssLibrary = null;
+            if (scoperIsUuid)
+            {
+                cdssLibrary = this.m_cdssLibrary.Get(uuid, null);
+            }
+            else
+            {
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(definition))) {
+                    var transpiler = CdssLibraryTranspiler.Transpile(ms, true);
+                    cdssLibrary = new XmlProtocolLibrary(transpiler);
+                }
+            }
             if(cdssLibrary != null)
             {
                 return this.ExecuteCdssLibrary(cdssLibrary, parameters);

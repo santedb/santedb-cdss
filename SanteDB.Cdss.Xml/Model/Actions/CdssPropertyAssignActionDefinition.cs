@@ -56,15 +56,15 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             if (this.ContainedExpression == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.property", "Assign action requires a setter expression", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.property", "Assign action requires a setter expression", Guid.Empty, this.ToReferenceString());
             }
             if (String.IsNullOrEmpty(this.Path))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.path", "Assign action requires a path expression", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.assign.path", "Assign action requires a path expression", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context).Union((this.ContainedExpression as CdssExpressionDefinition)?.Validate(context) ?? new DetectedIssue[0]))
             {
-                itm.RefersTo = itm.RefersTo ?? this.ToString();
+                itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
             }
         }

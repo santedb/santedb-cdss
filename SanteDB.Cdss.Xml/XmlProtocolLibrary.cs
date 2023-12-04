@@ -66,6 +66,7 @@ namespace SanteDB.Cdss.Xml
                 {
                     this.m_library.Uuid = value;
                 }
+                this.m_library.UuidSpecified = true;
             }
         }
         /// <inheritdoc/>

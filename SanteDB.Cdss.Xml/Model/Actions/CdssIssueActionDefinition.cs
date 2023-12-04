@@ -46,7 +46,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         {
             if (this.IssueToRaise == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.raise.issue", "Raise action requires a detected issue", Guid.Empty, this.ToString());
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.raise.issue", "Raise action requires a detected issue", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context))
             {
