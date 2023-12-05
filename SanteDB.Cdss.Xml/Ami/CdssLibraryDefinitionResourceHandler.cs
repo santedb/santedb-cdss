@@ -9,6 +9,7 @@ using SanteDB.Core.Exceptions;
 using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Interop;
+using SanteDB.Core.Matching;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Query;
@@ -30,16 +31,18 @@ namespace SanteDB.Cdss.Xml.Ami
     /// <summary>
     /// Represents an AMI handler for the <see cref="CdssLibraryDefinition"/>
     /// </summary>
-    public class CdssLibraryDefinitionResourceHandler : ChainedResourceHandlerBase
+    public class CdssLibraryDefinitionResourceHandler : ChainedResourceHandlerBase, ICheckoutResourceHandler
     {
         private readonly ICdssLibraryRepository m_cdssLibraryRepository;
+        private readonly IResourceCheckoutService m_checkService;
 
         /// <summary>
         /// DI constructor
         /// </summary>
-        public CdssLibraryDefinitionResourceHandler(ICdssLibraryRepository cdssLibraryRepository, ILocalizationService localizationService = null) : base(localizationService)
+        public CdssLibraryDefinitionResourceHandler(ICdssLibraryRepository cdssLibraryRepository, IResourceCheckoutService checkoutService = null, ILocalizationService localizationService = null) : base(localizationService)
         {
             this.m_cdssLibraryRepository = cdssLibraryRepository;
+            this.m_checkService = checkoutService;
         }
 
         /// <inheritdoc/>
@@ -238,6 +241,34 @@ namespace SanteDB.Cdss.Xml.Ami
             {
                 return lib.Uuid == Guid.Empty || RestOperationContext.Current.IncomingRequest.RawUrl.Contains(lib.Uuid.ToString());
             });
+        }
+
+        /// <inheritdoc/>
+        [Demand(PermissionPolicyIdentifiers.AlterClinicalProtocolConfigurationDefinition)]
+        public object CheckOut(object key)
+        {
+            _ = key is Guid uuid || Guid.TryParse(key.ToString(), out uuid);
+            var library = this.m_cdssLibraryRepository.Get(uuid, null);
+            if(library != null && 
+                this.m_checkService?.Checkout<ICdssLibrary>(uuid) == false)
+            {
+                throw new ObjectLockedException();
+            }
+            return null;
+        }
+
+        /// <inheritdoc/>
+        [Demand(PermissionPolicyIdentifiers.AlterClinicalProtocolConfigurationDefinition)]
+        public object CheckIn(object key)
+        {
+            var match = _ = key is Guid uuid || Guid.TryParse(key.ToString(), out uuid);
+            var library = this.m_cdssLibraryRepository.Get(uuid, null);
+            if (library != null &&
+                this.m_checkService?.Checkin<ICdssLibrary>(uuid) == false)
+            {
+                throw new ObjectLockedException();
+            }
+            return null;
         }
     }
 }

@@ -9,7 +9,8 @@ library:
 
 include_definition: INCLUDE(SPACE)?(NAMED_ID|STRING);
 library_definition: (DEFINE)? LIBRARY STRING
-    (having_statements)*
+    having_id
+    (having_uuid | having_oid | having_status)*
     (metadata_statement)?
     AS
     (library_definitions)+

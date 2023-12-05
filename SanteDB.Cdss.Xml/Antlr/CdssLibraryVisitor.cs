@@ -974,6 +974,9 @@ namespace SanteDB.Cdss.Xml.Antlr
                     case CdssPropertyAssignActionDefinition propertyAssignActionDefinition:
                         propertyAssignActionDefinition.ContainedExpression = expressionDefinition;
                         break;
+                    case CdssRepeatActionDefinition repeatActionDefinition:
+                        repeatActionDefinition.Until = new CdssWhenDefinition() { WhenComputation = expressionDefinition };
+                        break;
                     default:
                         throw new InvalidOperationException(String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
                 }
