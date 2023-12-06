@@ -928,7 +928,6 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 throw new CdssTranspilationException(context.Start, String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
             }
-
             var inlineRule = this.CreateCdssObject<CdssInlineRuleActionDefinition>(context);
             protocolDefinition.Actions = protocolDefinition.Actions ?? new CdssActionCollectionDefinition();
             protocolDefinition.Actions.Actions.Add(inlineRule);
