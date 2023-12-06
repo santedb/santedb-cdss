@@ -4,6 +4,7 @@ using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Net.Sockets;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Ami
@@ -104,12 +105,44 @@ namespace SanteDB.Cdss.Xml.Ami
         [XmlElement("obsoletedBy"), JsonProperty("obsoletedBy")]
         public Guid? ObsoletedByKey { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Serialization for <see cref="CreationTime"/>
+        /// </summary>
         [XmlElement("creationTime"), JsonProperty("creationTime")]
-        public DateTimeOffset CreationTime { get; set; }
+        public string CreationTimeXml
+        {
+            get => XmlConvert.ToString(this.CreationTime);
+            set
+            {
+                if(!string.IsNullOrEmpty(value))
+                {
+                    this.CreationTime = XmlConvert.ToDateTimeOffset(value);
+                }
+            }
+        }
 
         /// <inheritdoc/>
+        [XmlIgnore, JsonIgnore]
+        public DateTimeOffset CreationTime { get; set; }
+
+        /// <summary>
+        /// XmlSerialization for <see cref="ObsoletionTime"/>
+        /// </summary>
         [XmlElement("obsoletionTime"), JsonProperty("obsoletionTime")]
+        public string ObsoletionTimeXml
+        {
+            get => this.ObsoletionTime.HasValue ? XmlConvert.ToString(this.ObsoletionTime.Value) : null;
+            set
+            {
+                if(!String.IsNullOrEmpty(value))
+                {
+                    this.ObsoletionTime = XmlConvert.ToDateTimeOffset(value);
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        [XmlIgnore, JsonIgnore]
         public DateTimeOffset? ObsoletionTime { get; set; }
     }
 }

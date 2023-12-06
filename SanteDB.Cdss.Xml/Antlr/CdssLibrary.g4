@@ -255,7 +255,7 @@ WITH: 'with';
 AS: 'as';
 AGG_SELECTOR: 'first'|'last'|'single';
 MULTILINE_STRING: '$$' .*? '$$';
-OID_DOTTED: '"' ([0-9]+ '.'?)+? '"';
+OID_DOTTED: '"' ([0-9]+ '.')([0-9]+ '.'?)+? '"';
 HEX_4: [0-9a-f][0-9a-f][0-9a-f][0-9a-f];
 
 BOOL_VAL: ('true'|'false');
@@ -285,6 +285,10 @@ NAMED_ID
     : '<'LITERAL'>'
     ;
 
+STRING
+    : '"'(~["\r\n] | '""')*'"'
+    ;
+
 INTEGER
     : [0-9]+
     ;
@@ -298,9 +302,6 @@ VERSION_VAL
     : [0-9]+'.'[0-9]+'.'[0-9]+'.'[0-9]('-'LITERAL*)?
     | [0-9]+'.'[0-9]+'.'[0-9]('-'LITERAL)?
     | [0-9]+'.'[0-9]+('-'LITERAL)?
-    ;
-STRING
-    : '"' (~["\r\n] | '""')* '"'
     ;
 
 COMMENT

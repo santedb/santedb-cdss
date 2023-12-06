@@ -144,8 +144,14 @@ namespace SanteDB.Cdss.Xml
                                 library = CdssLibraryDefinition.Load(sourceReader);
                             }
 
-                            this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
-                            this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                            var existing = this.m_protocolRepository.Find(o => o.Id == library.Id).FirstOrDefault();
+
+                            // Is the UUID different then don't install or if the version is older
+                            if(existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
+                            {
+                                this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
+                                this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                            }
                         }
                         catch (Exception e)
                         {

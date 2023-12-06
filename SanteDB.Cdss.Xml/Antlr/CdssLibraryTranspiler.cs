@@ -420,7 +420,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
             writer.WriteLine("{0}\tthen", indentationStr);
             cdssInlineRule.Actions.EmitCdssText(writer, indentation + 2);
-            writer.WriteLine("{0}end rule");
+            writer.WriteLine("{0}end rule", indentationStr);
         }
 
         private static void EmitCdssText(this CdssProtocolAssetDefinition cdssProtocol, StringWriter writer, int indentation = 0)
