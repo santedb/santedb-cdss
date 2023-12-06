@@ -441,7 +441,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             // Get the HDSI expressions
             var hdsiChildren = context.children.OfType<CdssLibraryParser.Hdsi_logicContext>().Select(o =>
             {
-                if (this.TryExtractString(o.STRING(), out var hdsi))
+                if (this.TryExtractString(o.STRING(), out var hdsi) || this.TryExtractMultilineString(o.MULTILINE_STRING(), out hdsi))
                 {
                     return hdsi;
                 }
@@ -923,13 +923,13 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         public override CdssLibraryDefinition VisitInline_rule_definition([NotNull] CdssLibraryParser.Inline_rule_definitionContext context)
         {
-            if (!(m_currentObject.Peek() is CdssActionCollectionDefinition actionCollection))
+            if (!(m_currentObject.Peek() is CdssProtocolAssetDefinition actionCollection))
             {
                 throw new CdssTranspilationException(context.Start, String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
             }
-
+            actionCollection.Actions = actionCollection.Actions ?? new CdssActionCollectionDefinition() { Actions = new List<CdssActionDefinition>() };
             var inlineRule = this.CreateCdssObject<CdssInlineRuleActionDefinition>(context);
-            actionCollection.Actions.Add(inlineRule);
+            actionCollection.Actions.Actions.Add(inlineRule);
 
             this.m_currentObject.Push(inlineRule);
             var retVal = base.VisitInline_rule_definition(context);
