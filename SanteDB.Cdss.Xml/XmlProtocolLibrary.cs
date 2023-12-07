@@ -244,12 +244,21 @@ namespace SanteDB.Cdss.Xml
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
                 this.InitializeLibrary();
-                if(target is Entity ent) // HACK: Participations need to be reverse loaded
+                
+                CdssExecutionContext context = null;
+                if (XmlConvert.ToBoolean(debugParameterValue.ToString()))
+                {
+                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.m_scopedLibraries);
+                }
+                else
+                {
+                    context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
+                }
+
+                if (target is Entity ent) // HACK: Participations need to be reverse loaded
                 {
                     ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
                 }
-
-                var context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
 
                 using (CdssExecutionStackFrame.Enter(context))
                 {
@@ -264,7 +273,12 @@ namespace SanteDB.Cdss.Xml
                         .Select(r => new { result = r.Compute(), rule = r.Name })
                         .ToArray();
 
-                    return context.Proposals.OfType<Object>().Union(context.Issues);
+                    var retVal = context.Proposals.OfType<Object>().Union(context.Issues).ToList();
+                    if(context.DebugSession != null)
+                    {
+                        retVal.Add(context.DebugSession);
+                    }
+                    return retVal;
                 }
 
             }

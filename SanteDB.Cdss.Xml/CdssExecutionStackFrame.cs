@@ -23,6 +23,7 @@ namespace SanteDB.Cdss.Xml
         private readonly CdssExecutionContext m_context;
         private readonly CdssBaseObjectDefinition m_owner;
         private readonly CdssExecutionStackFrame m_parent;
+        private IdentifiedData m_scopedObject = null;
 
         /// <summary>
         /// Only allow current call
@@ -35,7 +36,8 @@ namespace SanteDB.Cdss.Xml
             }
 
             this.m_context = ctx;
-            this.ScopedObject = context.Target;
+            this.m_scopedObject = context.Target;
+            this.m_context.DebugSession?.EnterFrame(this);
         }
 
         private CdssExecutionStackFrame(CdssExecutionStackFrame parent, CdssBaseObjectDefinition owner) : this(parent.Context)
@@ -64,7 +66,15 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Gets or sets the scoped object
         /// </summary>
-        public IdentifiedData ScopedObject { get; internal set; }
+        public IdentifiedData ScopedObject
+        {
+            get => this.m_scopedObject;
+            set
+            {
+                this.m_context.DebugSession?.CurrentFrame.AddSample("scopedObject", value);
+                this.m_scopedObject = value;
+            }
+        }
 
         /// <summary>
         /// Get the CDSS definition object which is the owner of this context (null if it is a root context)
@@ -111,6 +121,7 @@ namespace SanteDB.Cdss.Xml
         public void Dispose()
         {
             m_currentContext = m_currentContext?.m_parent;
+            this.m_context.DebugSession?.ExitFrame();
         }
     }
 }

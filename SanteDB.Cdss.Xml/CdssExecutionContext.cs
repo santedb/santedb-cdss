@@ -19,6 +19,7 @@
  * Date: 2023-5-19
  */
 using DynamicExpresso;
+using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
@@ -123,6 +124,11 @@ namespace SanteDB.Cdss.Xml
         public IDictionary<String, CdssReferenceDataset> DataSets => this.m_datasets;
 
         /// <summary>
+        /// Gets the debugger session which is assigned to this context
+        /// </summary>
+        public CdssDebugSessionData DebugSession { get; private set; }
+
+        /// <summary>
         /// Get the variables
         /// </summary>
         public IEnumerable<String> Variables => this.m_variables.Keys;
@@ -175,6 +181,7 @@ namespace SanteDB.Cdss.Xml
 
             registration.Value = value;
             this.ClearEvaluatedFacts();
+            this.DebugSession?.CurrentFrame.AddSample(parameterName, value);
         }
 
         /// <summary>
@@ -187,9 +194,22 @@ namespace SanteDB.Cdss.Xml
             {
                 return true;
             }
-            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition factDefn)
+            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
             {
-                value = defn.Compute();
+                var debugFact = this.DebugSession?.CurrentFrame.AddFact(factName, defn);
+                try
+                {
+                    value = defn.Compute();
+                }
+                catch(Exception e)
+                {
+                    this.DebugSession?.CurrentFrame.AddException(e);
+                    throw;
+                }
+                finally
+                {
+                    debugFact?.SetFactResult(value);
+                }
                 return true;
             }
             return false;
@@ -259,6 +279,7 @@ namespace SanteDB.Cdss.Xml
                     Type = typeof(T),
                     Value = value
                 });
+                this.DebugSession?.CurrentFrame.AddSample(variableName, value);
             }
         }
 
@@ -333,6 +354,7 @@ namespace SanteDB.Cdss.Xml
             }
 
             this.ClearEvaluatedFacts();
+            this.DebugSession?.CurrentFrame.AddProposal(proposedAct);
         }
 
         /// <summary>
@@ -341,8 +363,8 @@ namespace SanteDB.Cdss.Xml
         internal void PushIssue(DetectedIssue issue)
         {
             this.m_detectedIssues.Add(issue);
+            this.DebugSession?.CurrentFrame.AddIssue(issue);
         }
-
 
         /// <summary>
         /// Get an expression interpreter for this CDSS context
@@ -360,6 +382,19 @@ namespace SanteDB.Cdss.Xml
             typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
 
             return expressionInterpreter;
+        }
+
+        /// <summary>
+        /// Create a debug context for the specified execution run
+        /// </summary>
+        /// <param name="forObject">The object which is to be created</param>
+        /// <param name="scopedLibraries">The libraries which are scoped to the context</param>
+        /// <returns>The created execution context with the debug information</returns>
+        public static CdssExecutionContext CreateDebugContext(IdentifiedData forObject, IEnumerable<CdssLibraryDefinition> scopedLibraries)
+        {
+            var retVal = CreateContext(forObject, scopedLibraries);
+            retVal.DebugSession = CdssDebugSessionData.Create(retVal, scopedLibraries);
+            return retVal;
         }
 
         /// <summary>

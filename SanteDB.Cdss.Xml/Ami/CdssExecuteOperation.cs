@@ -1,4 +1,5 @@
 ﻿using SanteDB.Cdss.Xml.Antlr;
+using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
@@ -86,14 +87,16 @@ namespace SanteDB.Cdss.Xml.Ami
 
             // Force the load of participations
             var startTime = DateTimeOffset.Now;
-            var results = cdssLibrary.Execute(target);
+            var results = cdssLibrary.Execute(target, parameters.Parameters.Where(o=>o.Name != "target" && o.Name != "definition").ToDictionaryIgnoringDuplicates(o=>o.Name, o=>o.Value));
+            var debugData = results.OfType<CdssDebugSessionData>().FirstOrDefault();
             return new CdssExecutionResult()
             {
                 StartTime = startTime,
                 StopTime = DateTimeOffset.Now,
                 Issues = results.OfType<DetectedIssue>().ToList(),
                 Proposals = results.OfType<IdentifiedData>().ToList(),
-                ResultingTarget = target
+                ResultingTarget = target,
+                Debug =  debugData?.GetDiagnosticReport()
             };
         }
     }

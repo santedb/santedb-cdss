@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Model.Diagnostics;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Interfaces;
@@ -54,6 +55,12 @@ namespace SanteDB.Cdss.Xml.Ami
         /// Gets the total results
         /// </summary>
         public int? TotalResults => this.Proposals.Count;
+
+        /// <summary>
+        /// Gets or sets the debug information is present
+        /// </summary>
+        [XmlElement("debug"), JsonProperty("debug")]
+        public CdssEvaluationDiagnositcReport Debug { get; set; }
 
         /// <summary>
         /// Add annotation to all objects
