@@ -40,7 +40,7 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
         /// <summary>
         /// Gets or sets the source
         /// </summary>
-        [XmlElement("source"), JsonProperty("source")]
+        [XmlElement("defn"), JsonProperty("defn")]
         public CdssDiagnosticObjectReference Source { get; set; }
 
         /// <summary>
@@ -53,7 +53,8 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
         /// Gets or sets the samples collected within the frame
         /// </summary>
         [XmlArray("activities"), 
-            XmlArrayItem("set", typeof(CdssValueDiagnosticSample)),
+            XmlArrayItem("assign", typeof(CdssPropertyAssignDiagnosticSample)),
+            XmlArrayItem("let", typeof(CdssValueDiagnosticSample)),
             XmlArrayItem("get", typeof(CdssValueLookupDiagnosticSample)),
             XmlArrayItem("fact", typeof(CdssFactDiagnosticSample)),
             XmlArrayItem("throw", typeof(CdssExceptionDiagnosticSample)),

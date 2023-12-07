@@ -88,6 +88,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                                 this.m_compiledExpression = uncompiledExpression.Compile();
                             }
                             var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                            CdssExecutionStackFrame.Current.Context.DebugSession?.CurrentFrame.AddAssignment(this.Path, value);
                             CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, value, this.OverwriteValue);
 
                             break;

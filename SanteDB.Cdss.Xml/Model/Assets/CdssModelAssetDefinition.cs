@@ -51,9 +51,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             if (this.m_parsedModel == null)
             {
-                if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel) && refModel is ICanDeepCopy icdc)
+                if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel))
                 {
-                    this.m_parsedModel = icdc.DeepCopy() as Act;
+                    this.m_parsedModel = refModel as Act;
                 }
                 else
                 {
@@ -70,7 +70,10 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     }
                 }
             }
-            return this.m_parsedModel.DeepCopy() as Act;
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
+            {
+                return this.m_parsedModel.DeepCopy() as Act;
+            }
         }
 
         /// <summary>

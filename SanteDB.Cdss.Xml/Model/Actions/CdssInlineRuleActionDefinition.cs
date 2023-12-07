@@ -46,7 +46,10 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                     Actions = this.Actions
                 };
             }
-            this.m_ruleAsset.Compute();
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
+            {
+                this.m_ruleAsset.Compute();
+            }
         }
     }
 }

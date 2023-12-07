@@ -1,5 +1,6 @@
 ﻿using DynamicExpresso;
 using NUnit.Framework;
+using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
@@ -111,6 +112,33 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.IsTrue(results.OfType<CdssDebugSessionData>().Any());
             var dbg = results.OfType<CdssDebugSessionData>().First();
             using(var ms = new MemoryStream())
+            {
+                dbg.GetDiagnosticReport().Save(ms);
+                var dbgInfo = Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
+
+        [Test]
+        public void TestCanDebugWithSourceReferences()
+        {
+            // NB: 
+            Patient newborn = new Patient()
+            {
+                Key = Guid.NewGuid(),
+                DateOfBirth = DateTime.Now,
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
+            };
+
+            // Load the weight protocol
+            var definition = CdssLibraryTranspiler.Transpile(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BCG.cdss"), true, "bcg.cdss");
+            var xmlLib = new XmlProtocolLibrary(definition);
+
+            // Run in debug mode
+            var results = xmlLib.Execute(newborn, new Dictionary<String, Object>() { { "debug", true } }).ToList();
+            Assert.AreEqual(2, results.Count);
+            Assert.IsTrue(results.OfType<CdssDebugSessionData>().Any());
+            var dbg = results.OfType<CdssDebugSessionData>().First();
+            using (var ms = new MemoryStream())
             {
                 dbg.GetDiagnosticReport().Save(ms);
                 var dbgInfo = Encoding.UTF8.GetString(ms.ToArray());

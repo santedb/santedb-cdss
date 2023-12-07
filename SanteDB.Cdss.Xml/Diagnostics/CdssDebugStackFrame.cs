@@ -6,6 +6,7 @@ using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Diagnostics
@@ -167,6 +168,19 @@ namespace SanteDB.Cdss.Xml.Diagnostics
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddIssue)));
             }
             var retVal = CdssDebugIssueSample.Create(issue);
+            this.m_activitySamples.AddLast(retVal);
+        }
+
+        /// <summary>
+        /// Add an assignment of a property
+        /// </summary>
+        internal void AddAssignment(string propertyName, object value)
+        {
+            if (this.m_exited)
+            {
+                throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddIssue)));
+            }
+            var retVal = CdssDebugPropertyAssignmentSample.Create(propertyName, value);
             this.m_activitySamples.AddLast(retVal);
         }
     }

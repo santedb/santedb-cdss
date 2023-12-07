@@ -33,7 +33,7 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
         /// <summary>
         /// Gets or sets the time that the colle
         /// </summary>
-        [XmlAttribute("collectionTime"), JsonProperty("collectionTime")]
+        [XmlAttribute("ts"), JsonProperty("ts")]
         public DateTime CollectionTime { get; set; }
 
         /// <summary>
@@ -56,6 +56,8 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
                     return new CdssIssueDiagnosticSample(iss);
                 case CdssDebugProposalSample prop:
                     return new CdssProposalDiagnosticSample(prop);
+                case CdssDebugPropertyAssignmentSample propAsgn:
+                    return new CdssPropertyAssignDiagnosticSample(propAsgn);
                 case CdssDebugValueSample val:
                     if (val.IsWrite)
                     {
