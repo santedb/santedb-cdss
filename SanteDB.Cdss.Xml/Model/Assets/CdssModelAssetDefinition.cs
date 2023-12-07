@@ -4,6 +4,7 @@ using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -50,9 +51,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             if (this.m_parsedModel == null)
             {
-                if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel))
+                if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel) && refModel is ICanDeepCopy icdc)
                 {
-                    this.m_parsedModel = refModel as Act;
+                    this.m_parsedModel = icdc.DeepCopy() as Act;
                 }
                 else
                 {

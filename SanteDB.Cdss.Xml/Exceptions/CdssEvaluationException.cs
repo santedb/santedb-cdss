@@ -52,7 +52,7 @@ namespace SanteDB.Cdss.Xml.Exceptions
         }
         
         /// <inheritdoc/>
-        public override string ToString()
+        public string ToCdssStackTrace()
         {
             var sb = new StringBuilder("CDSS:");
             sb.AppendFormat("{0}\r\n", this.Message);

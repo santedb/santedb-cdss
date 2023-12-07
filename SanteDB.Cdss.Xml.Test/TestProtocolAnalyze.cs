@@ -1,5 +1,6 @@
 ﻿using DynamicExpresso;
 using NUnit.Framework;
+using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Model;
@@ -10,6 +11,7 @@ using SanteDB.Core.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,8 +83,38 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.AreEqual(5.52, objectUnderTest.Value); // Rule has not changed value (only conversions for facts - don't leak into object)
             xmlProto.Analyze(originalObject.DeepCopy() as IdentifiedData);
 
+
         }
 
+        [Test]
+        public void TestCanExecuteProposal()
+        {
+            // NB: 
+            Patient newborn = new Patient()
+            {
+                Key = Guid.NewGuid(),
+                DateOfBirth = DateTime.Now,
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
+            };
 
+            // Load the weight protocol
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var xmlLib = new XmlProtocolLibrary(definition);
+
+            // Run the object in regular mode
+            var results = xmlLib.Execute(newborn.DeepCopy() as Patient).ToList();
+            Assert.AreEqual(120, results.Count);
+
+            // Run in debug mode
+            results = xmlLib.Execute(newborn, new Dictionary<String, Object>() { { "debug", true } }).ToList();
+            Assert.AreEqual(121, results.Count);
+            Assert.IsTrue(results.OfType<CdssDebugSessionData>().Any());
+            var dbg = results.OfType<CdssDebugSessionData>().First();
+            using(var ms = new MemoryStream())
+            {
+                dbg.GetDiagnosticReport().Save(ms);
+                var dbgInfo = Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
     }
 }

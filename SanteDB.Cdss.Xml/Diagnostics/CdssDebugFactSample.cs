@@ -3,26 +3,41 @@ using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace SanteDB.Cdss.Xml.Diagnostics
 {
     /// <summary>
     /// Represents a debug sample where the value at the time of collection is unknown
     /// </summary>
-    public class CdssDebugFactSample : CdssDebugSample
+    public sealed class CdssDebugFactSample : CdssDebugSample
     {
         /// <summary>
         /// Private CTOR
         /// </summary>
-        private CdssDebugFactSample(string factName, CdssComputableAssetDefinition assetDefinition) : base(factName)
+        private CdssDebugFactSample(string factName, CdssComputableAssetDefinition assetDefinition, object value) 
         {
+            this.FactName = factName;
             this.FactDefinition = assetDefinition;
+            if (value is ICanDeepCopy icdc)
+            {
+                this.Value = icdc.DeepCopy();
+            }
+            else
+            {
+                this.Value = value;
+            }
         }
 
         /// <summary>
         /// Create a new CDSS fact sample
         /// </summary>
-        internal static CdssDebugFactSample Create(string factName, CdssComputableAssetDefinition factAsset) => new CdssDebugFactSample(factName, factAsset);
+        internal static CdssDebugFactSample Create(string factName, CdssComputableAssetDefinition factAsset, object value) => new CdssDebugFactSample(factName, factAsset, value);
+
+        /// <summary>
+        /// Gets the name of the sample
+        /// </summary>
+        public string FactName { get; }
 
         /// <summary>
         /// Gets the fact definition
@@ -30,29 +45,9 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         public CdssComputableAssetDefinition FactDefinition { get; }
         
         /// <summary>
-        /// Gets the result timestamp
+        /// Gets or sets the value
         /// </summary>
-        public DateTimeOffset ResultTimestamp { get; private set; }
+        public object Value { get; }
 
-        /// <summary>
-        /// Set the fact result
-        /// </summary>
-        internal void SetFactResult(object value)
-        {
-            if(base.Value != null)
-            {
-                throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(SetFactResult)));
-            }
-
-            this.ResultTimestamp = DateTimeOffset.Now;
-            if (value is ICanDeepCopy icdc)
-            {
-                base.Value = icdc.DeepCopy();
-            }
-            else
-            {
-                base.Value = value;
-            }
-        }
     }
 }

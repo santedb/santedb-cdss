@@ -180,8 +180,8 @@ namespace SanteDB.Cdss.Xml
             }
 
             registration.Value = value;
-            this.ClearEvaluatedFacts();
             this.DebugSession?.CurrentFrame.AddSample(parameterName, value);
+            this.ClearEvaluatedFacts();
         }
 
         /// <summary>
@@ -192,23 +192,21 @@ namespace SanteDB.Cdss.Xml
             var caseInsensitiveName = factName.ToLowerInvariant(); // Case insensitive
             if (this.m_factCache.TryGetValue(caseInsensitiveName, out value))
             {
+                this.DebugSession?.CurrentFrame.AddRead(caseInsensitiveName, value);
                 return true;
             }
             else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
             {
-                var debugFact = this.DebugSession?.CurrentFrame.AddFact(factName, defn);
                 try
                 {
                     value = defn.Compute();
+                    var debugFact = this.DebugSession?.CurrentFrame.AddFact(caseInsensitiveName, defn, value);
+                    this.m_factCache.Add(caseInsensitiveName, value);
                 }
                 catch(Exception e)
                 {
                     this.DebugSession?.CurrentFrame.AddException(e);
                     throw;
-                }
-                finally
-                {
-                    debugFact?.SetFactResult(value);
                 }
                 return true;
             }
@@ -236,6 +234,7 @@ namespace SanteDB.Cdss.Xml
             if (this.m_variables.TryGetValue(caseInsensitiveName, out ParameterRegistration registration) &&
                 MapUtil.TryConvert(registration.Value, registration.Type, out object retVal))
             {
+                this.DebugSession?.CurrentFrame.AddRead(caseInsensitiveName, retVal);
                 return retVal;
             }
             else if (this.TryGetFact(caseInsensitiveName, out retVal))

@@ -5,7 +5,9 @@ using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Diagnostics
 {
@@ -16,9 +18,12 @@ namespace SanteDB.Cdss.Xml.Diagnostics
     public sealed class CdssDebugSessionData
     {
 
+
         // The current stack frame
         private CdssDebugStackFrame m_currentFrame;
-        
+        // The first entry frame
+        private CdssDebugStackFrame m_entryFrame;
+
         /// <summary>
         /// Creates a CDSS debug session for the current context
         /// </summary>
@@ -70,18 +75,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <summary>
         /// Get the root stack frame (where execution initiated)
         /// </summary>
-        public CdssDebugStackFrame RootFrame
-        {
-            get
-            {
-                var rf = this.m_currentFrame;
-                while(rf?.ParentFrame != null)
-                {
-                    rf = rf.ParentFrame;
-                }
-                return rf;
-            }
-        }
+        public CdssDebugStackFrame EntryFrame => this.m_entryFrame;
 
         /// <summary>
         /// Enter a debug stack frame for tracking debug data
@@ -91,6 +85,10 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         public CdssDebugStackFrame EnterFrame(CdssExecutionStackFrame cdssExecutionStackFrame)
         {
             this.m_currentFrame = CdssDebugStackFrame.Create(cdssExecutionStackFrame, this.m_currentFrame);
+            if(this.m_entryFrame == null)
+            {
+                this.m_entryFrame = this.m_currentFrame;
+            }
             return this.m_currentFrame;
         }
 
@@ -112,10 +110,9 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <summary>
         /// Get a diagnostic report for the session
         /// </summary>
-        internal CdssEvaluationDiagnositcReport GetDiagnosticReport()
-        {
-            throw new NotImplementedException();
-        }
+        public CdssDiagnositcReport GetDiagnosticReport() => new CdssDiagnositcReport(this);
+
+       
     }
 
 

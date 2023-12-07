@@ -5,6 +5,7 @@ using SanteDB.Core.Model;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Text;
 
 namespace SanteDB.Cdss.Xml
@@ -37,7 +38,6 @@ namespace SanteDB.Cdss.Xml
 
             this.m_context = ctx;
             this.m_scopedObject = context.Target;
-            this.m_context.DebugSession?.EnterFrame(this);
         }
 
         private CdssExecutionStackFrame(CdssExecutionStackFrame parent, CdssBaseObjectDefinition owner) : this(parent.Context)
@@ -71,7 +71,14 @@ namespace SanteDB.Cdss.Xml
             get => this.m_scopedObject;
             set
             {
-                this.m_context.DebugSession?.CurrentFrame.AddSample("scopedObject", value);
+                if (this.m_context.DebugSession != null &&
+                    this.m_context is ICdssExecutionContext cec 
+                    && cec.Target != value 
+                    && value != this.Parent?.ScopedObject 
+                    && value != this.ScopedObject)
+                {
+                    this.m_context.DebugSession.CurrentFrame.AddSample("scopedObject", value);
+                }
                 this.m_scopedObject = value;
             }
         }
@@ -97,6 +104,8 @@ namespace SanteDB.Cdss.Xml
             }
 
             m_currentContext = new CdssExecutionStackFrame(context);
+            (context as CdssExecutionContext)?.DebugSession?.EnterFrame(m_currentContext);
+
             return m_currentContext;
         }
 
@@ -112,6 +121,7 @@ namespace SanteDB.Cdss.Xml
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(EnterChildFrame)));
             }
             m_currentContext = new CdssExecutionStackFrame(m_currentContext, owner);
+            m_currentContext.Context.DebugSession?.EnterFrame(m_currentContext);
             return m_currentContext;
         }
 

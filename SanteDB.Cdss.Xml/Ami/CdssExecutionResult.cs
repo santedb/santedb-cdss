@@ -60,7 +60,7 @@ namespace SanteDB.Cdss.Xml.Ami
         /// Gets or sets the debug information is present
         /// </summary>
         [XmlElement("debug"), JsonProperty("debug")]
-        public CdssEvaluationDiagnositcReport Debug { get; set; }
+        public CdssDiagnositcReport Debug { get; set; }
 
         /// <summary>
         /// Add annotation to all objects

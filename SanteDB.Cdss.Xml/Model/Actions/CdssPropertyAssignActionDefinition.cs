@@ -87,7 +87,8 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                                 this.DebugView = uncompiledExpression.ToString();
                                 this.m_compiledExpression = uncompiledExpression.Compile();
                             }
-                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject), this.OverwriteValue);
+                            var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, value, this.OverwriteValue);
 
                             break;
                         case String str:

@@ -6,20 +6,29 @@ using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Diagnostics
 {
     /// <summary>
     /// Represents a CDSS debug stack frame
     /// </summary>
-    public class CdssDebugStackFrame 
+    public class CdssDebugStackFrame : CdssDebugSample
     {
         // The execution frame
         private readonly CdssExecutionStackFrame m_executionFrame;
         // True if exit has been called
         private bool m_exited = false;
         // Samples collected
-        private readonly LinkedList<CdssDebugSample> m_samples = new LinkedList<CdssDebugSample>();
+        private readonly LinkedList<CdssDebugSample> m_activitySamples = new LinkedList<CdssDebugSample>();
+
+        /// <summary>
+        /// Serialization ctor
+        /// </summary>
+        public CdssDebugStackFrame()
+        {
+            
+        }
 
         /// <summary>
         /// Creates a new execution stack frame
@@ -27,8 +36,8 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         private CdssDebugStackFrame(CdssExecutionStackFrame executionFrame, CdssDebugStackFrame parent)
         {
             this.ParentFrame = parent;
+            parent?.m_activitySamples.AddLast(this); // link the parent to us
             this.m_executionFrame = executionFrame;
-            this.EntryTime = DateTimeOffset.Now;
             this.Source = executionFrame.Owner;
         }
 
@@ -45,10 +54,6 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// </summary>
         public CdssDebugStackFrame ParentFrame { get; }
 
-        /// <summary>
-        /// Gets the entry time
-        /// </summary>
-        public DateTimeOffset EntryTime { get; }
 
         /// <summary>
         /// Gets the time that the frame was exited
@@ -59,6 +64,11 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// Gets the source of the frame
         /// </summary>
         public CdssBaseObjectDefinition Source { get; }
+
+        /// <summary>
+        /// Get samples
+        /// </summary>
+        public IEnumerable<CdssDebugSample> GetSamples() => this.m_activitySamples.ToArray();
 
         /// <summary>
         /// Exit the frame
@@ -80,7 +90,25 @@ namespace SanteDB.Cdss.Xml.Diagnostics
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddSample)));
             }
-            this.m_samples.AddLast(CdssDebugSample.Create(sampleName, value));
+            this.m_activitySamples.AddLast(CdssDebugValueSample.Create(sampleName, value, true));
+        }
+
+
+        /// <summary>
+        /// Add a read sample
+        /// </summary>
+        public void AddRead(String sampleName, object value)
+        {
+            if (this.m_exited)
+            {
+                throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddSample)));
+            }
+            // Is a read already the last object? if so we don't need to re-add it
+            if (!(this.m_activitySamples.Last?.Value is CdssDebugValueSample cdvs && cdvs.Name == sampleName && value == cdvs.Value ||
+                this.m_activitySamples.Last?.Value is CdssDebugFactSample cdfs && cdfs.FactName == sampleName && value == cdfs.Value))
+            {
+                this.m_activitySamples.AddLast(CdssDebugValueSample.Create(sampleName, value, false));
+            }
         }
 
         /// <summary>
@@ -89,14 +117,14 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <param name="factName">The name of the fact that is being added</param>
         /// <param name="factAsset">The fact asset definition</param>
         /// <returns>The created fact debug sample</returns>
-        public CdssDebugFactSample AddFact(String factName, CdssComputableAssetDefinition factAsset)
+        public CdssDebugFactSample AddFact(String factName, CdssComputableAssetDefinition factAsset, object value)
         {
             if (this.m_exited)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddFact)));
             }
-            var retVal = CdssDebugFactSample.Create(factName, factAsset);
-            this.m_samples.AddLast(retVal);
+            var retVal = CdssDebugFactSample.Create(factName, factAsset, value);
+            this.m_activitySamples.AddLast(retVal);
             return retVal;
         }
 
@@ -112,7 +140,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddException)));
             }
             var retVal = CdssDebugExceptionSample.Create(exception);
-            this.m_samples.AddLast(retVal);
+            this.m_activitySamples.AddLast(retVal);
             return retVal;  
         }
 
@@ -125,8 +153,8 @@ namespace SanteDB.Cdss.Xml.Diagnostics
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddProposal)));
             }
-            var retVal = CdssDebugSample.Create("proposal", proposedAct);
-            this.m_samples.AddLast(retVal);
+            var retVal = CdssDebugProposalSample.Create(proposedAct);
+            this.m_activitySamples.AddLast(retVal);
         }
 
         /// <summary>
@@ -138,8 +166,8 @@ namespace SanteDB.Cdss.Xml.Diagnostics
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddIssue)));
             }
-            var retVal = CdssDebugSample.Create("issue", issue);
-            this.m_samples.AddLast(retVal);
+            var retVal = CdssDebugIssueSample.Create(issue);
+            this.m_activitySamples.AddLast(retVal);
         }
     }
 }

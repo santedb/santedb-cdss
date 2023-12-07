@@ -234,9 +234,11 @@ namespace SanteDB.Cdss.Xml
             {
                 // Is the library not active?
                 object debugParameterValue = null;
+                _ = parameters?.TryGetValue("debug", out debugParameterValue);
+                _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
 
                 if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
+                    (this.m_library.Status == CdssObjectState.TrialUse && debugMode))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
@@ -246,7 +248,7 @@ namespace SanteDB.Cdss.Xml
                 this.InitializeLibrary();
                 
                 CdssExecutionContext context = null;
-                if (XmlConvert.ToBoolean(debugParameterValue.ToString()))
+                if (debugMode)
                 {
                     context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.m_scopedLibraries);
                 }
@@ -266,10 +268,18 @@ namespace SanteDB.Cdss.Xml
                     context.SetValue("mode", "execute");
                     context.ThrowIfNotValid();
 
-                    var definitions = this.m_library.Definitions
-                        .OfType<CdssDecisionLogicBlockDefinition>()
+                    // If the library has protocols we want to select those for execution - otherwise all rules
+                    var toExecute = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                         .AppliesTo(context)
-                        .SelectMany(o => o.Definitions)
+                        .SelectMany(o=>o.Definitions)
+                        .OfType<CdssComputableAssetDefinition>();
+
+                    if(toExecute.OfType<CdssProtocolAssetDefinition>().Any())
+                    {
+                        toExecute = toExecute.OfType<CdssProtocolAssetDefinition>();
+                    }
+
+                    var definitions = toExecute
                         .Select(r => new { result = r.Compute(), rule = r.Name })
                         .ToArray();
 
