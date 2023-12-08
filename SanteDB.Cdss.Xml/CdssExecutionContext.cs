@@ -121,7 +121,15 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the datasets
         /// </summary>
-        public IDictionary<String, CdssReferenceDataset> DataSets => this.m_datasets;
+        public CdssReferenceDataset GetDataSet(string idOrName)
+        {
+            var caseInsensitiveName = idOrName;
+            if(!this.m_datasets.TryGetValue(caseInsensitiveName, out var retVal))
+            {
+                throw new KeyNotFoundException(idOrName);
+            }
+            return retVal;
+        }
 
         /// <summary>
         /// Gets the debugger session which is assigned to this context

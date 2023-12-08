@@ -160,10 +160,7 @@ namespace SanteDB.Cdss.Xml
                 var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
                 this.m_scopedLibraries = new List<CdssLibraryDefinition>() { this.m_library };
                 this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o=>o.Library) ?? new CdssLibraryDefinition[0]);
-                if(this.m_scopedLibraries.Any(o=>o.Status == CdssObjectState.DontUse))
-                {
-                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
-                }
+                
             }
         }
 
@@ -236,11 +233,15 @@ namespace SanteDB.Cdss.Xml
                 object debugParameterValue = null;
                 _ = parameters?.TryGetValue("debug", out debugParameterValue);
                 _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
+                var ignoreStatus = parameters?.TryGetValue("isTesting", out var testingParm) == true && Boolean.Parse(testingParm?.ToString());
 
-                if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && debugMode))
+                if (!ignoreStatus && this.m_library.Status == CdssObjectState.DontUse)
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
+                }
+                else if (this.m_library.Status == CdssObjectState.TrialUse && !(debugMode || ignoreStatus))
+                {
+                    return new object[0];
                 }
 
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);

@@ -60,7 +60,7 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
             XmlArrayItem("throw", typeof(CdssExceptionDiagnosticSample)),
             XmlArrayItem("propose", typeof(CdssProposalDiagnosticSample)),
             XmlArrayItem("raise", typeof(CdssIssueDiagnosticSample)),
-            XmlArrayItem("call", typeof(CdssDiagnosticFrame)),
+            XmlArrayItem("compute", typeof(CdssDiagnosticFrame)),
         JsonProperty("activities")]
         public List<CdssDiagnosticSample> Samples { get; set; }
 

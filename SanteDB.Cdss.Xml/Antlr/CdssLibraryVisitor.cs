@@ -688,6 +688,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             if (context.FOR() != null && Int32.TryParse(context.INTEGER().GetText(), out var reps))
             {
                 repeatDefinition.Iterations = reps;
+                repeatDefinition.IterationsSpecified = true;
             }
             if (context.TRACKBY() != null)
             {
