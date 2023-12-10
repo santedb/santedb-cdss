@@ -230,10 +230,10 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
-                object debugParameterValue = null;
+                object debugParameterValue = null, testingParmValue = null;
                 _ = parameters?.TryGetValue("debug", out debugParameterValue);
                 _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
-                var ignoreStatus = parameters?.TryGetValue("isTesting", out var testingParm) == true && Boolean.Parse(testingParm?.ToString());
+                var ignoreStatus = parameters?.TryGetValue("isTesting", out testingParmValue) == true && Boolean.Parse(testingParmValue?.ToString());
 
                 if (!ignoreStatus && this.m_library.Status == CdssObjectState.DontUse)
                 {
