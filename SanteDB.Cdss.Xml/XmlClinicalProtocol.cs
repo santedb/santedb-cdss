@@ -20,298 +20,168 @@
  */
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Description;
 using SanteDB.Core.Applets.ViewModel.Null;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Protocol;
+using SanteDB.Core.Cdss;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using SanteDB.Core.Model.Entities;
+using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core.Model;
+using SanteDB.Cdss.Xml.Model.Actions;
+using SanteDB.Core.i18n;
+using System.Xml;
 
 namespace SanteDB.Cdss.Xml
 {
     /// <summary>
     /// Clinicl protocol that is stored/loaded via XML
     /// </summary>
-    public class XmlClinicalProtocol : IClinicalProtocol
+    public class XmlClinicalProtocol : ICdssProtocol
     {
-        // Protocol definition
-        private Core.Model.Acts.Protocol m_protocolDefinition = null;
 
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(XmlClinicalProtocol));
+        private readonly CdssProtocolAssetDefinition m_protocol;
+        private readonly IEnumerable<CdssLibraryDefinition> m_scopedLibraries;
 
         /// <summary>
         /// Default ctor
         /// </summary>
-        public XmlClinicalProtocol()
+        internal XmlClinicalProtocol(CdssProtocolAssetDefinition protocolAssetDefinition, IEnumerable<CdssLibraryDefinition> scopedLibraries)
         {
+            this.m_protocol = protocolAssetDefinition;
+            this.m_scopedLibraries = scopedLibraries;
         }
 
-        /// <summary>
-        /// Creates a new protocol from the specified definition
-        /// </summary>
-        /// <param name="defn"></param>
-        public XmlClinicalProtocol(ProtocolDefinition defn)
+        /// <inheritdoc/>
+        public Guid Uuid
         {
-            this.Definition = defn;
-        }
-
-        /// <summary>
-        /// Gets or sets the definition of the protocol
-        /// </summary>
-        public ProtocolDefinition Definition { get; set; }
-
-        /// <summary>
-        /// Gets or sets the id of the protocol
-        /// </summary>
-        public Guid Id
-        {
-            get
+            get => this.m_protocol.Uuid;
+            set
             {
-                return this.Definition.Uuid;
+                if(this.m_protocol.Uuid != Guid.Empty || 
+                    value != this.m_protocol.Uuid)
+                {
+                    throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);
+                }
+                else
+                {
+                    this.m_protocol.Uuid = value;
+                }
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of the protocol
-        /// </summary>
-        public string Name
+        /// <inheritdoc/>
+        public String Id => this.m_protocol.Id;
+
+        /// <inheritdoc/>
+        public string Name => this.m_protocol?.Name;
+
+        /// <inheritdoc/>
+        public string Oid => this.m_protocol?.Oid;
+
+        /// <inheritdoc/>
+        public string Version => this.m_protocol?.Metadata?.Version;
+
+        /// <inheritdoc/>
+        public string Documentation => this.m_protocol?.Metadata?.Documentation;
+
+        /// <inheritdoc/>
+        public IEnumerable<ICdssProtocolScope> Scopes => this.m_protocol.Scopes.Select(o => new XmlProtocolAssetGroup(o));
+
+        ///// <summary>
+        ///// Initialize the patient
+        ///// </summary>
+        //public void Prepare(Patient p, IDictionary<String, Object> parameters)
+        //{
+        //    if (parameters.ContainsKey("xml.initialized"))
+        //    {
+        //        return;
+        //    }
+
+        //    // Merge the view models
+        //    NullViewModelSerializer serializer = new NullViewModelSerializer();
+
+        //    if (parameters["runProtocols"] == null)
+        //    {
+        //        serializer.ViewModel = this.m_definition.Initialize;
+        //        serializer.ViewModel?.Initialize();
+        //    }
+        //    else
+        //    {
+        //        serializer.ViewModel = ViewModelDescription.Merge((parameters["runProtocols"] as IEnumerable<ICdssProtocol>).OfType<XmlClinicalProtocol>().Select(o => o.m_definition.Initialize));
+        //        serializer.ViewModel?.Initialize();
+        //    }
+
+        //    // serialize - This will load data
+        //    serializer.Serialize(p);
+
+        //    parameters.Add("xml.initialized", true);
+        //}
+
+        /// <inheritdoc/>
+        public IEnumerable<Object> ComputeProposals(Patient target, IDictionary<string, object> parameters)
         {
-            get
-            {
-                return this.Definition?.Name;
-            }
-        }
+#if DEBUG
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+#endif
 
-        /// <summary>
-        /// Gets the versionof this protocol
-        /// </summary>
-        public string Version => this.Definition?.Version;
-
-        /// <summary>
-        /// Gets the group id
-        /// </summary>
-        public string GroupId => this.Definition?.GroupId;
-
-        /// <summary>
-        /// Local index
-        /// </summary>
-        [ThreadStatic]
-#pragma warning disable IDE0051 // Remove unused private members
-#pragma warning disable CS0414
-        private static Dictionary<String, Object> s_variables = null;
-#pragma warning restore CS0414
-#pragma warning restore IDE0051 // Remove unused private members
-
-        /// <summary>
-        /// Calculate the protocol against a atient
-        /// </summary>
-        public IEnumerable<Act> Calculate(Patient triggerPatient, IDictionary<String, Object> parameters)
-        {
             try
             {
-#if DEBUG
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-#endif
-                if (parameters == null)
+                parameters = parameters ?? new Dictionary<String, Object>();
+
+                if (this.m_protocol.Status == CdssObjectState.DontUse ||
+                    (this.m_protocol.Status == CdssObjectState.TrialUse && (!parameters.TryGetValue("debug", out var dbg) || !XmlConvert.ToBoolean(dbg.ToString()))))
                 {
-                    parameters = new Dictionary<String, Object>();
+                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
 
                 // Get a clone to make decisions on
-                Patient patient = null;
-                lock (triggerPatient)
-                {
-                    patient = triggerPatient.Clone() as Patient;
-                    patient.Participations = triggerPatient.Participations?.ToList();
-                }
+                var targetClone = target.Clone() as Patient;
+                // Safe guard all the properties
+                targetClone.Participations = targetClone.Participations?.ToList() ?? target.GetParticipations().ToList();
+                targetClone.Participations.ForEach(o => o.Act = o.Act?.Clone() as Act);
+                this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 
-                this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, patient);
-
-                var context = new CdssContext<Patient>(patient);
-                context.Set("index", 0);
-                context.Set("parameters", parameters);
+                var context = CdssExecutionContext.CreateContext(targetClone, this.m_scopedLibraries);
                 foreach (var itm in parameters)
                 {
-                    context.Set(itm.Key, itm.Value);
+                    context.SetValue(itm.Key, itm.Value);
                 }
 
-                // Evaluate eligibility
-                if (this.Definition.When?.Evaluate(context) == false &&
-                    !parameters.ContainsKey("ignoreEntry"))
+                using (CdssExecutionStackFrame.Enter(context))
                 {
-                    this.m_tracer.TraceInfo("{0} does not meet criteria for {1}", patient, this.Id);
-                    return new List<Act>();
-                }
-
-                List<Act> retVal = new List<Act>();
-
-                // Rules
-                int step = 0;
-                foreach (var rule in this.Definition.Rules)
-                {
-                    for (var index = 0; index < rule.Repeat; index++)
+                    if (!(bool)this.m_protocol.Compute())
                     {
-
-                        context.Set("index", index);
-                        foreach (var itm in rule.Variables)
+                        yield break; // no computations
+                    }
+                    else
+                    {
+                        foreach (var prop in context.Proposals.OfType<Object>().Union(context.Issues))
                         {
-                            var value = itm.GetValue(null, context, new Dictionary<String, Object>());
-                            context.Declare(itm.VariableName, itm.VariableType);
-                            context.Set(itm.VariableName, value);
+                            yield return prop;
                         }
-
-                        // TODO: Variable initialization
-                        if (rule.When.Evaluate(context) && !parameters.ContainsKey("ignoreWhen"))
-                        {
-                            var acts = rule.Then.Evaluate(context);
-                            retVal.AddRange(acts);
-
-                            // Assign protocol
-                            foreach (var itm in acts)
-                            {
-                                itm.Protocols.Add(new ActProtocol()
-                                {
-                                    ProtocolKey = this.Id,
-                                    Protocol = this.GetProtocolData(),
-                                    Sequence = step,
-                                    Version = this.Version
-                                });
-                            }
-                        }
-                        else
-                        {
-                            this.m_tracer.TraceInfo("{0} does not meet criteria for rule {1}.{2}", patient, this.Name, rule.Name ?? rule.Id);
-                        }
-
-                        step++;
                     }
                 }
-
-                // Now we want to add the stuff to the patient
-                lock (triggerPatient)
-                {
-                    triggerPatient.LoadProperty(o => o.Participations).AddRange(retVal.Where(o => o != null).Select(o => new ActParticipation(ActParticipationKeys.RecordTarget, triggerPatient) { Act = o, ParticipationRole = new Core.Model.DataTypes.Concept() { Key = ActParticipationKeys.RecordTarget, Mnemonic = "RecordTarget" }, Key = Guid.NewGuid() }));
-                }
+            }
+            finally
+            {
 #if DEBUG
                 sw.Stop();
-                this.m_tracer.TraceVerbose("Protocol {0} took {1} ms", this.Name, sw.ElapsedMilliseconds);
+                this.m_tracer.TraceInfo("Calculate ({0}) for {1} took {2} ms...", this.Name, target, sw.ElapsedMilliseconds);
 #endif
-
-                return retVal;
             }
-            catch (Exception e)
-            {
-                throw new CdssEvaluationException($"Error applying protocol {this.Definition.Id}", this.Definition, e);
-            }
-        }
-
-        /// <summary>
-        /// Get protocol data
-        /// </summary>
-        public Core.Model.Acts.Protocol GetProtocolData()
-        {
-            if (this.m_protocolDefinition == null)
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    this.Definition.Save(ms);
-                    this.m_protocolDefinition = new Core.Model.Acts.Protocol()
-                    {
-                        HandlerClass = this.GetType(),
-                        Name = this.Name,
-                        Definition = ms.ToArray(),
-                        Key = this.Id,
-                        Oid = this.Definition.Oid
-                    };
-                }
-            }
-
-            return this.m_protocolDefinition;
-        }
-
-        /// <summary>
-        /// Create the protocol data from the protocol instance
-        /// </summary>
-        public IClinicalProtocol Load(Core.Model.Acts.Protocol protocolData)
-        {
-            if (protocolData == null)
-            {
-                throw new ArgumentNullException(nameof(protocolData));
-            }
-
-            using (MemoryStream ms = new MemoryStream(protocolData.Definition))
-            {
-                this.Definition = ProtocolDefinition.Load(ms);
-            }
-
-            var context = new CdssContext<Patient>();
-            context.Declare("index", typeof(Int32));
-
-            // Add callback rules
-            foreach (var rule in this.Definition.Rules)
-            {
-                for (var index = 0; index < rule.Repeat; index++)
-                {
-                    foreach (var itm in rule.Variables)
-                    {
-                        context.Declare(itm.VariableName, itm.VariableType);
-                    }
-                }
-            }
-
-            this.Definition.When?.Compile<Patient>(context);
-            foreach (var wc in this.Definition.Rules)
-            {
-                wc.When.Compile<Patient>(context);
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Updates an existing plan
-        /// </summary>
-        public IEnumerable<Act> Update(Patient p, IEnumerable<Act> existingPlan)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Initialize the patient
-        /// </summary>
-        public void Prepare(Patient p, IDictionary<String, Object> parameters)
-        {
-            if (parameters.ContainsKey("xml.initialized"))
-            {
-                return;
-            }
-
-            // Merge the view models
-            NullViewModelSerializer serializer = new NullViewModelSerializer();
-
-            if (parameters["runProtocols"] == null)
-            {
-                serializer.ViewModel = this.Definition.Initialize;
-                serializer.ViewModel?.Initialize();
-            }
-            else
-            {
-                serializer.ViewModel = ViewModelDescription.Merge((parameters["runProtocols"] as IEnumerable<IClinicalProtocol>).OfType<XmlClinicalProtocol>().Select(o => o.Definition.Initialize));
-                serializer.ViewModel?.Initialize();
-            }
-
-            // serialize - This will load data
-            serializer.Serialize(p);
-
-            parameters.Add("xml.initialized", true);
         }
     }
 }

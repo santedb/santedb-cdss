@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CdssLibrary xmlns="http://santedb.org/cdss" uuid="ABCFB6A1-3A77-4E83-86AB-9C3F56DFFF15" id="org.santedb.cdss.core" name="Core SanteDB CDSS Logic"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd">
+  <status>active</status>
+  <meta>
+    <authors>
+      <add>SanteSuite Inc. and the SanteSuite Contributors</add>
+    </authors>
+    <version>3.0</version>
+    <documentation>Contains core logic used in all SanteDB CDSS protocols</documentation>
+  </meta>
+  
+  <logic id="org.santedb.cdss.core.patient" name="Core CDSS Facts for Patient">
+    <context type="Patient" />
+    <define>
+
+      <fact name="Patient Is Deceased" type="bool">
+        <hdsi>deceasedDate=!null</hdsi>
+      </fact>
+
+      <fact name="Patient Is Not Deceased" type="bool">
+        <none>
+          <fact ref="Patient Is Deceased"/>
+        </none>
+      </fact>
+      <fact name="Patient Age In Years" type="real">
+        <csharp>DateTime.Now.Subtract(context.Target.DateOfBirth.Value.Date).TotalDays / 365.25f</csharp>
+      </fact>
+
+      <fact name="Patient Gender" type="string">
+        <hdsi>genderConcept.mnemonic</hdsi>
+      </fact>
+
+      <fact name="Patient Is Male" type="bool">
+        <any>
+          <hdsi>genderConcept.mnemonic=Male</hdsi>
+          <hdsi>genderConcept=f4e3a6bb-612e-46b2-9f77-ff844d971198</hdsi>
+        </any>
+      </fact>
+      
+      <fact name="Patient Is Female" type="bool">
+        <any>
+          <hdsi>genderConcept.mnemonic=Female</hdsi>
+          <hdsi>genderConcept=094941e9-a3db-48b5-862c-bc289bd7f86c</hdsi>
+        </any>
+      </fact>
+      <fact name="Patient Date of Birth" type="date">
+        <hdsi>dateOfBirth</hdsi>
+      </fact>
+
+    </define>
+  </logic>
+
+  <logic id="org.santedb.cdss.core.act" name="Core CDSS Facts for all Acts">
+    <context type="Act" />
+    <define>
+      <fact name="Record Target Gender" type="string">
+        <meta>
+          <documentation>Administrative gender of the record target</documentation>
+        </meta>
+        <hdsi>participation[RecordTarget].player@Person.genderConcept.mnemonic</hdsi>
+      </fact>
+
+      <fact name="Record Target Date Of Birth" type="date">
+        <meta>
+          <documentation>The date of birth of the record target expressed as the day they were born</documentation>
+        </meta>
+        <hdsi>participation[RecordTarget].player@Person.dateOfBirth</hdsi>
+      </fact>
+
+      <fact name="Record Target Age in Days" type="integer">
+        <meta>
+          <documentation>The age of the record target for this observation expressed as a whole number of days</documentation>
+        </meta>
+        <csharp>(long)DateTime.Now.Subtract((DateTime)context["Record Target Date Of Birth"]).TotalDays</csharp>
+      </fact>
+    </define>
+  </logic>
+</CdssLibrary>

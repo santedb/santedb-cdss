@@ -26,7 +26,7 @@ using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Protocol;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
 using System;
@@ -50,8 +50,6 @@ namespace SanteDB.Cdss.Xml.Test
             // Force load of the DLL
             TestApplicationContext.TestAssembly = typeof(TestProtocolApply).Assembly;
             TestApplicationContext.Initialize(TestContext.CurrentContext.TestDirectory);
-
-
         }
 
         /// <summary>
@@ -60,8 +58,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleOPV()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -71,7 +69,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Last().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -84,8 +82,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleBCG()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -96,7 +94,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(1, acts.Count());
@@ -108,8 +106,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldRepeatWeight()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -120,10 +118,13 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.Count());
+            Assert.AreEqual(120, acts.Count());
+            Assert.AreEqual(60, acts.OfType<Act>().Count(o => o.TypeConceptKey == Guid.Parse("850ca898-c656-4ba2-a7c1-ff74e3331396"))); // 60 heights
+            Assert.AreEqual(60, acts.OfType<Act>().Count(o => o.TypeConceptKey == Guid.Parse("a261f8cd-69b0-49aa-91f4-e6d3e5c612ed"))); // 60 weights
+
         }
 
         /// <summary>
@@ -132,8 +133,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSkipWeight()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -165,10 +166,10 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(59, acts.Count());
+            Assert.AreEqual(119, acts.Count());
         }
 
         /// <summary>
@@ -177,8 +178,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleMR()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -189,11 +190,28 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p=>p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
+
+            // The default schedule should have been applied
+            Assert.Greater(acts.First().ActTime.Value.DateTime, newborn.DateOfBirth.Value.AddDays(270));
+            Assert.Greater(acts.Last().ActTime.Value.DateTime, newborn.DateOfBirth.Value.AddMonths(17));
+            Assert.AreEqual("1.3.5.1.4.1.52820.5.3.2.3", acts.First().Protocols.First().Protocol.Oid);
+
+            // Apply the protocol - we should get the accelerated protocol
+            newborn.DateOfBirth = DateTime.Now.AddMonths(-18).AddDays(-1);
+            acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
+            Assert.AreEqual(2, acts.Count());
+
+            // The accelerated schedule should have been applied
+            Assert.AreEqual(acts.First().ActTime.Value.DateTime.Date, DateTime.Now.Date);
+            Assert.GreaterOrEqual(acts.Last().ActTime.Value.DateTime.Date, DateTime.Now.Date.AddMonths(1));
+            Assert.AreEqual("1.3.5.1.4.1.52820.5.3.2.3.1", acts.First().Protocols.First().Protocol.Oid);
+
         }
+
 
         /// <summary>
         /// Test that the care plan schedules OPV0 at the correct time
@@ -201,8 +219,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSchedulePCV()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -213,7 +231,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -225,8 +243,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleDTP()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -237,7 +255,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -249,8 +267,8 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleRota()
         {
-            ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
-            XmlClinicalProtocol xmlCp = new XmlClinicalProtocol(definition);
+            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
+            var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -261,7 +279,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.Calculate(newborn, null);
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
@@ -273,19 +291,19 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldHandlePartials()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
                 Key = Guid.NewGuid(),
-                DateOfBirth = DateTime.Now,
+                DateOfBirth = DateTime.Now.AddDays(-10),
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
-            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.AreEqual(143, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
             Assert.AreEqual(23, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKeys.RecordTarget)));
@@ -297,7 +315,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldExcludeAdults()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient adult = new Patient()
             {
@@ -319,7 +337,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAll()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -332,7 +350,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(83, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.AreEqual(144, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
@@ -342,7 +360,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void ShouldScheduleAppointments()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
             {
@@ -362,7 +380,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldNotModifyOriginal()
         {
-            var scp = ApplicationServiceContext.Current.GetService<ICarePlanService>();
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
 
             // Patient that is just born = Schedule OPV
             Patient newborn = new Patient()
@@ -402,59 +420,4 @@ namespace SanteDB.Cdss.Xml.Test
         }
     }
 
-    /// <summary>
-    /// Dummy clinical repository
-    /// </summary>
-    [ExcludeFromCodeCoverage]
-    internal class DummyProtocolRepository : IClinicalProtocolRepositoryService
-    {
-        public String ServiceName => "Fake Repository";
-
-        [Obsolete("Use FindProtocol()", true)]
-        public IEnumerable<Core.Model.Acts.Protocol> FindProtocol(Expression<Func<Core.Model.Acts.Protocol, bool>> predicate, int offset, int? count, out int totalResults)
-        {
-            List<Core.Model.Acts.Protocol> retVal = new List<Core.Model.Acts.Protocol>();
-
-            foreach (var i in typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames())
-            {
-                if (i.EndsWith(".xml"))
-                {
-                    ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
-                    retVal.Add(new XmlClinicalProtocol(definition).GetProtocolData());
-                }
-            }
-
-            totalResults = retVal.Count;
-            return retVal;
-        }
-
-        public IQueryResultSet<IClinicalProtocol> FindProtocol(String name = null, String oid = null, String group = null)
-        {
-            return new MemoryQueryResultSet<IClinicalProtocol>(typeof(DummyProtocolRepository).Assembly.GetManifestResourceNames().Where(n => n.Contains("Protocols") && n.EndsWith(".xml")).Select(i =>
-            {
-                ProtocolDefinition definition = ProtocolDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream(i));
-                return new XmlClinicalProtocol(definition);
-            })).Where(o => o.Name == (name ?? o.Name) || o.GroupId == (group ?? o.GroupId));
-        }
-
-        public IClinicalProtocol GetProtocol(Guid protocolUuid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Core.Model.Acts.Protocol InsertProtocol(Core.Model.Acts.Protocol data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IClinicalProtocol InsertProtocol(IClinicalProtocol data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IClinicalProtocol RemoveProtocol(Guid protocolUuid)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

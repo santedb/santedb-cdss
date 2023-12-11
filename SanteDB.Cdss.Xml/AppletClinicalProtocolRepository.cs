@@ -21,15 +21,20 @@
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Serialization;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using SanteDB.Core.Applets;
+using SanteDB.Cdss.Xml.Antlr;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -41,7 +46,7 @@ namespace SanteDB.Cdss.Xml
     public class AppletClinicalProtocolRepository : AppletClinicalProtocolInstaller
     {
         /// <inheritdoc/>
-        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, IClinicalProtocolRepositoryService clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
         {
         }
     }
@@ -59,7 +64,6 @@ namespace SanteDB.Cdss.Xml
     [ServiceProvider("Applet Based Clinical Protocol Installer")]
     public class AppletClinicalProtocolInstaller
     {
-        private XmlSerializer m_xsz = XmlModelSerializerFactory.Current.CreateSerializer(typeof(ProtocolDefinition));
 
         /// <summary>
         /// Gets the service name
@@ -68,55 +72,44 @@ namespace SanteDB.Cdss.Xml
 
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolInstaller));
+        private readonly IAppletManagerService m_appletManager;
+        private readonly IAppletSolutionManagerService m_appletSolutionManager;
+        private readonly ICdssLibraryRepository m_protocolRepository;
 
 
         /// <summary>
         /// Clinical repository service
         /// </summary>
-        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, IClinicalProtocolRepositoryService clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService, IAppletSolutionManagerService appletSolutionManagerService = null)
         {
-            this.LoadProtocols(appletManager, clinicalProtocolRepositoryService);
+            this.m_appletManager = appletManager;
+            this.m_appletSolutionManager = appletSolutionManagerService;
+            this.m_protocolRepository = clinicalProtocolRepositoryService;
+            this.LoadProtocols();
+            appletManager.Changed += (o, e) => this.LoadProtocols();
         }
 
         /// <summary>
         /// Load protocols
         /// </summary>
-        private void LoadProtocols(IAppletManagerService appletManager, IClinicalProtocolRepositoryService protocolRepositoryService)
+        private void LoadProtocols()
         {
             try
             {
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    // Get protocols from the applet
-                    var protocols = appletManager.Applets.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
-
-                    foreach (var f in protocols)
+                    var solutions = this.m_appletSolutionManager?.Solutions.ToList();
+                    if (solutions == null)
                     {
-                        var content = f.Content ?? appletManager.Applets.Resolver(f);
-                        if (content is String)
+                        this.ProcessApplet(this.m_appletManager.Applets); // no solution manager
+                    }
+                    else
+                    {
+                        solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
+                        foreach (var s in solutions)
                         {
-                            using (var rStream = new StringReader(content as String))
-                            {
-                                protocolRepositoryService.InsertProtocol(
-                                    new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
-                                );
-                            }
-                        }
-                        else if (content is byte[])
-                        {
-                            using (var rStream = new MemoryStream(content as byte[]))
-                            {
-                                protocolRepositoryService.InsertProtocol(new XmlClinicalProtocol(ProtocolDefinition.Load(rStream)));
-                            }
-                        }
-                        else if (content is XElement)
-                        {
-                            using (var rStream = (content as XElement).CreateReader())
-                            {
-                                protocolRepositoryService.InsertProtocol(
-                                    new XmlClinicalProtocol(this.m_xsz.Deserialize(rStream) as ProtocolDefinition)
-                                    );
-                            }
+                            var appletCollection = this.m_appletSolutionManager.GetApplets(s.Meta.Id);
+                            this.ProcessApplet(appletCollection);
                         }
                     }
                 }
@@ -127,5 +120,50 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
+        private void ProcessApplet(ReadonlyAppletCollection appletCollection)
+        {
+            try
+            {
+
+                // Get protocols from the applet
+                var protocols = appletCollection.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
+
+                foreach (var f in protocols)
+                {
+                    using (var sourceReader = new MemoryStream(appletCollection.RenderAssetContent(f)))
+                    {
+                        try
+                        {
+                            CdssLibraryDefinition library = null;
+                            if (f.Name.EndsWith(".cdss"))
+                            {
+                                library = CdssLibraryTranspiler.Transpile(sourceReader, false);
+                            }
+                            else
+                            {
+                                library = CdssLibraryDefinition.Load(sourceReader);
+                            }
+
+                            var existing = this.m_protocolRepository.Find(o => o.Id == library.Id).FirstOrDefault();
+
+                            // Is the UUID different then don't install or if the version is older
+                            if(existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
+                            {
+                                this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
+                                this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            this.m_tracer.TraceWarning("Could not load {0} due to {1}", f.Name, e.ToHumanReadableString());
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceWarning("Cannot process applet {0} for protocols - {1}", appletCollection, e.ToHumanReadableString());
+            }
+        }
     }
 }

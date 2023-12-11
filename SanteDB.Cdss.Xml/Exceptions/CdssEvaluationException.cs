@@ -20,6 +20,8 @@
  */
 using SanteDB.Cdss.Xml.Model;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace SanteDB.Cdss.Xml.Exceptions
 {
@@ -32,14 +34,37 @@ namespace SanteDB.Cdss.Xml.Exceptions
         /// <summary>
         /// Gets the protocol which caused this exception
         /// </summary>
-        public ProtocolDefinition Protocol { get; }
+        public CdssExecutionStackFrame CdssStack { get; }
 
         /// <summary>
         /// Create a new CDSS evaluation exception
         /// </summary>
-        public CdssEvaluationException(String message, ProtocolDefinition protocol, Exception cause) : base(message, cause)
+        public CdssEvaluationException(String message, Exception cause) : base(message, cause)
         {
-            this.Protocol = protocol;
+            this.CdssStack = CdssExecutionStackFrame.Current;
+        }
+
+        /// <summary>
+        /// Create new evaluation exception with just a message
+        /// </summary>
+        public CdssEvaluationException(String message) : this(message, null)
+        {
+        }
+        
+        /// <inheritdoc/>
+        public string ToCdssStackTrace()
+        {
+            var sb = new StringBuilder("CDSS:");
+            sb.AppendFormat("{0}\r\n", this.Message);
+            sb.Append("CDSS Stack:\r\n");
+            var ctx = this.CdssStack;
+            while (ctx != null)
+            {
+                sb.AppendFormat("\t{0}\r\n", ctx.Owner?.ToString() ?? this.CdssStack.Context.ToString());
+                ctx = ctx.Parent;
+            } 
+            sb.AppendFormat("at: \r\n", this.StackTrace);
+            return sb.ToString();
         }
     }
 }

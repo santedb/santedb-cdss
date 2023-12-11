@@ -8,6 +8,11 @@
     <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Protocols\BCG.cdss" />
+	  <None Remove="Protocols\CoreCdss.xml" />
+	  <None Remove="Protocols\CoreChildcare.xml" />
+	  <None Remove="Protocols\CoreVaccination.xml" />
+	  <None Remove="Protocols\Weight.cdss" />
 	  <None Remove="TestConfig.xml" />
 	</ItemGroup>
 
@@ -53,6 +58,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Protocols\BCG.cdss" />
+    <EmbeddedResource Include="Protocols\CoreCdss.xml" />
+    <EmbeddedResource Include="Protocols\CoreChildcare.xml" />
+    <EmbeddedResource Include="Protocols\CoreVaccination.xml" />
     <EmbeddedResource Include="Protocols\OralPolioVaccine.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -63,6 +72,7 @@
     <EmbeddedResource Include="Protocols\MeaslesRubellaVaccine.xml" />
     <EmbeddedResource Include="Protocols\PCV13Vaccine.xml" />
     <EmbeddedResource Include="Protocols\RotaVaccine.xml" />
+    <EmbeddedResource Include="Protocols\Weight.cdss" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Protocols\Weight.xml">
@@ -79,9 +89,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Antlr">
-      <Version>3.5.0.2</Version>
-    </PackageReference>
     <PackageReference Include="DynamicExpresso.Core">
       <Version>2.16.0</Version>
     </PackageReference>

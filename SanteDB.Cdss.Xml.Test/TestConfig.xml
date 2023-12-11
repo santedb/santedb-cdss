@@ -87,6 +87,7 @@
   </section>
   <section xsi:type="ApplicationServiceContextConfigurationSection" allowUnsignedAssemblies="true" threadPoolSize="4">
     <serviceProviders>
+      <add type="SanteDB.Cdss.Xml.Test.TestCdssLibraryPersistenceService, SanteDB.Cdss.Xml.Test" />
       <add type="SanteDB.Core.Security.SHA256PasswordHashingService,SanteDB.Core.Api" />
       <add type="SanteDB.Core.Security.DefaultPolicyDecisionService, SanteDB.Core.Api" />
       <add type="SanteDB.Core.Services.Impl.DefaultThreadPoolService, SanteDB.Core.Api" />
@@ -102,7 +103,6 @@
       <add type="SanteDB.Persistence.Data.Services.AdoPersistenceService, SanteDB.Persistence.Data" />
       <add type="SanteDB.Persistence.Data.Services.AdoPersistenceService, SanteDB.Persistence.Data" />
       <add type="SanteDB.Core.Security.Privacy.DataPolicyFilterService, SanteDB.Core.Api" />
-      <add type="SanteDB.Cdss.Xml.Test.DummyProtocolRepository, SanteDB.Cdss.Xml.Test"/>
     </serviceProviders>
   </section>
   

@@ -1,0 +1,88 @@
+include <org.santedb.cdss.core>
+include <org.santedb.cdss.core.childcare>
+
+library "BCG Vaccine Logic"
+    having id <org.santedb.cdss.vaccine.bcg>
+    having uuid "463FFFAD-FC37-4666-B949-4A96AE2A4FB9"
+    having status active
+    with metadata
+        author SanteSuite Inc. and the SanteSuite Contributors
+        version 3.0 
+        doc Provides decision logic for BCG vaccination
+    end metadata
+as
+    logic "BCG Vaccination Logic"
+        having id <org.santedb.cdss.vaccine.bcg.patient>
+        having status active
+        having context Patient
+        when all("Patient Is Child", "Patient Is Not Deceased")
+    as
+        
+        define fact "Patient Has Not Received BCG Dose"
+            having type bool
+        as 
+            hdsi("participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-BCG" 
+                scoped-to context 
+                negated)
+        end fact // Patient Has Not Receive BCG Dose
+                        
+        define model "BCG Administration Proposal Model"
+            having format json
+        as 
+        $$
+        {
+            "$type": "SubstanceAdministration",
+            "templateModel" : {
+                "mnemonic" : "org.santedb.emr.sbadm.immunization",
+                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
+            },
+            "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
+            "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "InitialImmunization" },
+            "doseSequence": 0,
+            "doseQuantity" : 1.0,
+            "doseUnit" : "A77B8D83-1CC9-4806-A268-5D1738154AFA",
+            "route" : "D594F99F-0151-41A0-A359-282AB54683A1",
+            "participation": {
+                "Product": [{
+                    "player": "ED144BD2-A334-40A2-9A8F-B767A1397D07",
+                    "playerModel" : {
+                        "$type" : "Material",
+                        "id" : "ED144BD2-A334-40A2-9A8F-B767A1397D07",
+                        "typeConcept": "19AFE679-EF94-48B4-9D6A-3C9827C4C8E2"
+                    }
+                }]
+            }
+        }  
+        $$                            
+        end model 
+        
+        define rule "Patient Should Receive BCG Dose"
+        as
+            when 
+                "Patient Has Not Received BCG Dose"
+            then
+                propose "BCG Birth Dose"
+                    having model "BCG Administration Proposal Model"
+                as 
+                    assign hdsi("dateOfBirth") to actTime
+                    assign hdsi("dateOfBirth") to startTime
+                    assign csharp("context.Target.DateOfBirth.Value.AddDays(2)") to stopTime
+                    assign const 0 to doseSequence
+                end propose
+        end rule
+        
+        define protocol "BCG Vaccination Protocol"
+            having id <org.santedb.cdss.vaccine.bcg.protocol>
+            having uuid "463FFFAD-FC37-4666-B949-4A96AE2A4FB9"
+            having oid "1.3.5.1.4.1.52820.5.3.2.1"
+            having scope <org.santedb.emr.enc.children.healthyVisit> 
+            having scope <org.santedb.emr.act.registration.birth>
+        as 
+            when
+                all("Patient Is Child", "Patient Is Not Deceased")
+            then
+                apply "Patient Should Receive BCG Dose"
+        end protocol
+    end logic
+
+end library
