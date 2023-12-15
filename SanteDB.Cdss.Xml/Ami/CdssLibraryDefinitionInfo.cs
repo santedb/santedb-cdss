@@ -45,6 +45,8 @@ namespace SanteDB.Cdss.Xml.Ami
                     Oid = libraryEntry.Oid,
                     Name = libraryEntry.Name,
                     UuidSpecified = true,
+                    Status = (libraryEntry as XmlProtocolLibrary)?.Library.Status ?? CdssObjectState.Unknown,
+                    StatusSpecified = true,
                     Metadata = new CdssObjectMetadata() { Documentation =  libraryEntry.Documentation, Version = libraryEntry.Version }
                 } : (libraryEntry as XmlProtocolLibrary)?.Library.Clone() as CdssLibraryDefinition;
             if (this.Library.TranspileSourceReference != null)
