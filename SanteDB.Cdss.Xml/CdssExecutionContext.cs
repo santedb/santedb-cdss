@@ -123,7 +123,7 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public CdssReferenceDataset GetDataSet(string idOrName)
         {
-            var caseInsensitiveName = idOrName;
+            var caseInsensitiveName = idOrName.ToLowerInvariant();
             if(!this.m_datasets.TryGetValue(caseInsensitiveName, out var retVal))
             {
                 throw new KeyNotFoundException(idOrName);
@@ -207,8 +207,11 @@ namespace SanteDB.Cdss.Xml
             {
                 try
                 {
+                    var sw = new Stopwatch();
+                    sw.Start();
                     value = defn.Compute();
-                    var debugFact = this.DebugSession?.CurrentFrame.AddFact(caseInsensitiveName, defn, value);
+                    sw.Stop();
+                    var debugFact = this.DebugSession?.CurrentFrame.AddFact(caseInsensitiveName, defn, value, sw.ElapsedMilliseconds);
                     this.m_factCache.Add(caseInsensitiveName, value);
                 }
                 catch(Exception e)

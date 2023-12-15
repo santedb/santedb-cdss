@@ -15,10 +15,11 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <summary>
         /// Private CTOR
         /// </summary>
-        private CdssDebugFactSample(string factName, CdssComputableAssetDefinition assetDefinition, object value) 
+        private CdssDebugFactSample(string factName, CdssComputableAssetDefinition assetDefinition, object value, long computationTime) 
         {
             this.FactName = factName;
             this.FactDefinition = assetDefinition;
+            this.ComputationTime = computationTime;
             if (value is ICanDeepCopy icdc)
             {
                 this.Value = icdc.DeepCopy();
@@ -32,7 +33,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <summary>
         /// Create a new CDSS fact sample
         /// </summary>
-        internal static CdssDebugFactSample Create(string factName, CdssComputableAssetDefinition factAsset, object value) => new CdssDebugFactSample(factName, factAsset, value);
+        internal static CdssDebugFactSample Create(string factName, CdssComputableAssetDefinition factAsset, object value, long computationTime) => new CdssDebugFactSample(factName, factAsset, value, computationTime);
 
         /// <summary>
         /// Gets the name of the sample
@@ -49,5 +50,9 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// </summary>
         public object Value { get; }
 
+        /// <summary>
+        /// Gets the computation time
+        /// </summary>
+        public long ComputationTime { get; }
     }
 }

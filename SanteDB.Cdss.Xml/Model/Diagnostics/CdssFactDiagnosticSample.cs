@@ -29,7 +29,14 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
             this.FactName = factSample.FactName;
             this.Value = new CdssDiagnosticSampleValueWrapper(factSample.Value);
             this.FactDefinition = new CdssDiagnosticObjectReference(factSample.FactDefinition);
+            this.ComputationTime = factSample.ComputationTime;
         }
+
+        /// <summary>
+        /// Exit time for the fact computation
+        /// </summary>
+        [XmlAttribute("computationMs"), JsonProperty("computationMs")]
+        public long ComputationTime { get; set; }
 
         /// <summary>
         /// Gets or sets the fact name

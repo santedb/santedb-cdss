@@ -29,7 +29,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Only allow current call
         /// </summary>
-        private CdssExecutionStackFrame(ICdssExecutionContext context)
+        private CdssExecutionStackFrame(ICdssExecutionContext context, CdssBaseObjectDefinition owner)
         {
             if (!(context is CdssExecutionContext ctx))
             { 
@@ -38,11 +38,11 @@ namespace SanteDB.Cdss.Xml
 
             this.m_context = ctx;
             this.m_scopedObject = context.Target;
+            this.m_owner = owner;
         }
 
-        private CdssExecutionStackFrame(CdssExecutionStackFrame parent, CdssBaseObjectDefinition owner) : this(parent.Context)
+        private CdssExecutionStackFrame(CdssExecutionStackFrame parent, CdssBaseObjectDefinition owner) : this(parent.Context, owner)
         {
-            this.m_owner = owner;
             this.m_parent = parent;
             this.ScopedObject = parent.ScopedObject;
         }
@@ -96,14 +96,15 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Enter a context
         /// </summary>
-        public static CdssExecutionStackFrame Enter(ICdssExecutionContext context)
+        public static CdssExecutionStackFrame Enter(ICdssExecutionContext context, CdssBaseObjectDefinition owner = null)
         {
             if (m_currentContext != null)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(Enter)));
             }
 
-            m_currentContext = new CdssExecutionStackFrame(context);
+            m_currentContext = new CdssExecutionStackFrame(context, owner);
+
             (context as CdssExecutionContext)?.DebugSession?.EnterFrame(m_currentContext);
 
             return m_currentContext;
@@ -132,6 +133,10 @@ namespace SanteDB.Cdss.Xml
         {
             m_currentContext = m_currentContext?.m_parent;
             this.m_context.DebugSession?.ExitFrame();
+            if (m_currentContext == null)
+            {
+                this.m_context.DebugSession?.End();
+            }
         }
     }
 }

@@ -263,7 +263,7 @@ namespace SanteDB.Cdss.Xml
                     ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
                 }
 
-                using (CdssExecutionStackFrame.Enter(context))
+                using (CdssExecutionStackFrame.Enter(context, this.m_library))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
                     context.SetValue("mode", "execute");

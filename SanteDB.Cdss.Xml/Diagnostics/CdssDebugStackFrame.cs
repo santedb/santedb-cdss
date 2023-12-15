@@ -117,14 +117,16 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// </summary>
         /// <param name="factName">The name of the fact that is being added</param>
         /// <param name="factAsset">The fact asset definition</param>
+        /// <param name="value">The value of the fact</param>
+        /// <param name="computationMs">The number of milliseconds it took to compute the fact</param>
         /// <returns>The created fact debug sample</returns>
-        public CdssDebugFactSample AddFact(String factName, CdssComputableAssetDefinition factAsset, object value)
+        public CdssDebugFactSample AddFact(String factName, CdssComputableAssetDefinition factAsset, object value, long computationMs)
         {
             if (this.m_exited)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddFact)));
             }
-            var retVal = CdssDebugFactSample.Create(factName, factAsset, value);
+            var retVal = CdssDebugFactSample.Create(factName, factAsset, value, computationMs);
             this.m_activitySamples.AddLast(retVal);
             return retVal;
         }

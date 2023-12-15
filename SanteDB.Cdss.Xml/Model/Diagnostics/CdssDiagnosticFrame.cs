@@ -44,12 +44,6 @@ namespace SanteDB.Cdss.Xml.Model.Diagnostics
         public CdssDiagnosticObjectReference Source { get; set; }
 
         /// <summary>
-        /// Gets the child frames
-        /// </summary>
-        [XmlArray("child"), XmlArrayItem("frame"), JsonProperty("children")]
-        public List<CdssDiagnosticFrame> ChildFrames { get; set; }
-
-        /// <summary>
         /// Gets or sets the samples collected within the frame
         /// </summary>
         [XmlArray("activities"), 

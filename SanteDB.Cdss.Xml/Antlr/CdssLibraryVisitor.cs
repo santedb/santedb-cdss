@@ -172,7 +172,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 case "active":
                     m_currentObject.Peek().Status = CdssObjectState.Active;
                     break;
-                case "trial":
+                case "trial-use":
                     m_currentObject.Peek().Status = CdssObjectState.TrialUse;
                     break;
                 case "dont-use":
