@@ -128,10 +128,18 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                                 break;
                         }
 
-                        if (!MapUtil.TryConvert(retVal, netType, out retVal))
+                        if (!MapUtil.TryConvert(retVal, netType, out var converted))
                         {
-                            throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
+                            if (this.ValueType == CdssValueType.Boolean) // It is boolean but cannot be converted to boolean so we do a null check
+                            {
+                                retVal = retVal != null;
+                            }
+                            else
+                            {
+                                throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
+                            }
                         }
+                        retVal = converted;
                     }
 
                     retVal = this.Normalize?.Select(o => o.TransformObject(retVal)).FirstOrDefault(o => o != null) ?? retVal;
