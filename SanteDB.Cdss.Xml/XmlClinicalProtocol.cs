@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,29 +16,19 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-9-15
  */
-using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
-using SanteDB.Core;
-using SanteDB.Core.Applets.ViewModel.Description;
-using SanteDB.Core.Applets.ViewModel.Null;
-using SanteDB.Core.BusinessRules;
-using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Model.Acts;
-using SanteDB.Core.Model.Constants;
-using SanteDB.Core.Model.Roles;
+using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.i18n;
+using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Roles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using SanteDB.Core.Model.Entities;
-using SanteDB.Cdss.Xml.Model.Assets;
-using SanteDB.Core.Model;
-using SanteDB.Cdss.Xml.Model.Actions;
-using SanteDB.Core.i18n;
 using System.Xml;
 
 namespace SanteDB.Cdss.Xml
@@ -69,7 +59,7 @@ namespace SanteDB.Cdss.Xml
             get => this.m_protocol.Uuid;
             set
             {
-                if(this.m_protocol.Uuid != Guid.Empty || 
+                if (this.m_protocol.Uuid != Guid.Empty ||
                     value != this.m_protocol.Uuid)
                 {
                     throw new InvalidOperationException(ErrorMessages.WOULD_RESULT_INVALID_STATE);

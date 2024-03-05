@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,22 +16,17 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-11-27
  */
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Data.Import;
 using SanteDB.Core.Data.Import.Format;
-using SanteDB.Core.Http.Compression;
 using SanteDB.Core.Model.Map;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -80,7 +75,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Select the value in the specified column
         /// </summary>
-        public IEnumerable<Object> Select(String columnName) 
+        public IEnumerable<Object> Select(String columnName)
         {
             foreach (var itm in this)
             {

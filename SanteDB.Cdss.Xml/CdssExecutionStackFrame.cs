@@ -1,12 +1,28 @@
-﻿using SanteDB.Cdss.Xml.Model;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Text;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -32,7 +48,7 @@ namespace SanteDB.Cdss.Xml
         private CdssExecutionStackFrame(ICdssExecutionContext context, CdssBaseObjectDefinition owner)
         {
             if (!(context is CdssExecutionContext ctx))
-            { 
+            {
                 throw new ArgumentOutOfRangeException(nameof(context), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(CdssExecutionContext), context.GetType()));
             }
 
@@ -72,9 +88,9 @@ namespace SanteDB.Cdss.Xml
             set
             {
                 if (this.m_context.DebugSession != null &&
-                    this.m_context is ICdssExecutionContext cec 
-                    && cec.Target != value 
-                    && value != this.Parent?.ScopedObject 
+                    this.m_context is ICdssExecutionContext cec
+                    && cec.Target != value
+                    && value != this.Parent?.ScopedObject
                     && value != this.ScopedObject)
                 {
                     this.m_context.DebugSession.CurrentFrame.AddSample("scopedObject", value);

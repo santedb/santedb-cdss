@@ -1,12 +1,30 @@
-﻿using SanteDB.Cdss.Xml.Model;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-12-8
+ */
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Diagnostics
@@ -28,7 +46,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// </summary>
         public CdssDebugStackFrame()
         {
-            
+
         }
 
         /// <summary>
@@ -87,7 +105,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// <param name="value">The value of the sample</param>
         public void AddSample(String sampleName, object value)
         {
-            if(this.m_exited)
+            if (this.m_exited)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddSample)));
             }
@@ -144,7 +162,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
             }
             var retVal = CdssDebugExceptionSample.Create(exception);
             this.m_activitySamples.AddLast(retVal);
-            return retVal;  
+            return retVal;
         }
 
         /// <summary>
@@ -152,7 +170,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
         /// </summary>
         internal void AddProposal(Act proposedAct)
         {
-            if(this.m_exited)
+            if (this.m_exited)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(AddProposal)));
             }

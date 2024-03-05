@@ -1,14 +1,31 @@
-﻿using SanteDB.Cdss.Xml.Model;
-using SanteDB.Cdss.Xml.Model.Actions;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
+using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
-using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SharpCompress;
@@ -16,9 +33,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
 using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace SanteDB.Cdss.Xml
@@ -119,7 +134,7 @@ namespace SanteDB.Cdss.Xml
                     .AppliesTo(context)
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
-                    .Where(o=>o.Status != CdssObjectState.DontUse)
+                    .Where(o => o.Status != CdssObjectState.DontUse)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
             if (!String.IsNullOrEmpty(forScope))
             {
@@ -159,8 +174,8 @@ namespace SanteDB.Cdss.Xml
             {
                 var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
                 this.m_scopedLibraries = new List<CdssLibraryDefinition>() { this.m_library };
-                this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o=>o.Library) ?? new CdssLibraryDefinition[0]);
-                
+                this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o => o.Library) ?? new CdssLibraryDefinition[0]);
+
             }
         }
 
@@ -247,7 +262,7 @@ namespace SanteDB.Cdss.Xml
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
                 this.InitializeLibrary();
-                
+
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
@@ -272,10 +287,10 @@ namespace SanteDB.Cdss.Xml
                     // If the library has protocols we want to select those for execution - otherwise all rules
                     var toExecute = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                         .AppliesTo(context)
-                        .SelectMany(o=>o.Definitions)
+                        .SelectMany(o => o.Definitions)
                         .OfType<CdssComputableAssetDefinition>();
 
-                    if(toExecute.OfType<CdssProtocolAssetDefinition>().Any())
+                    if (toExecute.OfType<CdssProtocolAssetDefinition>().Any())
                     {
                         toExecute = toExecute.OfType<CdssProtocolAssetDefinition>();
                     }
@@ -285,7 +300,7 @@ namespace SanteDB.Cdss.Xml
                         .ToArray();
 
                     var retVal = context.Proposals.OfType<Object>().Union(context.Issues).ToList();
-                    if(context.DebugSession != null)
+                    if (context.DebugSession != null)
                     {
                         retVal.Add(context.DebugSession);
                     }

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,25 +16,20 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
+using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Services;
-using SanteDB.Core.Diagnostics;
-using SanteDB.Core.i18n;
-using SanteDB.Core.Model.Acts;
-using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using System;
 using System.IO;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using SanteDB.Core.Applets;
-using SanteDB.Cdss.Xml.Antlr;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -147,7 +142,7 @@ namespace SanteDB.Cdss.Xml
                             var existing = this.m_protocolRepository.Find(o => o.Id == library.Id).FirstOrDefault();
 
                             // Is the UUID different then don't install or if the version is older
-                            if(existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
+                            if (existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
                             {
                                 this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
                                 this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));

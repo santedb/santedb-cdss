@@ -1,4 +1,24 @@
-﻿using Antlr4.Runtime;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
+using Antlr4.Runtime;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Cdss.Xml.Model.Assets;
@@ -6,14 +26,10 @@ using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.Model.Serialization;
 using SharpCompress;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
-using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
@@ -49,7 +65,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 // Process
                 var visitor = new CdssLibraryVisitor(includeSourceMap, (inputStream as FileStream)?.Name ?? sourceName ?? ":memory:");
                 var library = visitor.VisitLibrary(result);
-                if(includeSourceMap)
+                if (includeSourceMap)
                 {
                     library.TranspileSourceReference.OriginalSource = ms.ToArray();
                 }
@@ -79,9 +95,13 @@ namespace SanteDB.Cdss.Xml.Antlr
             cdssLibrary.Include?.ForEach(o =>
             {
                 if (o.StartsWith("#"))
+                {
                     writer.WriteLine("{0}include <{1}>", indentationStr, o.Substring(1));
+                }
                 else
+                {
                     writer.WriteLine("{0}include \"{1}\"", indentationStr, o);
+                }
             });
 
             writer.WriteLine("{0}define library \"{1}\"", indentationStr, cdssLibrary.Name);
@@ -129,7 +149,7 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         private static void EmitCdssText(this CdssComputableAssetDefinition assetDefinition, StringWriter writer, int indentation = 0)
         {
-            switch(assetDefinition)
+            switch (assetDefinition)
             {
                 case CdssFactAssetDefinition fact:
                     fact.EmitCdssText(writer, indentation);
@@ -151,7 +171,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             var indentationStr = new String('\t', indentation);
             writer.WriteLine("{0}define fact \"{1}\"", indentationStr, cdssFact.Name);
             cdssFact.EmitHavingStatements(writer, indentation);
-            switch(cdssFact.ValueType)
+            switch (cdssFact.ValueType)
             {
                 case CdssValueType.Boolean:
                     writer.WriteLine("{0}\thaving type bool", indentationStr);
@@ -173,11 +193,11 @@ namespace SanteDB.Cdss.Xml.Antlr
                     break;
             }
 
-            if(cdssFact.IsNegated)
+            if (cdssFact.IsNegated)
             {
                 writer.WriteLine("{0}\thaving negation true", indentationStr);
             }
-            if(cdssFact.Priority != 0)
+            if (cdssFact.Priority != 0)
             {
                 writer.WriteLine("{0}\thaving priority {1}", indentationStr, cdssFact.Priority);
             }
@@ -197,7 +217,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             var indentationStr = new String('\t', indentation);
             writer.WriteLine("{0}define model \"{1}\"", indentationStr, cdssModel.Name);
             cdssModel.EmitHavingStatements(writer, indentation);
-            if(cdssModel.Model is string str)
+            if (cdssModel.Model is string str)
             {
                 writer.WriteLine("{0}\thaving format json", indentationStr);
             }
@@ -209,7 +229,7 @@ namespace SanteDB.Cdss.Xml.Antlr
 
             writer.WriteLine("{0}as\r\n\t{0}$$", indentationStr);
 
-            if(cdssModel.Model is string str1)
+            if (cdssModel.Model is string str1)
             {
                 writer.Write(str1);
             }
@@ -244,7 +264,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             cdssRule.Metadata?.EmitMetadata(writer, indentation + 1);
             writer.WriteLine("{0}as", indentationStr);
 
-            if(cdssRule.When != null)
+            if (cdssRule.When != null)
             {
                 writer.WriteLine("{0}\twhen", indentationStr);
                 writer.Write("{0}\t\t", indentationStr);
@@ -262,11 +282,11 @@ namespace SanteDB.Cdss.Xml.Antlr
             var indentationStr = new String('\t', indentation);
             actionCollection.Actions?.ForEach(a =>
             {
-                switch(a)
+                switch (a)
                 {
                     case CdssRuleReferenceActionDefinition ruleRef:
                         writer.Write("{0}apply ", indentationStr);
-                        if(ruleRef.RuleName.StartsWith("#"))
+                        if (ruleRef.RuleName.StartsWith("#"))
                         {
                             writer.WriteLine("<{0}>", ruleRef.RuleName.Substring(1));
                         }
@@ -298,7 +318,7 @@ namespace SanteDB.Cdss.Xml.Antlr
         {
             var indentationStr = new String('\t', indentation);
             writer.Write("{0}repeat ", indentationStr);
-            if(cdssRepeat.Until != null)
+            if (cdssRepeat.Until != null)
             {
                 writer.Write("until ");
                 cdssRepeat.Until.WhenComputation.EmitCdssText(writer, indentation);
@@ -306,7 +326,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             else
             {
                 writer.Write("for {0} iterations ", cdssRepeat.Iterations);
-                if(!String.IsNullOrEmpty(cdssRepeat.IterationVariable))
+                if (!String.IsNullOrEmpty(cdssRepeat.IterationVariable))
                 {
                     writer.Write(" track-by {0}", cdssRepeat.IterationVariable);
                 }
@@ -315,14 +335,14 @@ namespace SanteDB.Cdss.Xml.Antlr
             cdssRepeat.Actions?.EmitCdssText(writer, indentation + 1);
 
             writer.WriteLine("{0}end repeat", indentationStr);
-                 
+
         }
 
         private static void EmitCdssText(this CdssProposeActionDefinition cdssPropose, StringWriter writer, int indentation = 0)
         {
             var indentationStr = new String('\t', indentation);
             writer.Write("{0}propose ", indentationStr);
-            if(!String.IsNullOrEmpty(cdssPropose.Name))
+            if (!String.IsNullOrEmpty(cdssPropose.Name))
             {
                 writer.Write("\"{0}\"", cdssPropose.Name);
             }
@@ -367,7 +387,7 @@ namespace SanteDB.Cdss.Xml.Antlr
         {
             var indentationStr = new String('\t', indentation);
             writer.Write("{0}assign ", indentationStr);
-            switch(cdssAssign.ContainedExpression)
+            switch (cdssAssign.ContainedExpression)
             {
                 case string s:
                     writer.Write("const \"{0}\"", s);
@@ -378,7 +398,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
 
             writer.Write(" to {0}", cdssAssign.Path);
-            if(cdssAssign.OverwriteValue)
+            if (cdssAssign.OverwriteValue)
             {
                 writer.Write(" overwrite");
             }
@@ -389,11 +409,11 @@ namespace SanteDB.Cdss.Xml.Antlr
         {
             var indentationStr = new String('\t', indentation);
             writer.WriteLine("{0}raise having priority {1} ", indentationStr, cdssIssue.IssueToRaise.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error ? "danger" : cdssIssue.IssueToRaise.Priority == Core.BusinessRules.DetectedIssuePriorityType.Warning ? "warn" : "info");
-            if(cdssIssue.IssueToRaise.TypeKey != Guid.Empty)
+            if (cdssIssue.IssueToRaise.TypeKey != Guid.Empty)
             {
                 writer.WriteLine("{0}\thaving type {{{1}}}", indentationStr, cdssIssue.IssueToRaise.TypeKey);
             }
-            if(!String.IsNullOrEmpty(cdssIssue.Id))
+            if (!String.IsNullOrEmpty(cdssIssue.Id))
             {
                 writer.Write("{0}\thaving id <{1}>", indentationStr, cdssIssue.Id);
             }
@@ -412,7 +432,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             writer.WriteLine("{0}rule", indentationStr);
             cdssInlineRule.Metadata?.EmitMetadata(writer, indentation + 1);
             writer.WriteLine("{0}as", indentationStr);
-            if(cdssInlineRule.When != null)
+            if (cdssInlineRule.When != null)
             {
                 writer.Write("{0}\twhen", indentationStr);
                 cdssInlineRule.When.WhenComputation.EmitCdssText(writer, indentation + 1);
@@ -438,7 +458,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 {
                     writer.WriteLine("{0}\thaving scope <{1}>", indentationStr, o.Id);
                 }
-                else if(!String.IsNullOrEmpty(o.Name))
+                else if (!String.IsNullOrEmpty(o.Name))
                 {
                     writer.WriteLine("{0}\thaving scope \"{1}\"", indentationStr, o.Name);
                 }
@@ -462,15 +482,15 @@ namespace SanteDB.Cdss.Xml.Antlr
         private static void EmitCdssText(this CdssExpressionDefinition cdssExpression, StringWriter writer, int indentation = 0)
         {
             var indentationStr = new String('\t', indentation);
-            switch(cdssExpression)
+            switch (cdssExpression)
             {
                 case CdssHdsiExpressionDefinition hdsi:
                     writer.Write("hdsi($${0}$$", hdsi.ExpressionValue);
-                    if(hdsi.Scope != CdssHdsiExpressionScopeType.Context)
+                    if (hdsi.Scope != CdssHdsiExpressionScopeType.Context)
                     {
                         writer.Write(" scoped-to proposal");
                     }
-                    if(hdsi.IsNegated)
+                    if (hdsi.IsNegated)
                     {
                         writer.Write(" negated");
                     }
@@ -481,7 +501,8 @@ namespace SanteDB.Cdss.Xml.Antlr
                     break;
                 case CdssAggregateExpressionDefinition agg:
                     writer.WriteLine("{0}(", agg is CdssAnyExpressionDefinition ? "any" : agg is CdssAllExpressionDefinition ? "all" : "none");
-                    agg.ContainedExpressions?.ForEach(e => {
+                    agg.ContainedExpressions?.ForEach(e =>
+                    {
                         writer.Write("{0}\t", indentationStr);
                         e.EmitCdssText(writer, indentation + 1);
                         if (e != agg.ContainedExpressions.Last())
@@ -500,19 +521,19 @@ namespace SanteDB.Cdss.Xml.Antlr
                     break;
                 case CdssQueryExpressionDefinition query:
                     writer.WriteLine("query(");
-                    if(!String.IsNullOrEmpty(query.SourceCollectionHdsi))
+                    if (!String.IsNullOrEmpty(query.SourceCollectionHdsi))
                     {
                         writer.WriteLine("{0}\tfrom hdsi($${1}$$)", indentationStr, query.SourceCollectionHdsi);
                     }
-                    if(!string.IsNullOrEmpty(query.FilterHdsi))
+                    if (!string.IsNullOrEmpty(query.FilterHdsi))
                     {
                         writer.WriteLine("{0}\twhere hdsi($${1}$$)", indentationStr, query.FilterHdsi);
                     }
-                    if(!String.IsNullOrEmpty(query.SelectHdsi))
+                    if (!String.IsNullOrEmpty(query.SelectHdsi))
                     {
                         writer.WriteLine("{0}\tselect {1} hdsi($${2}$$)", indentationStr, query.SelectorFunction.ToString().ToLowerInvariant(), query.SelectHdsi);
                     }
-                    if(!string.IsNullOrEmpty(query.OrderByHdsi))
+                    if (!string.IsNullOrEmpty(query.OrderByHdsi))
                     {
                         writer.WriteLine("{0}\torder by hdsi($${1}$$)", indentationStr, query.OrderByHdsi);
                     }
@@ -549,7 +570,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 writer.WriteLine("{0}\thaving oid \"{1}\"", indentationStr, cdssBaseObject.Oid);
             }
-           
+
 
             if (cdssBaseObject.StatusSpecified || cdssBaseObject.Status != CdssObjectState.Unknown)
             {
@@ -566,7 +587,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             writer.WriteLine("{0}with metadata", indentationStr);
             objectMetadata.Authors?.ForEach(o => writer.WriteLine("{0}\tauthor {1}", indentationStr, o));
 
-            if(!string.IsNullOrEmpty(objectMetadata.Version))
+            if (!string.IsNullOrEmpty(objectMetadata.Version))
             {
                 writer.WriteLine("{0}\tversion {1}", indentationStr, objectMetadata.Version);
             }
