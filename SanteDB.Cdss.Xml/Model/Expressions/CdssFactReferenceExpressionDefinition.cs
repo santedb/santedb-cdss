@@ -1,4 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
+using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
@@ -7,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Expressions
@@ -24,7 +43,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// </summary>
         public CdssFactReferenceExpressionDefinition()
         {
-                
+
         }
 
         /// <summary>
@@ -45,11 +64,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if(String.IsNullOrEmpty(this.FactName))
+            if (String.IsNullOrEmpty(this.FactName))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.missingReference", "Fact reference expressions require a @ref attribute", Guid.Empty, this.ToReferenceString());
             }
-            else if(!context.FactNames.Contains(this.FactName.ToLowerInvariant()))
+            else if (!context.FactNames.Contains(this.FactName.ToLowerInvariant()))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.fact.notFound", $"Could not find a fact in scope named {this.FactName}", Guid.Empty, this.ToReferenceString());
             }
@@ -65,8 +84,9 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
 
             // Determine the type of fact
             Expression retVal = Expression.Call(contextParameter, typeof(CdssExecutionContext).GetMethod(nameof(CdssExecutionContext.GetFact)), Expression.Constant(this.FactName));
-            if(cdssContext.TryGetFactDefinition(this.FactName, out var definition) && definition.ValueTypeSpecified) {
-                switch(definition.ValueType)
+            if (cdssContext.TryGetFactDefinition(this.FactName, out var definition) && definition.ValueTypeSpecified)
+            {
+                switch (definition.ValueType)
                 {
                     case CdssValueType.Boolean:
                         retVal = Expression.Convert(retVal, typeof(bool));
@@ -88,13 +108,13 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                         break;
                 }
             }
-            else if(cdssContext.TryGetFact(this.FactName, out var fact))
+            else if (cdssContext.TryGetFact(this.FactName, out var fact))
             {
                 if (fact != null)
                 {
                     retVal = Expression.Convert(retVal, fact.GetType());
                 }
-                
+
             }
             else
             {

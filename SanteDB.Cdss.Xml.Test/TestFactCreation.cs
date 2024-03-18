@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,14 +16,11 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-11-27
  */
-using Microsoft.CSharp;
 using NUnit.Framework;
-using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Cdss.Xml.Model.Expressions;
-using SanteDB.Cdss.Xml.XmlLinq;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.DataTypes;
 using SanteDB.Core.Model.Entities;
@@ -117,7 +114,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 var fact = when.Compute();
                 Assert.IsInstanceOf<string>(fact);
-                Assert.AreEqual("12343120423",fact);
+                Assert.AreEqual("12343120423", fact);
             }
         }
 

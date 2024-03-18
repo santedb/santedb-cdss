@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-11-27
  */
 using DynamicExpresso;
 using SanteDB.Cdss.Xml.Diagnostics;
@@ -25,7 +25,6 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
-using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
@@ -115,7 +114,7 @@ namespace SanteDB.Cdss.Xml
             this.m_computableAssetsInScope = this.m_scopedLogicBlocks?
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
-            
+
         }
 
         /// <summary>
@@ -124,7 +123,7 @@ namespace SanteDB.Cdss.Xml
         public CdssReferenceDataset GetDataSet(string idOrName)
         {
             var caseInsensitiveName = idOrName.ToLowerInvariant();
-            if(!this.m_datasets.TryGetValue(caseInsensitiveName, out var retVal))
+            if (!this.m_datasets.TryGetValue(caseInsensitiveName, out var retVal))
             {
                 throw new KeyNotFoundException(idOrName);
             }
@@ -159,7 +158,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get the facts which can be referenced
         /// </summary>
-        public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o=>o.Value is CdssComputableAssetDefinition).Select(o=>o.Key);
+        public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o => o.Value is CdssComputableAssetDefinition).Select(o => o.Key);
 
 
         /// <summary>
@@ -203,7 +202,7 @@ namespace SanteDB.Cdss.Xml
                 this.DebugSession?.CurrentFrame.AddRead(caseInsensitiveName, value);
                 return true;
             }
-            else if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
+            else if (this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssFactAssetDefinition)
             {
                 try
                 {
@@ -214,7 +213,7 @@ namespace SanteDB.Cdss.Xml
                     var debugFact = this.DebugSession?.CurrentFrame.AddFact(caseInsensitiveName, defn, value, sw.ElapsedMilliseconds);
                     this.m_factCache.Add(caseInsensitiveName, value);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     this.DebugSession?.CurrentFrame.AddException(e);
                     throw;
@@ -230,7 +229,7 @@ namespace SanteDB.Cdss.Xml
         internal bool TryGetModel(String modelName, out object value)
         {
             var caseInsensitiveName = modelName.ToLowerInvariant();
-            if(this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssModelAssetDefinition modelDefn)
+            if (this.m_computableAssetsInScope.TryGetValue(caseInsensitiveName, out var defn) && defn is CdssModelAssetDefinition modelDefn)
             {
                 value = modelDefn.Compute();
                 return true;
@@ -332,7 +331,7 @@ namespace SanteDB.Cdss.Xml
             {
                 case Entity entity:
                     // If the target of this context is an entity then set them as the record target
-                    if (!entity.LoadProperty(o=>o.Participations).Any(p => p.Act == proposedAct || p.ActKey == proposedAct.Key))
+                    if (!entity.LoadProperty(o => o.Participations).Any(p => p.Act == proposedAct || p.ActKey == proposedAct.Key))
                     {
                         lock (this.m_lock)
                         {
@@ -349,7 +348,7 @@ namespace SanteDB.Cdss.Xml
                     break;
                 case Act act:
                     // If the target of this context is another act then set them as a component
-                    if (!act.LoadProperty(o=>o.Relationships).Any(r => r.TargetAct == proposedAct || r.TargetActKey == proposedAct.Key))
+                    if (!act.LoadProperty(o => o.Relationships).Any(r => r.TargetAct == proposedAct || r.TargetActKey == proposedAct.Key))
                     {
                         lock (this.m_lock)
                         {
@@ -414,7 +413,7 @@ namespace SanteDB.Cdss.Xml
         /// <returns>The constructed context</returns>
         public static CdssExecutionContext CreateContext(IdentifiedData forObject, IEnumerable<CdssLibraryDefinition> scopedLibraries)
         {
-            if(forObject == null)
+            if (forObject == null)
             {
                 throw new ArgumentNullException(nameof(forObject));
             }
@@ -465,7 +464,7 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         internal bool TryGetRuleDefinition(string ruleName, out CdssRuleAssetDefinition definition)
         {
-            if(this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssRuleAssetDefinition defn)
+            if (this.m_computableAssetsInScope.TryGetValue(ruleName.ToLowerInvariant(), out var computableAsset) && computableAsset is CdssRuleAssetDefinition defn)
             {
                 definition = defn;
                 return true;
@@ -495,7 +494,7 @@ namespace SanteDB.Cdss.Xml
         internal void ThrowIfNotValid()
         {
             var issues = this.m_scopedLogicBlocks.SelectMany(o => o.Validate(this)).ToArray();
-            if(issues.Any(o=>o.Priority == DetectedIssuePriorityType.Error))
+            if (issues.Any(o => o.Priority == DetectedIssuePriorityType.Error))
             {
                 throw new DetectedIssueException(issues);
             }
@@ -525,11 +524,11 @@ namespace SanteDB.Cdss.Xml
     /// <summary>
     /// Parameter manager for the CDSS
     /// </summary>
-    public class CdssExecutionContext<TTarget>  : CdssExecutionContext
+    public class CdssExecutionContext<TTarget> : CdssExecutionContext
         where TTarget : IdentifiedData
     {
-       
-        
+
+
         /// <inheritdoc/>
         public CdssExecutionContext(TTarget target, IEnumerable<CdssLibraryDefinition> scopedLibraries = null, bool validationContext = false) : base(target, scopedLibraries, validationContext)
         {

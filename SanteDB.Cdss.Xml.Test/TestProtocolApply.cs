@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
@@ -24,16 +24,13 @@ using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
-using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
-using SanteDB.Core.Cdss;
 using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace SanteDB.Cdss.Xml.Test
 {
@@ -190,7 +187,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p=>p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
+            var acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
