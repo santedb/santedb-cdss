@@ -104,8 +104,15 @@ namespace SanteDB.Cdss.Xml.Ami
                     // Validate 
                     foreach (var itm in transpiled.Definitions.OfType<CdssDecisionLogicBlockDefinition>())
                     {
-                        var context = CdssExecutionContext.CreateValidationContext(Activator.CreateInstance(itm.Context.Type) as IdentifiedData, scopedLibraries);
-                        retVal.AddRange(itm.Validate(context));
+                        if (itm.Context == null)
+                        {
+                            retVal.Add(new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.missing", "Logic block requires a context", Guid.Empty));
+                        }
+                        else
+                        {
+                            var context = CdssExecutionContext.CreateValidationContext(Activator.CreateInstance(itm.Context.Type) as IdentifiedData, scopedLibraries);
+                            retVal.AddRange(itm.Validate(context));
+                        }
                     }
                 }
             }

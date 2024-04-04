@@ -100,6 +100,7 @@ namespace SanteDB.Cdss.Xml
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()))
+                .Where(o=>o.Definitions != null)
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);

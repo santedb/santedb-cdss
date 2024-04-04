@@ -142,7 +142,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     var scopedLibraries = transpiled.Include.Select(o => this.m_cdssRepository.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o => o.Library).ToList();
                     scopedLibraries.Add(transpiled);
 
-                    retVal.AddRange(scopedLibraries.SelectMany(o => o.Definitions).Union(scopedLibraries.SelectMany(o=>o.Definitions).OfType<CdssDecisionLogicBlockDefinition>().SelectMany(o=>o.Definitions)).Select(o => new CdssSymbolInfo(o)));
+                    retVal.AddRange(scopedLibraries.SelectMany(o => o.Definitions).Union(scopedLibraries.SelectMany(o=>o.Definitions).OfType<CdssDecisionLogicBlockDefinition>().Where(o=>o.Definitions != null).SelectMany(o=>o.Definitions)).Select(o => new CdssSymbolInfo(o)));
                 }
             }
             catch (Exception e)
