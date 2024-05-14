@@ -28,6 +28,8 @@ using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
+using SanteDB.Core.Security;
+using SanteDB.Core.Security.Claims;
 using SharpCompress;
 using System;
 using System.Collections.Generic;
@@ -212,6 +214,8 @@ namespace SanteDB.Cdss.Xml
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
                     context.SetValue("mode", "analyze");
+                    this.InitializeContextVariables(context);
+                    
                     context.ThrowIfNotValid();
 
                     var definitions = this.m_library.Definitions
@@ -231,6 +235,18 @@ namespace SanteDB.Cdss.Xml
                 sw.Stop();
                 this.m_tracer.TraceInfo("Finished analysis of {0} (in {1} ms)", analysisTarget, sw.ElapsedMilliseconds);
 #endif
+            }
+        }
+
+        private void InitializeContextVariables(CdssExecutionContext context)
+        {
+            context.SetValue("currentUserName", AuthenticationContext.Current.Principal.Identity.Name);
+            if(AuthenticationContext.Current.Principal is IClaimsPrincipal icp)
+            {
+                // Retrieve clinician claims
+                context.SetValue("currentUserClinicalRole", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaUserRoleClaim).Select(o => o.Value)));
+                context.SetValue("currentUserOrganization", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaOrganizationNameClaim).Select(o => o.Value)));
+                context.SetValue("currentUserFacility", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaFacilityClaim).Select(o => o.Value)));
             }
         }
 
@@ -282,6 +298,7 @@ namespace SanteDB.Cdss.Xml
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
                     context.SetValue("mode", "execute");
+                    this.InitializeContextVariables(context);
                     context.ThrowIfNotValid();
 
                     // If the library has protocols we want to select those for execution - otherwise all rules
