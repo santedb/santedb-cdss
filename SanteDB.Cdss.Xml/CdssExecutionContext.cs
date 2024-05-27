@@ -23,8 +23,10 @@ using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.Data.Quality;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
@@ -32,7 +34,10 @@ using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Map;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Model.Roles;
+using SanteDB.Core.Model.Serialization;
+using SanteDB.Core.Services;
 using SharpCompress;
 using System;
 using System.Collections.Concurrent;
@@ -65,6 +70,7 @@ namespace SanteDB.Cdss.Xml
         }
 
         protected readonly IdentifiedData m_target;
+        private readonly ModelSerializationBinder m_serializationBinder = new ModelSerializationBinder();
 
         /// <summary>
         /// True if the context is for validation purposes
@@ -100,6 +106,7 @@ namespace SanteDB.Cdss.Xml
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()))
+                .Where(o=>o.Definitions != null)
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
@@ -115,6 +122,34 @@ namespace SanteDB.Cdss.Xml
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
 
+        }
+
+        /// <summary>
+        /// Perform a CDR query from the specified <paramref name="resourceType"/>
+        /// </summary>
+        /// <param name="resourceType">The type of resource</param>
+        /// <param name="filterExpression">The filter expression to apply</param>
+        /// <returns>A query result set for the CDR query</returns>
+        public IQueryResultSet Lookup(String resourceType, String filterExpression)
+        {
+            var tResource = this.m_serializationBinder.BindToType(null, resourceType);
+            if(tResource == null)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.TYPE_NOT_FOUND, resourceType));
+            }
+            var tRepository = typeof(IRepositoryService<>).MakeGenericType(tResource);
+            var repository = ApplicationServiceContext.Current.GetService(tRepository) as IRepositoryService;
+            if (repository == null)
+            {
+                throw new InvalidOperationException(string.Format(ErrorMessages.SERVICE_NOT_FOUND, tRepository));
+            }
+
+            
+            var vars = this.m_variables.Select(o=>o.Key)
+                .Union(this.m_computableAssetsInScope.Select(o=>o.Key))
+                .ToDictionaryIgnoringDuplicates<String, String, Func<Object>>(o => o, v => () => this.GetValue(v));
+            var linqExpression = QueryExpressionParser.BuildLinqExpression(tResource, filterExpression.ParseQueryString(), "filter", vars);
+            return repository.Find(linqExpression);
         }
 
         /// <summary>
