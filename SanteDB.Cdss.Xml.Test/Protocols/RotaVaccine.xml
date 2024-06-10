@@ -1,5 +1,5 @@
 ﻿<!--
- - Copyright 2021-2023 SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ - Copyright 2021-2024 SanteSuite Contributors (See NOTICE.md for full copyright notices)
  - Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  - Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  - 
@@ -16,7 +16,7 @@
  - the License.
  - 
  - User: fyfej
- - Date: 2023-5-19
+ - Date: 2023-6-21
  -->
 <CdssLibrary xmlns="http://santedb.org/cdss" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://santedb.org/cdss http://santedb.org/schema/SanteDBCdss.xsd"
@@ -89,8 +89,7 @@
         <hdsi>
           participation[RecordTarget].source.isNegated=true&amp;
           participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-rotavirus&amp;
-          participation[RecordTarget].source.reasonConcept=0D40C2B6-7CEB-4492-AB2A-6E7C730EAF22&amp;
-          participation[RecordTarget].source.reasonConcept=42351A36-F60F-4687-B334-7A41B091BAE1
+          participation[RecordTarget].source.reasonConcept.conceptSet=3BD46185-E3C3-4A6D-A1FE-0F2C9C49360D
         </hdsi>
       </fact>
 

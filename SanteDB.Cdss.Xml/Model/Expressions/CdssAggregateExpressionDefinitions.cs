@@ -1,11 +1,29 @@
-﻿using Newtonsoft.Json;
-using SanteDB.Cdss.Xml.Model.Assets;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
+using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Expressions
@@ -34,11 +52,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if(this.ContainedExpressions?.Any() != true)
+            if (this.ContainedExpressions?.Any() != true)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.aggregate.missingInstructions", "<any> or <all> missing contained expressions", Guid.Empty, this.ToReferenceString());
             }
-            foreach(var itm in this.ContainedExpressions?.SelectMany(o=>o.Validate(context)))
+            foreach (var itm in this.ContainedExpressions?.SelectMany(o => o.Validate(context)))
             {
                 itm.RefersTo = itm.RefersTo ?? this.ToReferenceString();
                 yield return itm;
@@ -77,13 +95,13 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                 var clause = itm.GenerateComputableExpression(cdssContext, parameters);
 
                 // Is the clause not returning bool? If so then not null is the conversion
-                if(clause.Type != typeof(bool))
+                if (clause.Type != typeof(bool))
                 {
                     clause = Expression.MakeBinary(ExpressionType.NotEqual, clause, Expression.Constant(null));
                 }
                 clause = this.ModifyContainedExpression(clause);
 
-                if(currentBody == null)
+                if (currentBody == null)
                 {
                     currentBody = clause;
                 }
@@ -130,7 +148,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public CdssNoneExpressionDefinition(params CdssExpressionDefinition[] contents) : base(ExpressionType.OrElse, contents)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Expression ModifyContainedExpression(Expression computedContainedExpression) => Expression.Not(computedContainedExpression);
     }

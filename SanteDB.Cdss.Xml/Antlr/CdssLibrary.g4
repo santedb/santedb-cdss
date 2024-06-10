@@ -65,7 +65,7 @@ logic_block: (DEFINE)?LOGIC STRING
     (logic_having_statements)*
     (metadata_statement)?
     AS
-    (logic_definitions)+
+    (logic_definitions)*
     END (LOGIC)?;
 
 data_block: (DEFINE)?DATA STRING
@@ -85,7 +85,7 @@ define_fact: (DEFINE)?FACT STRING
     (fact_having_statements)*
     (metadata_statement)?
     AS
-    fact_computation
+    fact_computation?
     (fact_normalization)*
     END (FACT)?;
 

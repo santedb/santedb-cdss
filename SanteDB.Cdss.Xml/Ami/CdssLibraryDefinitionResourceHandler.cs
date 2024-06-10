@@ -1,4 +1,23 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿/*
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2023-11-27
+ */
 using RestSrvr;
 using RestSrvr.Attributes;
 using SanteDB.Cdss.Xml.Antlr;
@@ -9,9 +28,6 @@ using SanteDB.Core.Exceptions;
 using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Interop;
-using SanteDB.Core.Matching;
-using SanteDB.Core.Model;
-using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
@@ -22,8 +38,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace SanteDB.Cdss.Xml.Ami
@@ -77,7 +91,7 @@ namespace SanteDB.Cdss.Xml.Ami
             {
                 case CdssLibraryDefinition definition:
                     {
-                        
+
                         var xmlLibrary = new XmlProtocolLibrary(definition);
                         if (validator?.Invoke(xmlLibrary) == false)
                         {
@@ -99,7 +113,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     }
                 case String stringData:
                     {
-                        using(var ms = new MemoryStream(Encoding.UTF8.GetBytes(stringData)))
+                        using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(stringData)))
                         {
                             try
                             {
@@ -188,7 +202,7 @@ namespace SanteDB.Cdss.Xml.Ami
                 throw new KeyNotFoundException(id.ToString());
             }
 
-            switch(RestOperationContext.Current.IncomingRequest.QueryString["_format"])
+            switch (RestOperationContext.Current.IncomingRequest.QueryString["_format"])
             {
                 case "xml":
                     var library = retVal.Library.Clone();
@@ -201,7 +215,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
                     return new MemoryStream(retVal.Library.TranspileSourceReference?.OriginalSource ?? Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
                 default:
-                   return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
+                    return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
             }
         }
 
@@ -249,7 +263,7 @@ namespace SanteDB.Cdss.Xml.Ami
         {
             _ = key is Guid uuid || Guid.TryParse(key.ToString(), out uuid);
             var library = this.m_cdssLibraryRepository.Get(uuid, null);
-            if(library != null && 
+            if (library != null &&
                 this.m_checkService?.Checkout<ICdssLibrary>(uuid) == false)
             {
                 throw new ObjectLockedException();
