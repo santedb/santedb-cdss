@@ -102,7 +102,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.8" />
-    <PackageReference Include="SQLiteSpellfix.lib.e_sqlite3mc" Version="2.1.8" />
+    <PackageReference Include="SQLiteSpellfix.lib.e_sqlite3mc" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
