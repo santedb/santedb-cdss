@@ -232,6 +232,12 @@ namespace SanteDB.Cdss.Xml.Ami
             queryParameters.Remove("creationTime");
             queryParameters.Remove("obsoletionTime");
 
+            if (!String.IsNullOrEmpty(queryParameters["_id"]))
+            {
+                queryParameters.Add("uuid", queryParameters["_id"]);
+                queryParameters.Remove("_id");
+            }
+
             var query = QueryExpressionParser.BuildLinqExpression<ICdssLibrary>(queryParameters);
             var repositoryResult = this.m_cdssLibraryRepository.Find(query);
 
