@@ -286,6 +286,10 @@ namespace SanteDB.Cdss.Xml
             {
                 return retVal;
             }
+            else if(parameterOrFactName.StartsWith("_") || parameterOrFactName.StartsWith("$")) // Control parameters are null when not presetn
+            {
+                return null;
+            }
             else
             {
                 throw new CdssEvaluationException(string.Format(ErrorMessages.REFERENCE_NOT_FOUND, parameterOrFactName));

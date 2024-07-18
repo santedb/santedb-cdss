@@ -140,7 +140,7 @@ namespace SanteDB.Cdss.Xml
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
             if (!String.IsNullOrEmpty(forScope))
             {
-                retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope));
+                retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope || s.Id == forScope));
             }
             return retVal;
         }

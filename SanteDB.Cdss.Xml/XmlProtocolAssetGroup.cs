@@ -47,5 +47,8 @@ namespace SanteDB.Cdss.Xml
 
         /// <inheritdoc/>
         public string Oid => this.m_definition.Oid;
+
+        /// <inheritdoc/>
+        public string Id => this.m_definition.Id;
     }
 }
