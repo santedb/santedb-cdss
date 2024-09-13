@@ -128,7 +128,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get protocols defined for patients in the library
         /// </summary>
-        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, String forScope)
+        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, params String[] forScope)
         {
             this.InitializeLibrary();
             var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
@@ -138,9 +138,10 @@ namespace SanteDB.Cdss.Xml
                     .OfType<CdssProtocolAssetDefinition>()
                     .Where(o => o.Status != CdssObjectState.DontUse)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
-            if (!String.IsNullOrEmpty(forScope))
+            forScope = forScope.OfType<String>().ToArray();
+            if (forScope.Any())
             {
-                retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope || s.Id == forScope));
+                retVal = retVal.Where(o => o.Scopes.Any(s => forScope.Any(f => s.Oid == f || s.Name == f || s.Id == f)));
             }
             return retVal;
         }
