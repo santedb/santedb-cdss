@@ -138,7 +138,7 @@ namespace SanteDB.Cdss.Xml
                     .OfType<CdssProtocolAssetDefinition>()
                     .Where(o => o.Status != CdssObjectState.DontUse)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
-            forScope = forScope.OfType<String>().ToArray();
+            forScope = forScope.Where(o=>!String.IsNullOrEmpty(o)).ToArray();
             if (forScope.Any())
             {
                 retVal = retVal.Where(o => o.Scopes.Any(s => forScope.Any(f => s.Oid == f || s.Name == f || s.Id == f)));
