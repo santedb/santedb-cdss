@@ -15,9 +15,6 @@
  - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
  - License for the specific language governing permissions and limitations under 
  - the License.
- - 
- - User: fyfej
- - Date: 2023-11-27
  -->
 <CdssLibrary xmlns="http://santedb.org/cdss" uuid="ABCFB6A1-3A77-4E83-86AB-9C3F56DFFF15" id="org.santedb.cdss.core" name="Core SanteDB CDSS Logic"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

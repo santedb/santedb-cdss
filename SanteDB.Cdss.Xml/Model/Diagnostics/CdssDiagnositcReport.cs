@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-12-8
  */
 using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Diagnostics;
