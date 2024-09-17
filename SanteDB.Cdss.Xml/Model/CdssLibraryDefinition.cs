@@ -18,6 +18,7 @@
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Generic;
 using System.IO;

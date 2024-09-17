@@ -24,6 +24,7 @@ using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Security;
@@ -121,6 +122,21 @@ namespace SanteDB.Cdss.Xml
                     this.m_storageMetadata = value;
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<Protocol> GetProtocolDefinitions()
+        {
+            return this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
+                   .SelectMany(o => o.Definitions)
+                   .OfType<CdssProtocolAssetDefinition>()
+                   .Where(o => o.Status != CdssObjectState.DontUse)
+                   .Select(p => new Protocol()
+                   {
+                       Key = p.Uuid,
+                       Name = p.Name,
+                       Oid = p.Oid
+                   });
         }
 
         /// <summary>
