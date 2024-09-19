@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Model;
@@ -40,8 +38,7 @@ namespace SanteDB.Cdss.Xml
     [Obsolete("Use AppletClinicalProtocolInstaller", true)]
     public class AppletClinicalProtocolRepository : AppletClinicalProtocolInstaller
     {
-        /// <inheritdoc/>
-        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService) : base(appletManager, clinicalProtocolRepositoryService)
+        public AppletClinicalProtocolRepository(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService, IRepositoryService<Protocol> protocolRepositoryService, IAppletSolutionManagerService appletSolutionManagerService = null) : base(appletManager, clinicalProtocolRepositoryService, protocolRepositoryService, appletSolutionManagerService)
         {
         }
     }
@@ -68,18 +65,23 @@ namespace SanteDB.Cdss.Xml
         // Tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletClinicalProtocolInstaller));
         private readonly IAppletManagerService m_appletManager;
+        private readonly IRepositoryService<Protocol> m_protocolRepositoryService;
         private readonly IAppletSolutionManagerService m_appletSolutionManager;
-        private readonly ICdssLibraryRepository m_protocolRepository;
+        private readonly ICdssLibraryRepository m_cdssRepositoryService;
 
 
         /// <summary>
         /// Clinical repository service
         /// </summary>
-        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, ICdssLibraryRepository clinicalProtocolRepositoryService, IAppletSolutionManagerService appletSolutionManagerService = null)
+        public AppletClinicalProtocolInstaller(IAppletManagerService appletManager, 
+            ICdssLibraryRepository clinicalProtocolRepositoryService, 
+            IRepositoryService<Protocol> protocolRepositoryService,
+            IAppletSolutionManagerService appletSolutionManagerService = null)
         {
             this.m_appletManager = appletManager;
+            this.m_protocolRepositoryService = protocolRepositoryService;
             this.m_appletSolutionManager = appletSolutionManagerService;
-            this.m_protocolRepository = clinicalProtocolRepositoryService;
+            this.m_cdssRepositoryService = clinicalProtocolRepositoryService;
             this.LoadProtocols();
             appletManager.Changed += (o, e) => this.LoadProtocols();
         }
@@ -139,14 +141,15 @@ namespace SanteDB.Cdss.Xml
                                 library = CdssLibraryDefinition.Load(sourceReader);
                             }
 
-                            var existing = this.m_protocolRepository.Find(o => o.Id == library.Id).FirstOrDefault();
+                            var existing = this.m_cdssRepositoryService.Find(o => o.Id == library.Id).FirstOrDefault();
 
                             // Is the UUID different then don't install or if the version is older
                             if (existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
                             {
                                 this.m_tracer.TraceInfo("Installing CDSS rule from applet {0}...", library.Name ?? library.Oid);
-                                this.m_protocolRepository.InsertOrUpdate(new XmlProtocolLibrary(library));
+                                this.m_cdssRepositoryService.InsertOrUpdate(new XmlProtocolLibrary(library));
                             }
+
                         }
                         catch (Exception e)
                         {

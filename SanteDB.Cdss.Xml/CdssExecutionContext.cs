@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using DynamicExpresso;
 using SanteDB.Cdss.Xml.Diagnostics;
@@ -285,6 +283,10 @@ namespace SanteDB.Cdss.Xml
             else if (this.TryGetFact(caseInsensitiveName, out retVal))
             {
                 return retVal;
+            }
+            else if(parameterOrFactName.StartsWith("_") || parameterOrFactName.StartsWith("$")) // Control parameters are null when not presetn
+            {
+                return null;
             }
             else
             {

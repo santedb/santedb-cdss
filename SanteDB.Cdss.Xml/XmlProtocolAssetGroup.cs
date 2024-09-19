@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.Cdss;
@@ -47,5 +45,8 @@ namespace SanteDB.Cdss.Xml
 
         /// <inheritdoc/>
         public string Oid => this.m_definition.Oid;
+
+        /// <inheritdoc/>
+        public string Id => this.m_definition.Id;
     }
 }

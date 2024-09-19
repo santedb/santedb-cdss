@@ -15,9 +15,6 @@
  - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
  - License for the specific language governing permissions and limitations under 
  - the License.
- - 
- - User: fyfej
- - Date: 2023-6-21
  -->
 <CdssLibrary xmlns="http://santedb.org/cdss" uuid="463FFFAD-FC37-4666-B949-4A96AE2A4FB9" id="org.santedb.cdss.vaccine.bcg" name="BCG Vaccine Logic"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

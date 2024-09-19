@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using RestSrvr;
 using RestSrvr.Attributes;
@@ -231,6 +229,12 @@ namespace SanteDB.Cdss.Xml.Ami
             queryParameters.Remove("modifiedOn");
             queryParameters.Remove("creationTime");
             queryParameters.Remove("obsoletionTime");
+
+            if (!String.IsNullOrEmpty(queryParameters["_id"]))
+            {
+                queryParameters.Add("uuid", queryParameters["_id"]);
+                queryParameters.Remove("_id");
+            }
 
             var query = QueryExpressionParser.BuildLinqExpression<ICdssLibrary>(queryParameters);
             var repositoryResult = this.m_cdssLibraryRepository.Find(query);

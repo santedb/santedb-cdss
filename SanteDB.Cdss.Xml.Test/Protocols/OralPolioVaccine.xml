@@ -15,9 +15,6 @@
  - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
  - License for the specific language governing permissions and limitations under 
  - the License.
- - 
- - User: fyfej
- - Date: 2023-6-21
  -->
 <CdssLibrary xmlns="http://santedb.org/cdss" id="org.santedb.cdss.vaccine.opv" name="Oral Polio Vaccine Decision Logic"
              uuid="C2A628F3-DB52-45ED-B863-0FB4B1B8E77C"

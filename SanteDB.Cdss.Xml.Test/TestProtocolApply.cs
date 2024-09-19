@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
@@ -66,7 +64,7 @@ namespace SanteDB.Cdss.Xml.Test
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Last().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Last().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
 
@@ -91,7 +89,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(1, acts.Count());
@@ -115,7 +113,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(120, acts.Count());
@@ -163,7 +161,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(119, acts.Count());
@@ -187,7 +185,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());
@@ -199,7 +197,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Apply the protocol - we should get the accelerated protocol
             newborn.DateOfBirth = DateTime.Now.AddMonths(-18).AddDays(-1);
-            acts = xmlCp.GetProtocols(newborn, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
+            acts = xmlCp.GetProtocols(newborn, null, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
             Assert.AreEqual(2, acts.Count());
 
             // The accelerated schedule should have been applied
@@ -228,7 +226,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -252,7 +250,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(3, acts.Count());
@@ -276,7 +274,7 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, acts.Count());

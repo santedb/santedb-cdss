@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
@@ -26,6 +24,7 @@ using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Security;
@@ -125,22 +124,39 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
+        /// <inheritdoc/>
+        public IEnumerable<Protocol> GetProtocolDefinitions()
+        {
+            return this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
+                   .SelectMany(o => o.Definitions)
+                   .OfType<CdssProtocolAssetDefinition>()
+                   .Where(o => o.Status != CdssObjectState.DontUse)
+                   .Select(p => new Protocol()
+                   {
+                       Key = p.Uuid,
+                       Name = p.Name,
+                       Oid = p.Oid
+                   });
+        }
+
         /// <summary>
         /// Get protocols defined for patients in the library
         /// </summary>
-        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, String forScope)
+        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, IDictionary<String, Object> parameters, params String[] forScope)
         {
             this.InitializeLibrary();
             var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
+            parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                     .AppliesTo(context)
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
                     .Where(o => o.Status != CdssObjectState.DontUse)
                     .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
-            if (!String.IsNullOrEmpty(forScope))
+            forScope = forScope.Where(o=>!String.IsNullOrEmpty(o)).ToArray();
+            if (forScope.Any())
             {
-                retVal = retVal.Where(o => o.Scopes.Any(s => s.Oid == forScope || s.Name == forScope));
+                retVal = retVal.Where(o => o.Scopes.Any(s => forScope.Any(f => s.Oid == f || s.Name == f || s.Id == f)));
             }
             return retVal;
         }

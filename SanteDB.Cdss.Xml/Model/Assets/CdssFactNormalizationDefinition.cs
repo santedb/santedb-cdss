@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
@@ -71,11 +69,25 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "cdss.fact.normalize.when", "Normalization instructions should carry a when condition", Guid.Empty, this.ToReferenceString());
             }
+            else
+            {
+                foreach(var itm in this.When.Validate(context))
+                {
+                    yield return itm;
+                }
+            }
             if (this.EmitExpression == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.fact.normalize.emit", "Normalization instructions must carry a computation", Guid.Empty, this.ToReferenceString());
             }
-
+            else
+            {
+                foreach(var itm in this.EmitExpression.Validate(context))
+                {
+                    yield return itm;
+                }
+            }
+            
         }
 
         /// <summary>

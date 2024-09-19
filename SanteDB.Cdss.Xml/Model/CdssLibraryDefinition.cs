@@ -15,11 +15,10 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-11-27
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Generic;
 using System.IO;
