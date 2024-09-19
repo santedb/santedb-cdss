@@ -142,10 +142,11 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get protocols defined for patients in the library
         /// </summary>
-        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, params String[] forScope)
+        public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, IDictionary<String, Object> parameters, params String[] forScope)
         {
             this.InitializeLibrary();
             var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
+            parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                     .AppliesTo(context)
                     .SelectMany(o => o.Definitions)
