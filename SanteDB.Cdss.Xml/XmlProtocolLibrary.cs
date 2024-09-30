@@ -210,7 +210,7 @@ namespace SanteDB.Cdss.Xml
                 // Is the library not active?
                 object debugParameterValue = null;
                 if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue("debug", out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
+                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
@@ -278,9 +278,9 @@ namespace SanteDB.Cdss.Xml
             {
                 // Is the library not active?
                 object debugParameterValue = null, testingParmValue = null;
-                _ = parameters?.TryGetValue("debug", out debugParameterValue);
+                _ = parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue);
                 _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
-                var ignoreStatus = parameters?.TryGetValue("isTesting", out testingParmValue) == true && Boolean.Parse(testingParmValue?.ToString());
+                var ignoreStatus = parameters?.TryGetValue(CdssParameterNames.TESTING, out testingParmValue) == true && Boolean.Parse(testingParmValue?.ToString());
 
                 if (!ignoreStatus && this.m_library.Status == CdssObjectState.DontUse)
                 {
