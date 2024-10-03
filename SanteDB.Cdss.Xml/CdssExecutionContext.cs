@@ -208,12 +208,13 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         public void SetValue(String parameterName, object value)
         {
+            
             var caseInsitiveName = parameterName.ToLowerInvariant(); // Case insensitive
             if (!this.m_variables.TryGetValue(caseInsitiveName, out ParameterRegistration registration))
             {
                 registration = new ParameterRegistration()
                 {
-                    Type = value.GetType(),
+                    Type = value?.GetType() ?? typeof(object),
                     Value = value
                 };
                 this.m_variables.Add(caseInsitiveName, registration);
