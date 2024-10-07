@@ -116,7 +116,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             }
             else
             {
-                throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, this.FactName));
+                retVal = Expression.Constant(cdssContext.GetValue(this.FactName)) ?? throw new CdssEvaluationException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, this.FactName));
             }
             return retVal;
         }
