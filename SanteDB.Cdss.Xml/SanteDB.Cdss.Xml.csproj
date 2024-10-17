@@ -61,8 +61,8 @@
   </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.4.0" PrivateAssets="all" />
-    <PackageReference Include="DynamicExpresso.Core" Version="2.16.0" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>    
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -168,7 +168,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SharpCompress" Version="0.33.0" />
+    <PackageReference Include="SharpCompress" Version="0.38.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
