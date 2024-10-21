@@ -77,7 +77,11 @@
                                 "playerModel": {
                                     "$type": "Material",
                                     "id": "7D80E518-6E04-4091-8D19-7265BB09BC1F",
-                                    "typeConcept": "3023bad7-8c16-49ea-81fc-eee6232b80e7"
+                                    "typeConcept": "3023bad7-8c16-49ea-81fc-eee6232b80e7",
+                                    "typeConceptModel": {
+                      "id" : "3023bad7-8c16-49ea-81fc-eee6232b80e7",
+                      "mnemonic": "Supplement-VitaminA"
+                    },
                                 }
                             }
                         ]

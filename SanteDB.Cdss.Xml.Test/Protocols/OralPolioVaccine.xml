@@ -235,7 +235,7 @@
               <hdsi>dateOfBirth</hdsi>
             </assign>
             <assign path="stopTime">
-              <csharp>((Act)scopedObject).StartTime.Value.AddDays(14)</csharp>
+              <csharp>((Act)scopedObject).StartTime.Value.AddDays(7)</csharp>
             </assign>
             <assign path="doseSequence">
               <fixed>0</fixed>
@@ -252,10 +252,10 @@
           <propose>
             <model ref="OPV Dose Proposal" />
             <assign path="actTime">
-              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
+              <csharp>context.GreaterOf(DateTime.Now, context.Target.DateOfBirth.Value.AddDays(42))</csharp>
             </assign>
             <assign path="startTime">
-              <hdsi scope="scopedObject">actTime</hdsi>
+              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
             </assign>
             <assign path="doseSequence">
               <fixed>1</fixed>

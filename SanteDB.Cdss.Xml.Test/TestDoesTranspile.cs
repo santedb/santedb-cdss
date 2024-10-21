@@ -58,7 +58,7 @@ namespace SanteDB.Cdss.Xml.Test
                     var libXml = Encoding.UTF8.GetString(ms.ToArray());
                     Assert.AreEqual(3, transpiledLibrary.Definitions.Count());
                     Assert.AreEqual("org.santedb.cdss.weight.zscores", transpiledLibrary.Id);
-                    Assert.AreEqual(9, transpiledLibrary.Definitions.OfType<CdssDecisionLogicBlockDefinition>().First().Definitions.Count());
+                    Assert.AreEqual(7, transpiledLibrary.Definitions.OfType<CdssDecisionLogicBlockDefinition>().First().Definitions.Count());
                     Assert.AreEqual(7, transpiledLibrary.Definitions.OfType<CdssDecisionLogicBlockDefinition>().Last().Definitions.Count());
                     Assert.AreEqual(1, transpiledLibrary.Definitions.OfType<CdssDatasetDefinition>().Count());
                 }

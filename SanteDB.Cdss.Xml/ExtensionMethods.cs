@@ -147,7 +147,7 @@ namespace SanteDB.Cdss.Xml
                 return secondValue;
             }
         }
-
+        
         /// <summary>
         /// Return the lesser of <paramref name="firstValue"/> or <paramref name="secondValue"/>
         /// </summary>
