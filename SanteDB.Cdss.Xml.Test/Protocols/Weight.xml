@@ -41,6 +41,10 @@
       <all>
       <fact ref="Patient Is Child" />
       <fact ref="Patient Is Not Deceased" />
+        <none>
+          <csharp>true.Equals(context["_excludeObservations"])</csharp>
+          <csharp>true.Equals(context["_persistent"])</csharp>
+        </none>
       </all>
     </when>
     <status>active</status>

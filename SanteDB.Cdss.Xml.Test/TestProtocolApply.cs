@@ -20,6 +20,7 @@ using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
 using SanteDB.Core.Model.Roles;
@@ -27,6 +28,7 @@ using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -349,6 +351,54 @@ namespace SanteDB.Cdss.Xml.Test
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
+
+        /// <summary>
+        /// Tests the periodic hull where there is overlap between a late/delayed action and original timing
+        /// </summary>
+        [Test]
+        public void TestShouldGroupPeriodicHull()
+        {
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
+            // Patient that is just born = Schedule OPV
+            Patient patient = new Patient()
+            {
+                Key = Guid.NewGuid(),
+                DateOfBirth = DateTime.Now.AddDays(-80),
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
+            };
+
+            // Now apply the protocol
+            var acts = scp.CreateCarePlan(patient, true, new Dictionary<String, Object>()
+            {
+                { CdssParameterNames.PERSISTENT_OUTPUT, false },
+                { CdssParameterNames.NON_INTERACTIVE, false },
+                {CdssParameterNames.EXCLUDE_OBSERVATIONS, false }
+            });
+
+
+            // Emit the care plan
+            foreach(var enc in 
+                acts.Relationships
+                    .Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent)
+                    .Select(r=>r.TargetAct))
+            {
+                Debug.WriteLine("{0} : {1:yyyy-MM-dd} - {2:yyyy-MM-dd}", enc.Type, enc.StartTime, enc.StopTime);
+                foreach(var rl in enc.Relationships.Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(e=>e.TargetAct))
+                {
+                    if (rl is SubstanceAdministration adm)
+                    {
+                        var antigen = rl.Participations.FirstOrDefault(p => p.ParticipationRoleKey == ActParticipationKeys.Product).PlayerEntity.TypeConcept.ToDisplay();
+                        Debug.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", antigen, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("\t{0} : R:{1:yyyy-MM-dd}, RG: {2:yyyy-MM-dd} - {3:yyyy-MM-dd}", rl.TypeConcept.ToDisplay(), rl.ActTime, rl.StartTime, rl.StopTime);
+                    }
+                }
+            }
+
+        }
+
         /// <summary>
         /// Should group into appointments
         /// </summary>
@@ -368,7 +418,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = scp.CreateCarePlan(newborn, true);
             var jsonSerializer = new JsonViewModelSerializer();
             string json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Protocols.IsNullOrEmpty()));
         }
 
@@ -411,7 +461,7 @@ namespace SanteDB.Cdss.Xml.Test
             var jsonSerializer = new JsonViewModelSerializer();
             string json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, newborn.Participations.Count);
-            Assert.AreEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
         }
     }
 

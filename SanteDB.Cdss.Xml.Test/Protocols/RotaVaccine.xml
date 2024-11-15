@@ -187,10 +187,10 @@
           <propose>
             <model ref="ROTA Dose Administration" />
             <assign path="actTime">
-              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
+              <csharp>context.GreaterOf(DateTime.Now, context.Target.DateOfBirth.Value.AddDays(42))</csharp>
             </assign>
             <assign path="startTime">
-              <hdsi scope="scopedObject">actTime</hdsi>
+              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
             </assign>
             <assign path="stopTime">
               <csharp>context.Target.DateOfBirth.Value.AddMonths(3)</csharp>
@@ -222,7 +222,7 @@
               <csharp>context.Target.DateOfBirth.Value.AddMonths(3)</csharp>
             </assign>
             <assign path="doseSequence">
-              <fixed>1</fixed>
+              <fixed>2</fixed>
             </assign>
           </propose>
         </then>

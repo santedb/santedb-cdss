@@ -194,13 +194,13 @@
           <propose>
             <model ref="DTP-Hib-HepB Dose Proposal" />
             <assign path="actTime">
-              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
+              <csharp>context.GreaterOf(DateTime.Now, context.Target.DateOfBirth.Value.AddDays(42))</csharp>
             </assign>
             <assign path="startTime">
-              <csharp>((SubstanceAdministration)scopedObject).ActTime</csharp>
+              <csharp>context.Target.DateOfBirth.Value.AddDays(42)</csharp>
             </assign>
             <assign path="stopTime">
-              <csharp>((SubstanceAdministration)scopedObject).ActTime.Value.AddDays(7)</csharp>
+              <csharp>((SubstanceAdministration)scopedObject).StartTime.Value.AddDays(7)</csharp>
             </assign>
             <assign overwrite="true" path="doseSequence">
               <fixed>1</fixed>
@@ -226,7 +226,7 @@
               <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
             </assign>
             <assign path="stopTime">
-              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).StartTime.Value.AddDays(35)</csharp>
             </assign>
             <assign overwrite="true" path="doseSequence">
               <fixed>2</fixed>
@@ -245,13 +245,13 @@
             <model ref="DTP-Hib-HepB Dose Proposal" />
            
             <assign path="actTime">
-              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).ActTime.Value.AddDays(28)</csharp>
             </assign>
             <assign path="startTime">
-              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).ActTime.Value.AddDays(28)</csharp>
             </assign>
             <assign path="stopTime">
-              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)</csharp>
+              <csharp>((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).StartTime.Value.AddDays(35)</csharp>
             </assign>
             <assign overwrite="true" path="doseSequence">
               <fixed>3</fixed>
