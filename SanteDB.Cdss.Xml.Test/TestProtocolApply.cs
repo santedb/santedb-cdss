@@ -419,7 +419,7 @@ namespace SanteDB.Cdss.Xml.Test
             var jsonSerializer = new JsonViewModelSerializer();
             string json = jsonSerializer.Serialize(newborn);
             //Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
-            Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.GreaterOrEqual(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count(), 60);
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Protocols.IsNullOrEmpty()));
         }
 
@@ -463,7 +463,7 @@ namespace SanteDB.Cdss.Xml.Test
             string json = jsonSerializer.Serialize(newborn);
             Assert.AreEqual(2, newborn.Participations.Count);
             //Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
-            Assert.GreaterOrEqual(60, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.GreaterOrEqual(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count(), 60);
         }
     }
 
