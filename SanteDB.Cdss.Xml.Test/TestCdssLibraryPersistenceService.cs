@@ -16,6 +16,7 @@
  * the License.
  * 
  */
+using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Query;
@@ -44,7 +45,18 @@ namespace SanteDB.Cdss.Xml.Test
                     {
                         using (var ms = asm.GetManifestResourceStream(o))
                         {
-                            return new XmlProtocolLibrary(CdssLibraryDefinition.Load(ms)) as ICdssLibrary;
+                            if (o.EndsWith("xml"))
+                            {
+                                return new XmlProtocolLibrary(CdssLibraryDefinition.Load(ms)) as ICdssLibrary;
+                            }
+                            else if(o.EndsWith("cdss"))
+                            {
+                                return new XmlProtocolLibrary(CdssLibraryTranspiler.Transpile(ms, true, o));
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                     }
                     catch (Exception e)

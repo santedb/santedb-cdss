@@ -1,0 +1,103 @@
+//
+// Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+// Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+// Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you 
+// may not use this file except in compliance with the License. You may 
+// obtain a copy of the License at 
+// 
+// http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+// License for the specific language governing permissions and limitations under 
+// the License.
+//
+include <org.santedb.cdss.core>
+include <org.santedb.cdss.core.childcare>
+define library "Vitamin A Schedule Logic"
+	having id <org.santedb.cdss.supplement.vita>
+	having uuid {d743e71f-86bd-4992-a50b-4ff05838095c}
+	having status active
+	with metadata
+		author SanteSuite Inc. and the SanteSuite Contributors
+		version 3.10
+		doc This library contains the necessary logic for the Vitamin A logic
+	end metadata
+	as
+	define logic "Routine Vitamin A Supplement Administration"
+		having id <org.santedb.cdss.supplement.vita>
+		having status active
+		having context Patient when all(
+				"Patient Is A Child",
+				"Patient Is Not Deceased",
+				none("CDS Exclude Supplements", "CDS Output Will be Saved")
+			)
+
+		as
+		define fact "Vitamin A Supplement has not been performed"
+		as
+			all(
+				hdsi($$participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=Supplement-VitaminA&
+          participation[RecordTarget].source@SubstanceAdministration.doseSequence=$index$$ negated),
+				csharp($$((int)context["index"]) > 0$$)
+			)
+
+		end fact
+		define rule "Should Administer Vitamin A supplement on routine schedule"
+		as
+			when
+				"Vitamin A Supplement has not been performed"
+			then
+				propose  having model 
+				having format json
+				as
+				$$
+	
+                {
+                    "$type": "SubstanceAdministration",
+					"template":"feac9b2d-e560-4b75-ac77-921bf0eceee8",
+                    "moodConcept": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+                    "typeConcept": "7D84A057-1FCC-4054-A51F-B77D230FC6D1",
+                    "doseQuantity": 1.0,
+                    "doseUnit": "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
+                    "route": "0a1388b0-66fb-4063-bfe3-151dd8442838",
+                    "site": "e5b6847e-91e0-4fca-ac2e-753962008080",
+                    "participation": {
+                        "Product": [
+                            {
+                                "player": "7D80E518-6E04-4091-8D19-7265BB09BC1F"
+                            }
+                        ]
+                    }
+                }
+                
+				$$
+				end model
+				as
+					assign csharp($$(int)context["index"]$$) to doseSequence
+					assign csharp($$context.Target.DateOfBirth.Value.Date.AddMonths(((int)context["index"]) * 6)$$) to actTime
+					assign hdsi($$actTime$$ scoped-to proposal) to startTime
+					assign csharp($$context.Target.DateOfBirth.Value.Date.AddMonths((((int)context["index"]) + 1) * 6).AddDays(-context.Target.DateOfBirth.Value.Day).AddHours(23).AddMinutes(59)$$) to stopTime
+				end propose
+		end rule
+		define protocol "Vitamin A Dose Administration Protocol"
+			having id <org.santedb.cdss.supplement.vita.protocol>
+			having uuid {d743e71f-86bd-4992-a50b-4ff05838095c}
+			having oid "1.3.5.1.4.1.52820.5.3.1.3"
+			having scope <org.santedb.ims.pediatric.routineVacc>
+		as
+			when
+				all(
+					"Patient Is A Child",
+					"Patient Is Not Deceased"
+				)
+
+			then
+				repeat for 9 iterations  track-by index					apply "Should Administer Vitamin A supplement on routine schedule"
+				end repeat
+		end protocol
+	end logic
+end library

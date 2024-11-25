@@ -41,6 +41,12 @@ namespace SanteDB.Cdss.Xml.Test
     [TestFixture(Category = "CDSS")]
     public class TestProtocolApply
     {
+
+        private readonly Dictionary<String, Object> m_routineVaccParms = new Dictionary<string, object>()
+        {
+            {  CdssParameterNames.ENCOUNTER_SCOPE, "org.santedb.ims.pediatric.routineVacc" }
+        };
+
         [OneTimeSetUp]
         public void Initialize()
         {
@@ -55,7 +61,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleOPV()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.OralPolioVaccine.xml"));
+            var definition = TestUtils.Load("OPV.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -63,6 +69,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
             // Now apply the protocol
@@ -79,7 +86,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleBCG()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BcgVaccine.xml"));
+            var definition = TestUtils.Load("BCG.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -87,6 +94,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -103,7 +111,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldRepeatWeight()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var definition = TestUtils.Load("WeightHeight.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -111,6 +119,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -130,7 +139,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSkipWeight()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var definition = TestUtils.Load("WeightHeight.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -138,6 +147,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" },
                 Participations = new List<ActParticipation>()
                 {
@@ -175,7 +185,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleMR()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.MeaslesRubellaVaccine.xml"));
+            var definition = TestUtils.Load("MMR.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -183,6 +193,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -216,7 +227,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldSchedulePCV()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.PCV13Vaccine.xml"));
+            var definition = TestUtils.Load("PCV13.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -224,6 +235,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -240,7 +252,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleDTP()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.DTP-HepB-HibTrivalent.xml"));
+            var definition = TestUtils.Load("DTP.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -248,6 +260,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -264,7 +277,7 @@ namespace SanteDB.Cdss.Xml.Test
         [Test]
         public void TestShouldScheduleRota()
         {
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.RotaVaccine.xml"));
+            var definition = TestUtils.Load("Rota.cdss");
             var xmlCp = new XmlProtocolLibrary(definition);
 
             // Patient that is just born = Schedule OPV
@@ -272,6 +285,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -294,16 +308,40 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now.AddDays(-10),
-                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
+
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE", Key = AdministrativeGenderConceptKeys.Female }
             };
 
             // Now apply the protocol
-            var acts = scp.CreateCarePlan(newborn);
+            var acts = scp.CreateCarePlan(newborn, false, m_routineVaccParms);
             var jsonSerializer = new JsonViewModelSerializer();
-            Assert.AreEqual(143, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+
+            var c = acts.LoadCollection(o => o.Relationships).Select(o => o.TargetAct).GroupBy(o => o.Protocols.First().Protocol.Name).ToDictionary(o => o.Key, o => o.Count());
+
+            Assert.AreEqual(146, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
-            Assert.AreEqual(23, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
+            Assert.AreEqual(26, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKeys.RecordTarget)));
+
+            // Male - should not have HPV
+            // Patient that is just born = Schedule OPV
+            newborn = new Patient()
+            {
+                Key = Guid.NewGuid(),
+                DateOfBirth = DateTime.Now.AddDays(-10),
+                GenderConceptKey = AdministrativeGenderConceptKeys.Male,
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "MALE", Key = AdministrativeGenderConceptKeys.Male }
+            };
+
+            // Now apply the protocol
+            acts = scp.CreateCarePlan(newborn, false, m_routineVaccParms);
+            Assert.AreEqual(144, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
+            Assert.AreEqual(24, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Where(o => !(o.LoadProperty(r => r.TargetAct) is QuantityObservation)).Count());
+            Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => !o.Participations.Any(p => p.ParticipationRoleKey == ActParticipationKeys.RecordTarget)));
+
+
         }
 
         /// <summary>
@@ -318,11 +356,12 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now.AddMonths(-240),
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Now apply the protocol
-            var acts = scp.CreateCarePlan(adult);
+            var acts = scp.CreateCarePlan(adult, false, m_routineVaccParms);
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(adult);
             Assert.AreEqual(0, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
@@ -340,14 +379,16 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Now apply the protocol
-            var acts = scp.CreateCarePlan(newborn);
+            var acts = scp.CreateCarePlan(newborn, false, m_routineVaccParms);
             var jsonSerializer = new JsonViewModelSerializer();
+            var c = acts.LoadCollection(o => o.Relationships).Select(o => o.TargetAct).GroupBy(o => o.Protocols.First().Protocol.Name).ToDictionary(o => o.Key, o => o.Count());
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(144, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
+            Assert.AreEqual(146, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
             Assert.IsFalse(acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Any(o => o.Protocols.Count() > 1));
         }
 
@@ -363,16 +404,18 @@ namespace SanteDB.Cdss.Xml.Test
             Patient patient = new Patient()
             {
                 Key = Guid.NewGuid(),
-                DateOfBirth = DateTime.Now.AddDays(-80),
+                DateOfBirth = DateTime.Parse("2024-08-30"),
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(patient, true, new Dictionary<String, Object>()
             {
-                { CdssParameterNames.PERSISTENT_OUTPUT, false },
+                { CdssParameterNames.PERSISTENT_OUTPUT, true },
                 { CdssParameterNames.NON_INTERACTIVE, false },
-                {CdssParameterNames.EXCLUDE_OBSERVATIONS, false }
+                {CdssParameterNames.EXCLUDE_OBSERVATIONS, true },
+                {CdssParameterNames.ENCOUNTER_SCOPE, "org.santedb.ims.pediatric.routineVacc" }
             });
 
 
@@ -387,8 +430,7 @@ namespace SanteDB.Cdss.Xml.Test
                 {
                     if (rl is SubstanceAdministration adm)
                     {
-                        var antigen = rl.Participations.FirstOrDefault(p => p.ParticipationRoleKey == ActParticipationKeys.Product).PlayerEntity.TypeConcept.ToDisplay();
-                        Debug.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", antigen, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
+                        Debug.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", rl.Protocols.First().Protocol.Name, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
                     }
                     else
                     {
@@ -396,6 +438,8 @@ namespace SanteDB.Cdss.Xml.Test
                     }
                 }
             }
+
+            Assert.AreEqual(8, acts.Relationships.Count());
 
         }
 
@@ -411,6 +455,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
@@ -433,6 +478,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" },
                 Participations = new List<ActParticipation>()
                 {

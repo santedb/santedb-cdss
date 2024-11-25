@@ -1,88 +1,93 @@
+//
+// Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+// Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+// Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you 
+// may not use this file except in compliance with the License. You may 
+// obtain a copy of the License at 
+// 
+// http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+// License for the specific language governing permissions and limitations under 
+// the License.
+//
 include <org.santedb.cdss.core>
 include <org.santedb.cdss.core.childcare>
+define library "BCG Vaccine Logic"
+	having id <org.santedb.cdss.vaccine.bcg>
+	having uuid {463fffad-fc37-4666-b949-4a96ae2a4fb9}
+	having status active
+	with metadata
+		author SanteSuite Inc. and the SanteSuite Contributors
+		version 3.06
+		doc Contains logic related to the computation of the BCG dosing schedule
+	end metadata
+	as
+	define logic "BCG Vaccination Logic"
+		having id <org.santedb.cdss.vaccine.bcg.patient>
+		having status active
+		having context Patient when all(
+				"Patient Is a Child",
+				"Patient Is Not Deceased"
+			)
 
-library "BCG Vaccine Logic"
-    having id <org.santedb.cdss.vaccine.bcg>
-    having uuid "463FFFAD-FC37-4666-B949-4A96AE2A4FB9"
-    having status active
-    with metadata
-        author SanteSuite Inc. and the SanteSuite Contributors
-        version 3.0 
-        doc Provides decision logic for BCG vaccination
-    end metadata
-as
-    logic "BCG Vaccination Logic"
-        having id <org.santedb.cdss.vaccine.bcg.patient>
-        having status active
-        having context Patient
-        when all("Patient Is Child", "Patient Is Not Deceased")
-    as
-        
-        define fact "Patient Has Not Received BCG Dose"
-            having type bool
-        as 
-            hdsi("participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-BCG" 
-                scoped-to context 
-                negated)
-        end fact // Patient Has Not Receive BCG Dose
-                        
-        define model "BCG Administration Proposal Model"
-            having format json
-        as 
-        $$
-        {
-            "$type": "SubstanceAdministration",
-            "templateModel" : {
+		as
+		define fact "Patient Has Not Received BCG Dose"
+			having type bool
+		as
+			hdsi($$participation[RecordTarget].source@SubstanceAdministration.participation[Product].player@Material.typeConcept.mnemonic=VaccineType-BCG$$ negated)
+		end fact
+		define protocol "BCG Vaccination Schedule Protocol"
+			having id <org.santedb.cdss.vaccine.bcg>
+			having uuid {463fffad-fc37-4666-b949-4a96ae2a4fb9}
+			having oid "1.3.5.1.4.1.52820.5.3.2.1"
+			having scope <org.santedb.ims.pediatric.routineVacc>
+			having scope <org.santedb.emr.act.registration.birth>
+		as
+			when
+				all(
+					"Patient Is a Child",
+					"Patient Has Not Received BCG Dose"
+				)
+
+			then
+				propose  having model 
+				having format json
+				as
+				$$
+	
+            {
+				"$type": "SubstanceAdministration",
+               "template":"50ac9b2d-e560-4b75-ac77-921bf0eceee8",
+              "templateModel" : {
                 "mnemonic" : "org.santedb.emr.sbadm.immunization",
                 "oid": "1.3.5.1.4.1.52820.5.2.3.2"
-            },
-            "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
-            "typeConceptModel": { "id" : "F3BE6B88-BC8F-4263-A779-86F21EA10A47", "mnemonic" : "InitialImmunization" },
-            "doseSequence": 0,
-            "doseQuantity" : 1.0,
-            "doseUnit" : "A77B8D83-1CC9-4806-A268-5D1738154AFA",
-            "route" : "D594F99F-0151-41A0-A359-282AB54683A1",
-            "participation": {
-                "Product": [{
-                    "player": "ED144BD2-A334-40A2-9A8F-B767A1397D07",
-                    "playerModel" : {
-                        "$type" : "Material",
-                        "id" : "ED144BD2-A334-40A2-9A8F-B767A1397D07",
-                        "typeConcept": "19AFE679-EF94-48B4-9D6A-3C9827C4C8E2"
-                    }
-                }]
-            }
-        }  
-        $$                            
-        end model 
-        
-        define rule "Patient Should Receive BCG Dose"
-        as
-            when 
-                "Patient Has Not Received BCG Dose"
-            then
-                propose "BCG Birth Dose"
-                    having model "BCG Administration Proposal Model"
-                as 
-                    assign hdsi("dateOfBirth") to actTime
-                    assign hdsi("dateOfBirth") to startTime
-                    assign csharp("context.Target.DateOfBirth.Value.AddDays(2)") to stopTime
-                    assign const 0 to doseSequence
-                end propose
-        end rule
-        
-        define protocol "BCG Vaccination Protocol"
-            having id <org.santedb.cdss.vaccine.bcg.protocol>
-            having uuid "463FFFAD-FC37-4666-B949-4A96AE2A4FB9"
-            having oid "1.3.5.1.4.1.52820.5.3.2.1"
-            having scope <org.santedb.emr.enc.children.healthyVisit> 
-            having scope <org.santedb.emr.act.registration.birth>
-        as 
-            when
-                all("Patient Is Child", "Patient Is Not Deceased")
-            then
-                apply "Patient Should Receive BCG Dose"
-        end protocol
-    end logic
-
+              },
+			  "doseSequence" : 0,
+			  "moodConceptModel": { "id" : "ACF7BAF2-221F-4BC2-8116-CEB5165BE079", "mnemonic" : "PROPOSE" },
+              "typeConcept": "F3BE6B88-BC8F-4263-A779-86F21EA10A47",
+              "doseQuantity" : 1.0,
+              "doseUnit" : "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
+              "route" : "D594F99F-0151-41A0-A359-282AB54683A1",
+			  "site":"13c8ec88-f0b8-47a3-850a-522616855106",
+		      "participation": {
+			      "Product": [{
+                      "player" : "ED144BD2-A334-40A2-9A8F-B767A1397D07",
+			      }]
+			  }
+		  }
+          
+				$$
+				end model
+				as
+					assign hdsi($$dateOfBirth$$) to actTime
+					assign hdsi($$dateOfBirth$$) to startTime
+					assign csharp($$context.Target.DateOfBirth.Value.AddDays(2)$$) to stopTime
+				end propose
+		end protocol
+	end logic
 end library

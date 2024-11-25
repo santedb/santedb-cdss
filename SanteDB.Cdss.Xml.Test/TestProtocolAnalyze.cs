@@ -60,6 +60,7 @@ namespace SanteDB.Cdss.Xml.Test
             var originalObject = new QuantityObservation()
             {
                 TypeConceptKey = Guid.Parse("a261f8cd-69b0-49aa-91f4-e6d3e5c612ed"), // Weight
+                StatusConceptKey = StatusKeys.Completed,
                 UnitOfMeasureKey = Guid.Parse("49974584-7c48-457e-a79c-031cdd62714a"), // lbs_i
                 Value = (decimal)5.52,
                 Participations = new List<ActParticipation>()
@@ -79,14 +80,14 @@ namespace SanteDB.Cdss.Xml.Test
 
 
             // Load the weight protocol
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var definition = TestUtils.Load("WeightHeight.cdss");
             // Ensure the protocol loaded properly
             Assert.IsNotNull(definition.Definitions);
             Assert.AreEqual(3, definition.Definitions.Count);
             Assert.AreEqual(2, definition.Definitions.OfType<CdssDecisionLogicBlockDefinition>().Count());
             Assert.AreEqual(1, definition.Definitions.OfType<CdssDatasetDefinition>().Count());
             Assert.AreEqual(CdssObjectState.Active, definition.Status);
-            Assert.AreEqual("3.0", definition.Metadata.Version);
+            Assert.AreEqual("3.20", definition.Metadata.Version);
 
             var xmlProto = new XmlProtocolLibrary(definition);
             // No interpretation
@@ -109,11 +110,12 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Load the weight protocol
-            var definition = CdssLibraryDefinition.Load(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.Weight.xml"));
+            var definition = TestUtils.Load("WeightHeight.cdss");
             var xmlLib = new XmlProtocolLibrary(definition);
 
             // Run the object in regular mode
@@ -140,11 +142,12 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 Key = Guid.NewGuid(),
                 DateOfBirth = DateTime.Now,
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
                 GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
             };
 
             // Load the weight protocol
-            var definition = CdssLibraryTranspiler.Transpile(typeof(TestProtocolApply).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Test.Protocols.BCG.cdss"), true, "bcg.cdss");
+            var definition = TestUtils.Load("BCG.cdss");
             var xmlLib = new XmlProtocolLibrary(definition);
 
             // Run in debug mode
