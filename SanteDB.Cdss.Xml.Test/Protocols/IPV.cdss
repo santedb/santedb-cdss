@@ -108,7 +108,14 @@ define library "Inactivated Poliovirus Vaccine (IPV)"
               "site" : "dd5db8ed-0d97-4728-bd94-27aacd79ea02",
         	  "participation": {
         		"Product": [{
-                	"player" : "800b8fc3-a2f9-4f24-a119-6e98b76119a1"
+                	"player" : "800b8fc3-a2f9-4f24-a119-6e98b76119a1",
+					"playerModel" : {
+						"$type": "Material",
+						"id" : "800b8fc3-a2f9-4f24-a119-6e98b76119a1",
+						"typeConceptModel": {
+							"mnemonic": "VaccineType-IPV"
+						}
+					}
         		}]
         	}
         }	   
