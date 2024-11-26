@@ -173,26 +173,73 @@ define library "Oral Polio Vaccine Decision Logic"
 			having format json
 		as
 			$$
-
-            {
-				      "$type": "SubstanceAdministration",
-               "template":"50ac9b2d-e560-4b75-ac77-921bf0eceee8",
-              "templateModel" : {
-                "mnemonic" : "org.santedb.emr.sbadm.immunization",
-                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
-              },
-             
-			  "typeConcept": "6e7a3521-2967-4c0a-80ec-6c5c197b2178",
-              "doseQuantity" : 1.0,
-              "doseUnit" : "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
-              "route" : "0a1388b0-66fb-4063-bfe3-151dd8442838",
-			  "site" : "e5b6847e-91e0-4fca-ac2e-753962008080",
-			  "participation": {
-				"Product": [{
-                	"player" : "790be5ca-d07d-46c6-8fa0-9d4f5adf388c",
-				}]
+			{
+				"$type": "SubstanceAdministration",
+				"templateModel": {
+					"mnemonic": "org.santedb.emr.sbadm.immunization",
+					"oid": "1.3.5.1.4.1.52820.5.2.3.2"
+				},
+				"moodConceptModel": {
+					"id": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+					"mnemonic": "PROPOSE"
+				},
+				"typeConcept": "F3BE6B88-BC8F-4263-A779-86F21EA10A47",
+				"statusConceptModel": {
+					"id": "c8064cbd-fa06-4530-b430-1a52f1530c27",
+					"mnemonic": "ACTIVE"
+				},
+				"doseQuantity": 1.0,
+				"doseUnitModel": {
+					"id": "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
+					"mnemonic": "UnitOfMeasure-Dose"
+				},
+				"routeModel": {
+					"id": "0a1388b0-66fb-4063-bfe3-151dd8442838",
+					"mnemonic": "RouteOfAdministration-PO"
+				},
+				"site": "e5b6847e-91e0-4fca-ac2e-753962008080",
+				"siteModel": {
+					"id": "e5b6847e-91e0-4fca-ac2e-753962008080",
+					"mnemonic": 'Site-Oral'
+				},
+				"participation": {
+					"Product": [
+						{
+							"playerModel": {
+								"$type": "Material",
+								"id": "790be5ca-d07d-46c6-8fa0-9d4f5adf388c",
+								"typeConceptModel": {
+									"id": "c7f4980b-e338-4363-83f7-2b3d38933e7e",
+									"mnemonic": "VaccineType-OPV",
+									"name": {
+										"en": "bOPV"
+									}
+								},
+								"name": {
+									"OfficialRecord": [
+										{
+											"component": {
+												"$other": [
+													"Oral Polio Vaccine"
+												]
+											}
+										}
+									],
+									"Assigned": [
+										{
+											"component": {
+												"$other": [
+													"bOPV"
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					]
+				}
 			}
-		}
             
 			$$
 		end model

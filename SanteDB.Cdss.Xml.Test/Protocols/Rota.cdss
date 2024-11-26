@@ -118,25 +118,64 @@ define library "Rotavirus Childhood Vaccination Schedule Logic"
 			having format json
 		as
 			$$
-
-        {
-			   "$type": "SubstanceAdministration",
-               "template":"50ac9b2d-e560-4b75-ac77-921bf0eceee8",
-              "templateModel" : {
-                "mnemonic" : "org.santedb.emr.sbadm.immunization",
-                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
-              },
-              "typeConcept": "6e7a3521-2967-4c0a-80ec-6c5c197b2178",
-              "doseQuantity" : 1.0,
-              "doseUnit" : "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
-			  "site" : "e5b6847e-91e0-4fca-ac2e-753962008080",
-              "route" : "0a1388b0-66fb-4063-bfe3-151dd8442838",
-			  "participation": {
-			      "Product": [{
-            	      "player" : "DD53B8FF-2F4D-4359-A031-9405AD384893"
-				  }]
-			  }
-		}
+			{
+				"$type": "SubstanceAdministration",
+				"templateModel": {
+					"mnemonic": "org.santedb.emr.sbadm.immunization",
+					"oid": "1.3.5.1.4.1.52820.5.2.3.2"
+				},
+				"moodConceptModel": {
+					"id": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+					"mnemonic": "PROPOSE"
+				},
+				"typeConceptModel": {
+					"id": "F3BE6B88-BC8F-4263-A779-86F21EA10A47",
+					"mnemonic": "InitialImmunization"
+				},
+				"doseQuantity": 1.0,
+				"doseUnitModel": {
+					"id": "A77B8D83-1CC9-4806-A268-5D1738154AFA",
+					"mnemonic": "DOSE"
+				},
+				"routeModel": {
+					"id": "D594F99F-0151-41A0-A359-282AB54683A1",
+					"mnemonic": "RouteOfAdministration-IM"
+				},
+				"participation": {
+					"Product": [
+						{
+							"playerModel": {
+								"$type": "Material",
+								"id": "DD53B8FF-2F4D-4359-A031-9405AD384893",
+								"typeConceptModel": {
+									"id": "9606ACF1-8A70-4664-944B-87B3750CA7CC",
+									"mnemonic": "VaccineType-rotavirus"
+								},
+								"name": {
+									"OfficialRecord": [
+										{
+											"component": {
+												"$other": [
+													"ROTAVIRUS VACCINE"
+												]
+											}
+										}
+									],
+									"Assigned": [
+										{
+											"component": {
+												"$other": [
+													"ROTA"
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			}
 			$$
 		end model
 		define rule "Raise Alert when Patient is to Receive ROTA but has an AEFI"

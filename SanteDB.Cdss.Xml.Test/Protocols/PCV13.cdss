@@ -112,26 +112,64 @@ define library "PCV 13 Childhood Vaccination Schedule"
 			having format json
 		as
 			$$
-
-          {
-				      "$type": "SubstanceAdministration",
-               "template":"50ac9b2d-e560-4b75-ac77-921bf0eceee8",
-              "templateModel" : {
-                "mnemonic" : "org.santedb.emr.sbadm.immunization",
-                "oid": "1.3.5.1.4.1.52820.5.2.3.2"
-              },
-              "typeConcept": "6e7a3521-2967-4c0a-80ec-6c5c197b2178",
-              "doseQuantity" : 1.0,
-              "doseUnit" : "a4fc5c93-31c2-4f87-990e-c5a4e5ea2e76",
-              "route" : "D594F99F-0151-41A0-A359-282AB54683A1",
-			  "site":"6d607c13-5a87-40b2-91cd-79f000bd82e4",
-			  "participation": {
-				"Product": [{
-                	"player" : "e829c3d1-5243-474e-a2d6-ba35d99610c4"
-						}]
-					}
+			{
+				"$type": "SubstanceAdministration",
+				"templateModel": {
+					"mnemonic": "org.santedb.emr.sbadm.immunization",
+					"oid": "1.3.5.1.4.1.52820.5.2.3.2"
+				},
+				"moodConceptModel": {
+					"id": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+					"mnemonic": "PROPOSE"
+				},
+				"typeConceptModel": {
+					"id": "F3BE6B88-BC8F-4263-A779-86F21EA10A47",
+					"mnemonic": "Immunization"
+				},
+				"doseQuantity": 1.0,
+				"doseUnitModel": {
+					"id": "A77B8D83-1CC9-4806-A268-5D1738154AFA",
+					"mnemonic": "DOSE"
+				},
+				"routeModel": {
+					"id": "D594F99F-0151-41A0-A359-282AB54683A1",
+					"mnemonic": "RouteOfAdministration-IM"
+				},
+				"participation": {
+					"Product": [
+						{
+							"playerModel": {
+								"$type": "Material",
+								"id": "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
+								"typeConceptModel": {
+									"id": "1185DEF1-6AD4-4995-B67A-406DB08945B5",
+									"mnemonic": "VaccineType-PCV13"
+								},
+								"name": {
+									"OfficialRecord": [
+										{
+											"component": {
+												"$other": [
+													"Pneumococcal conjugate PCV 13"
+												]
+											}
+										}
+									],
+									"Assigned": [
+										{
+											"component": {
+												"$other": [
+													"PCV13"
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					]
 				}
-          
+			}
 			$$
 		end model
 		define fact "Patient Should Receive PCV13 Dose 1"
