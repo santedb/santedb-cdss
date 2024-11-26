@@ -16,6 +16,7 @@
  * the License.
  * 
  */
+using Newtonsoft.Json;
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
@@ -199,8 +200,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
-            var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(newborn);
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(2, acts.Count());
 
             // The default schedule should have been applied
@@ -242,7 +242,8 @@ namespace SanteDB.Cdss.Xml.Test
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(newborn);
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            
             Assert.AreEqual(3, acts.Count());
         }
 
@@ -265,9 +266,12 @@ namespace SanteDB.Cdss.Xml.Test
             };
 
             // Now apply the protocol
-            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
-            var jsonSerializer = new JsonViewModelSerializer();
-            Assert.AreEqual(3, acts.Count());
+            var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()
+            {
+                {  CdssParameterNames.DEBUG_MODE, true }
+            }).ToArray();
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Assert.AreEqual(3, acts.OfType<Act>().Count());
         }
 
         /// <summary>
@@ -290,8 +294,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
-            var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(newborn);
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(2, acts.Count());
         }
 
@@ -314,8 +317,8 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn, false, m_routineVaccParms);
-            var jsonSerializer = new JsonViewModelSerializer();
-
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            
             var c = acts.LoadCollection(o => o.Relationships).Select(o => o.TargetAct).GroupBy(o => o.Protocols.First().Protocol.Name).ToDictionary(o => o.Key, o => o.Count());
 
             Assert.AreEqual(146, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
@@ -361,8 +364,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(adult, false, m_routineVaccParms);
-            var jsonSerializer = new JsonViewModelSerializer();
-            String json = jsonSerializer.Serialize(adult);
+            Debug.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(0, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
         }
 
