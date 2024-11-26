@@ -138,7 +138,15 @@ define library "Human Papilloma Virus (HPV)"
               "site" : "dd5db8ed-0d97-4728-bd94-27aacd79ea02",
         	  "participation": {
         		"Product": [{
-                	"player" : "15b42b90-17fa-48cd-8121-f909c9d00ccc"
+                	"player" : "15b42b90-17fa-48cd-8121-f909c9d00ccc",
+					"playerModel" : {
+						"$type": "Material",
+						"id" : "15b42b90-17fa-48cd-8121-f909c9d00ccc",
+						"typeConceptModel": {
+							"id": "C20CE9A2-57FD-4FFB-9C12-04A3957D732A",
+							"mnemonic": "VaccineType-HPV"
+						}
+					}
         		}]
         	}
         }
