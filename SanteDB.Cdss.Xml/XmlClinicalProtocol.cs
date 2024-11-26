@@ -150,11 +150,11 @@ namespace SanteDB.Cdss.Xml
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)targetClone, this.m_scopedLibraries);
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateContext((IdentifiedData)targetClone, this.m_scopedLibraries);
                 }
 
                 using (CdssExecutionStackFrame.Enter(context))

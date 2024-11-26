@@ -200,7 +200,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).SelectMany(p => p.ComputeProposals(newborn, new Dictionary<String, Object>())).OfType<Act>().ToArray();
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(2, acts.Count());
 
             // The default schedule should have been applied
@@ -242,7 +242,7 @@ namespace SanteDB.Cdss.Xml.Test
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
             var jsonSerializer = new JsonViewModelSerializer();
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             
             Assert.AreEqual(3, acts.Count());
         }
@@ -270,7 +270,7 @@ namespace SanteDB.Cdss.Xml.Test
             {
                 {  CdssParameterNames.DEBUG_MODE, true }
             }).ToArray();
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(3, acts.OfType<Act>().Count());
         }
 
@@ -294,7 +294,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>());
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(2, acts.Count());
         }
 
@@ -317,7 +317,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(newborn, false, m_routineVaccParms);
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             
             var c = acts.LoadCollection(o => o.Relationships).Select(o => o.TargetAct).GroupBy(o => o.Protocols.First().Protocol.Name).ToDictionary(o => o.Key, o => o.Count());
 
@@ -364,7 +364,7 @@ namespace SanteDB.Cdss.Xml.Test
 
             // Now apply the protocol
             var acts = scp.CreateCarePlan(adult, false, m_routineVaccParms);
-            Debug.WriteLine(JsonConvert.SerializeObject(acts));
+            Console.WriteLine(JsonConvert.SerializeObject(acts));
             Assert.AreEqual(0, acts.LoadCollection(o => o.Relationships).Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(o => o.LoadProperty(r => r.TargetAct)).Count());
         }
 
@@ -426,16 +426,16 @@ namespace SanteDB.Cdss.Xml.Test
                     .Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent)
                     .Select(r=>r.TargetAct))
             {
-                Debug.WriteLine("{0} : {1:yyyy-MM-dd} - {2:yyyy-MM-dd}", enc.Type, enc.StartTime, enc.StopTime);
+                Console.WriteLine("{0} : {1:yyyy-MM-dd} - {2:yyyy-MM-dd}", enc.Type, enc.StartTime, enc.StopTime);
                 foreach(var rl in enc.Relationships.Where(r=>r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(e=>e.TargetAct))
                 {
                     if (rl is SubstanceAdministration adm)
                     {
-                        Debug.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", rl.Protocols.First().Protocol.Name, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
+                        Console.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", rl.Protocols.First().Protocol.Name, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
                     }
                     else
                     {
-                        Debug.WriteLine("\t{0} : R:{1:yyyy-MM-dd}, RG: {2:yyyy-MM-dd} - {3:yyyy-MM-dd}", rl.TypeConcept.ToDisplay(), rl.ActTime, rl.StartTime, rl.StopTime);
+                        Console.WriteLine("\t{0} : R:{1:yyyy-MM-dd}, RG: {2:yyyy-MM-dd} - {3:yyyy-MM-dd}", rl.TypeConcept.ToDisplay(), rl.ActTime, rl.StartTime, rl.StopTime);
                     }
                 }
             }
