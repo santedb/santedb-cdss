@@ -21,6 +21,7 @@ using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Roles;
 using System;
@@ -135,6 +136,10 @@ namespace SanteDB.Cdss.Xml
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }
 
+                object debugParameterValue = null;
+                _ = parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue);
+                _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
+
                 // Get a clone to make decisions on
                 var targetClone = target.Clone() as Patient;
                 // Safe guard all the properties
@@ -142,14 +147,24 @@ namespace SanteDB.Cdss.Xml
                 targetClone.Participations.ForEach(o => o.Act = o.Act?.Clone() as Act);
                 this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
 
-                var context = CdssExecutionContext.CreateContext(targetClone, this.m_scopedLibraries);
-                foreach (var itm in parameters)
+                CdssExecutionContext context = null;
+                if (debugMode)
                 {
-                    context.SetValue(itm.Key, itm.Value);
+                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)targetClone, this.m_scopedLibraries);
+                }
+                else
+                {
+                    context = CdssExecutionContext.CreateContext((IdentifiedData)targetClone, this.m_scopedLibraries);
                 }
 
                 using (CdssExecutionStackFrame.Enter(context))
                 {
+
+                    foreach (var itm in parameters)
+                    {
+                        context.SetValue(itm.Key, itm.Value);
+                    }
+
                     if (!(bool)this.m_protocol.Compute())
                     {
                         yield break; // no computations
@@ -161,6 +176,11 @@ namespace SanteDB.Cdss.Xml
                             yield return prop;
                         }
                     }
+                }
+
+                if(context.DebugSession != null)
+                {
+                    yield return context.DebugSession;
                 }
             }
             finally

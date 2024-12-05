@@ -1,0 +1,283 @@
+//
+// Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+// Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+// Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you 
+// may not use this file except in compliance with the License. You may 
+// obtain a copy of the License at 
+// 
+// http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+// License for the specific language governing permissions and limitations under 
+// the License.
+//
+include <org.santedb.cdss.core>
+include <org.santedb.cdss.core.childcare>
+define library "DTP-Hib-HepB Vaccine Logic"
+	having id <org.santedb.cdss.vaccine.dtpHibHepB>
+	having uuid {f6186968-9ba7-40de-939b-42fcc00083a3}
+	having status active
+	with metadata
+		author SanteSuite Inc. and the SanteSuite Contributors
+		version 3.05
+		doc Provides core logic for the compuation of DTP-Hib-HepB Schedules
+	end metadata
+	as
+	define logic "DTP-Hib-HepB Trivalent Decision Logic for Patient Context"
+		having id <org.santedb.cdss.vaccine.dtptrivalent.patient>
+		having context Patient when all(
+				"Patient Is A Child",
+				"Patient Is Not Deceased"
+			)
+
+		as
+		define fact "Patient's Last Administration of DTP-Hib-HepB Dose 1"
+		as
+			query(
+				from hdsi($$participation[RecordTarget]$$)
+				where hdsi($$source.isNegated=false&source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&source@SubstanceAdministration.doseSequence=1$$)
+				select last hdsi($$source@SubstanceAdministration$$)
+				order by hdsi($$source.actTime$$)
+			)
+
+		end fact
+		define fact "Patient's Last Administration of DTP-Hib-HepB Dose 2"
+		as
+			query(
+				from hdsi($$participation[RecordTarget]$$)
+				where hdsi($$source.isNegated=false&source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&source@SubstanceAdministration.doseSequence=2$$)
+				select last hdsi($$source@SubstanceAdministration$$)
+				order by hdsi($$source.actTime$$)
+			)
+
+		end fact
+		define fact "Patient's Last Administration of DTP-Hib-HepB Dose 3"
+		as
+			query(
+				from hdsi($$participation[RecordTarget]$$)
+				where hdsi($$source.isNegated=false&source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&source@SubstanceAdministration.doseSequence=3$$)
+				select last hdsi($$source@SubstanceAdministration$$)
+				order by hdsi($$source.actTime$$)
+			)
+
+		end fact
+		define fact "Patient Has an Unresolved AEFI to DTP-Hib-HepB Dose"
+			with metadata
+				doc Patient has an active (unresolved) AEFI to a previous dose of DTP-Hib-HepB
+			end metadata
+		as
+			any(
+				hdsi($$
+            participation[RecordTarget].source.typeConcept=0744B6AD-BE39-4A08-B64D-F61CB8282267
+            &participation[RecordTarget].source.relationship[HasSubject].target.typeConcept=0124fde0-7857-4815-b257-74acaa0dd92d
+            &participation[RecordTarget].source.relationship[RefersTo].target.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB
+          $$),
+				hdsi($$
+            participation[RecordTarget].source.typeConcept=0124fde0-7857-4815-b257-74acaa0dd92d&
+            participation[RecordTarget].source@CodedObservation.value.mnemonic=VaccineType-DTP-Hib-HepB&
+            participation[RecordTarget].source.isNegated=false
+          $$)
+			)
+
+		end fact
+		define fact "Patient Refused Previous DTP-Hib-HepB Dose"
+			with metadata
+				doc When a patient has refused a previous dose of DTP-Hib-HepB due to personal or religious reasons
+			end metadata
+		as	
+			hdsi($$
+          participation[RecordTarget].source.isNegated=true&
+          participation[RecordTarget].source.participation[Product].player.typeConcept.mnemonic=VaccineType-DTP-Hib-HepB&
+		  participation[RecordTarget].source.reasonConcept.conceptSet=3BD46185-E3C3-4A6D-A1FE-0F2C9C49360D
+        $$)
+		end fact
+		define fact "Patient Should Receive DTP-Hib-HepB Dose 1"
+		as
+			none(
+				"Patient's Last Administration of DTP-Hib-HepB Dose 1",
+				"Patient Refused Previous DTP-Hib-HepB Dose"
+			)
+
+		end fact
+		define fact "Patient Should Receive DTP-Hib-HepB Dose 2"
+		as
+			all(
+				"Patient's Last Administration of DTP-Hib-HepB Dose 1",
+				none(
+					"Patient Refused Previous DTP-Hib-HepB Dose",
+					"Patient's Last Administration of DTP-Hib-HepB Dose 2"
+				)
+
+			)
+
+		end fact
+		define fact "Patient Should Receive DTP-Hib-HepB Dose 3"
+		as
+			all(
+				"Patient's Last Administration of DTP-Hib-HepB Dose 1",
+				"Patient's Last Administration of DTP-Hib-HepB Dose 2",
+				none(
+					"Patient Refused Previous DTP-Hib-HepB Dose",
+					"Patient's Last Administration of DTP-Hib-HepB Dose 3"
+				)
+
+			)
+
+		end fact
+		define rule "Raise Alert if Active AEFI Reported for DTP-Hib-HepB"
+		as
+			when
+				all(
+					any(
+						"Patient Should Receive DTP-Hib-HepB Dose 1",
+						"Patient Should Receive DTP-Hib-HepB Dose 2",
+						"Patient Should Receive DTP-Hib-HepB Dose 3"
+					)
+,
+					"Patient Has an Unresolved AEFI to DTP-Hib-HepB Dose"
+				)
+
+			then
+				raise having priority warn 
+					having type {1a4fff6c-f54f-11e8-8eb2-f2801f1b9fd1}
+				$$
+					
+              Patient has had a previous adverse event or drug/intolerance to DTP-Hib-HepB Dose - confirm administration with patient/guardian prior to administration
+            
+				$$
+		end rule
+		define model "DTP-Hib-HepB Dose Proposal"
+			having format json
+		as
+			$$
+
+          {
+			"$type": "SubstanceAdministration",
+			"templateModel": {
+				"mnemonic": "org.santedb.emr.sbadm.immunization",
+				"oid": "1.3.5.1.4.1.52820.5.2.3.2"
+			},
+			"moodConceptModel": {
+				"id": "ACF7BAF2-221F-4BC2-8116-CEB5165BE079",
+				"mnemonic": "PROPOSE"
+			},
+			"typeConceptModel": {
+				"id": "F3BE6B88-BC8F-4263-A779-86F21EA10A47",
+				"mnemonic": "InitialImmunization"
+			},
+			"statusConceptModel": {
+				"id": "c8064cbd-fa06-4530-b430-1a52f1530c27",
+				"mnemonic": "ACTIVE"
+			},
+			"doseQuantity": 1.0,
+			"doseUnitModel": {
+				"id": "a77b8d83-1cc9-4806-a268-5d1738154afa",
+				"mnemonic": "DOSE"
+			},
+			"routeModel": {
+				"id": "d594f99f-0151-41a0-a359-282ab54683a1",
+				"mnemonic": "RouteOfAdministration-IM"
+			},
+			"siteModel": {
+				"id": "dd5db8ed-0d97-4728-bd94-27aacd79ea02",
+				"mnemonic": 'Site-LeftArm'
+			},
+			"participation": {
+				"Product": [
+					{
+						"playerModel": {
+							"$type": "Material",
+							"id": "41B008A6-FCF8-40BC-AB96-7567E94BCF8F",
+							"typeConceptModel": {
+								"id": "C20CE9A2-57FD-4FFB-9C12-04A3957D732A",
+								"mnemonic": "VaccineType-DTP-Hib-HepB"
+							},
+							"name": {
+								"OfficialRecord": [
+									{
+										"component": {
+											"$other": [
+												"DTP - Haemophilus influenzae type b conjugate and hepatitis b"
+											]
+										}
+									}
+								],
+								"Assigned": [
+									{
+										"component": {
+											"$other": [
+												"DTP-Hib-HepB"
+											]
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		}
+          
+			$$
+		end model
+		define rule "Recommend DTP-Hib-HepB Dose 1"
+		as
+			when
+				"Patient Should Receive DTP-Hib-HepB Dose 1"
+			then
+				propose  having model "DTP-Hib-HepB Dose Proposal"
+				as
+					assign csharp($$context.Target.DateOfBirth.Value.AddDays(42)$$) to startTime
+					assign csharp($$context.GreaterOf(DateTime.Now, context.Target.DateOfBirth.Value.AddDays(42))$$) to actTime
+					assign const "1" to doseSequence overwrite
+					assign const "F3BE6B88-BC8F-4263-A779-86F21EA10A47" to typeConcept overwrite
+
+				end propose
+		end rule
+		define rule "Recommend DTP-Hib-HepB Dose 2"
+		as
+			when
+				"Patient Should Receive DTP-Hib-HepB Dose 2"
+			then
+				propose  having model "DTP-Hib-HepB Dose Proposal"
+				as
+					assign csharp($$
+                ((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)
+              $$) to actTime
+					assign csharp($$((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(28)$$) to startTime
+					//assign csharp($$((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 1"]).ActTime.Value.AddDays(35)$$) to stopTime
+					assign const "2" to doseSequence overwrite
+				end propose
+		end rule
+		define rule "Recommend DTP-Hib-HepB Dose 3"
+		as
+			when
+				"Patient Should Receive DTP-Hib-HepB Dose 3"
+			then
+				propose  having model "DTP-Hib-HepB Dose Proposal"
+				as
+					assign csharp($$((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).ActTime.Value.AddDays(28)$$) to actTime
+					assign csharp($$((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).ActTime.Value.AddDays(28)$$) to startTime
+					//assign csharp($$((SubstanceAdministration)context["Patient's Last Administration of DTP-Hib-HepB Dose 2"]).ActTime.Value.AddDays(35)$$) to stopTime
+					assign const "3" to doseSequence overwrite
+				end propose
+		end rule
+		define protocol "DTP-Hib-HepB Vaccination Protocol"
+			having id <org.santedb.cdss.vaccine.dtpHibHepB.protocol>
+			having uuid {f6186968-9ba7-40de-939b-42fcc00083a3}
+			having oid "1.3.5.1.4.1.52820.5.3.2.2"
+			having scope <org.santedb.ims.pediatric.routineVacc>
+		as
+			when
+				"Patient Is A Child"
+			then
+				apply "Recommend DTP-Hib-HepB Dose 1"
+				apply "Recommend DTP-Hib-HepB Dose 2"
+				apply "Recommend DTP-Hib-HepB Dose 3"
+		end protocol
+	end logic
+end library
