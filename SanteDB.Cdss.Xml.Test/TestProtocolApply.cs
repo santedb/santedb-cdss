@@ -440,7 +440,7 @@ namespace SanteDB.Cdss.Xml.Test
                 }
             }
 
-            Assert.AreEqual(8, acts.Relationships.Count());
+            Assert.AreEqual(9, acts.Relationships.Count());
 
         }
 
