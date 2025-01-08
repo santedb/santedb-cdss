@@ -53,6 +53,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             this.ExpressionValue = expression;
         }
 
+
         /// <summary>
         /// Expression value
         /// </summary>
@@ -87,6 +88,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                   .SetVariable("value", null, typeof(object))
                   .SetVariable("scopedObject", null, typeof(IdentifiedData))
                   .DetectIdentifiers(this.ExpressionValue);
+
                 if (identifiers.UnknownIdentifiers.Any())
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.unknownId", $"Unknown identifiers {String.Join(",", identifiers.UnknownIdentifiers.Select(o => o.ToString()))} in C# expression {this.ExpressionValue}", Guid.Empty, this.ToReferenceString());

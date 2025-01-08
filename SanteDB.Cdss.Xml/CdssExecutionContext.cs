@@ -113,7 +113,7 @@ namespace SanteDB.Cdss.Xml
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .AppliesTo(this)
-                .SelectMany(o => o.Definitions)
+                .SelectMany(o => o.Definitions?.ToArray() ?? new CdssComputableAssetDefinition[0])
                 .ToArray();
 
             this.m_computableAssetsInScope = this.m_scopedLogicBlocks?
@@ -428,6 +428,24 @@ namespace SanteDB.Cdss.Xml
             // Add types
             typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
 
+            // Add delegates 
+            Func<String, Int32> intFunc = (s) => this.Int(s);
+            Func<String, Double> realFunc = (s) => this.Real(s);
+            Func<String, Boolean> boolFunc = (s) => this.Bool(s);
+            Func<String, DateTime> dateFunc = (s) => this.Date(s);
+            Func<String, String> stringFunc = (s) => this.String(s);
+            Func<String, Act> actFunc = (s) => this[s] as Act;
+            Func<String, Entity> entityFunc = (s) => this[s] as Entity;
+            Func<String, CdssReferenceDataset> datasetFunc = (s) => this.GetDataSet(s);
+            expressionInterpreter.SetFunction("int", intFunc);
+            expressionInterpreter.SetFunction("real", realFunc);
+            expressionInterpreter.SetFunction("bool", boolFunc);
+            expressionInterpreter.SetFunction("date", dateFunc);
+            expressionInterpreter.SetFunction("string", stringFunc);
+            expressionInterpreter.SetFunction("act", actFunc);
+            expressionInterpreter.SetFunction("entity", entityFunc);
+            expressionInterpreter.SetFunction("data", datasetFunc);
+            
             return expressionInterpreter;
         }
 
