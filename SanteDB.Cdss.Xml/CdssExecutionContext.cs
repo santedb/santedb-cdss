@@ -437,13 +437,13 @@ namespace SanteDB.Cdss.Xml
             Func<String, Act> actFunc = (s) => this[s] as Act;
             Func<String, Entity> entityFunc = (s) => this[s] as Entity;
             Func<String, CdssReferenceDataset> datasetFunc = (s) => this.GetDataSet(s);
-            expressionInterpreter.SetFunction("int", intFunc);
-            expressionInterpreter.SetFunction("real", realFunc);
-            expressionInterpreter.SetFunction("bool", boolFunc);
-            expressionInterpreter.SetFunction("date", dateFunc);
-            expressionInterpreter.SetFunction("string", stringFunc);
-            expressionInterpreter.SetFunction("act", actFunc);
-            expressionInterpreter.SetFunction("entity", entityFunc);
+            expressionInterpreter.SetFunction("intf", intFunc);
+            expressionInterpreter.SetFunction("realf", realFunc);
+            expressionInterpreter.SetFunction("boolf", boolFunc);
+            expressionInterpreter.SetFunction("datef", dateFunc);
+            expressionInterpreter.SetFunction("stringf", stringFunc);
+            expressionInterpreter.SetFunction("actf", actFunc);
+            expressionInterpreter.SetFunction("entf", entityFunc);
             expressionInterpreter.SetFunction("data", datasetFunc);
             
             return expressionInterpreter;
