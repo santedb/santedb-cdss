@@ -212,7 +212,7 @@ namespace SanteDB.Cdss.Xml
                 if (this.m_library.Status == CdssObjectState.DontUse ||
                     (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
                 {
-                    throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
+                    return new DetectedIssue[0];
                 }
 
 
