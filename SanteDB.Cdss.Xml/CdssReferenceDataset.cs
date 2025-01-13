@@ -96,6 +96,11 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public IEnumerable<long> SelectLong(string columnName) => this.Select(columnName).OfType<long>();
 
+        /// <summary>
+        /// Select as a date time
+        /// </summary>
+        public IEnumerable<DateTime> SelectDate(string columnName) => this.Select(columnName).OfType<DateTime>();
+
         /// <inheritdoc/>
         public IEnumerator<IForeignDataRecord> GetEnumerator()
         {
