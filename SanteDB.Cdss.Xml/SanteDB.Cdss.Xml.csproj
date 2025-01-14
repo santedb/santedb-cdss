@@ -110,10 +110,6 @@
     <None Include="Model.old\ProtocolWhenClauseCollection.cs" />
     <None Include="Model.old\RulesetLibrary.cs" />
     <None Include="Model.old\Types.cs" />
-    <None Include="Schema\SanteDBProtocol.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <!-- <ItemGroup> -->
     <!-- <Compile Include="AppletClinicalProtocolRepository.cs" /> -->
@@ -187,7 +183,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Schema\SanteDBCdss.xsd">
+    <None Update="Schema\Cdss.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
