@@ -67,6 +67,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 {
                     library.TranspileSourceReference.OriginalSource = ms.ToArray();
                 }
+                library.Definitions = library.Definitions ?? new System.Collections.Generic.List<CdssBaseObjectDefinition>();
                 return library;
             }
         }

@@ -429,14 +429,14 @@ namespace SanteDB.Cdss.Xml
             typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
 
             // Add delegates 
-            Func<String, Int32> intFunc = (s) => this.Int(s);
-            Func<String, Double> realFunc = (s) => this.Real(s);
-            Func<String, Boolean> boolFunc = (s) => this.Bool(s);
-            Func<String, DateTime> dateFunc = (s) => this.Date(s);
-            Func<String, String> stringFunc = (s) => this.String(s);
-            Func<String, Act> actFunc = (s) => this[s] as Act;
-            Func<String, Entity> entityFunc = (s) => this[s] as Entity;
-            Func<String, CdssReferenceDataset> datasetFunc = (s) => this.GetDataSet(s);
+            Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
+            Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
+            Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
+            Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
+            Func<String, String> stringFunc = (s) => CdssExecutionStackFrame.Current.Context.String(s);
+            Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
+            Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
+            Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
             expressionInterpreter.SetFunction("intf", intFunc);
             expressionInterpreter.SetFunction("realf", realFunc);
             expressionInterpreter.SetFunction("boolf", boolFunc);

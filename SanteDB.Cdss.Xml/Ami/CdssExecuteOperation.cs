@@ -145,8 +145,8 @@ namespace SanteDB.Cdss.Xml.Ami
             {
                 StartTime = startTime,
                 StopTime = DateTimeOffset.Now,
-                Issues = results.OfType<DetectedIssue>().ToList(),
-                Proposals = results.OfType<IdentifiedData>().ToList(),
+                Issues = results.OfType<CdssDetectedIssueResult>().Select(o=>o.Issue).ToList(),
+                Proposals = results.OfType<CdssProposeResult>().Select(o=>o.ProposedAction).ToList(),
                 ResultingTarget = targetForExecution,
                 Debug = debugData?.GetDiagnosticReport()
             };

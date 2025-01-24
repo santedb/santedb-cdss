@@ -13,7 +13,7 @@ library_definition: (DEFINE)? LIBRARY STRING
     (having_uuid | having_oid | having_status)*
     (metadata_statement)?
     AS
-    (library_definitions)+
+    (library_definitions)*
     END (LIBRARY)?;
 
 having_statements:

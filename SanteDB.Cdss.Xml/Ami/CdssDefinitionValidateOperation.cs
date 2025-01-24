@@ -100,7 +100,7 @@ namespace SanteDB.Cdss.Xml.Ami
                     scopedLibraries.Add(transpiled);
 
                     // Validate 
-                    foreach (var itm in transpiled.Definitions.OfType<CdssDecisionLogicBlockDefinition>())
+                    foreach (var itm in transpiled.Definitions?.OfType<CdssDecisionLogicBlockDefinition>() ?? new CdssDecisionLogicBlockDefinition[0])
                     {
                         if (itm.Context == null)
                         {

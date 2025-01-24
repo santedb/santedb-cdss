@@ -29,6 +29,7 @@ using SanteDB.Core.Model.Entities;
 using SanteDB.Core.Model.Roles;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Claims;
+using SanteDB.Core.Services;
 using SharpCompress;
 using System;
 using System.Collections.Generic;
@@ -198,7 +199,7 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <inheritdoc/>
-        public IEnumerable<DetectedIssue> Analyze(IdentifiedData analysisTarget, IDictionary<String, object> parameters = null)
+        public IEnumerable<ICdssResult> Analyze(IdentifiedData analysisTarget, IDictionary<String, object> parameters = null)
         {
 
 #if DEBUG
@@ -212,7 +213,7 @@ namespace SanteDB.Cdss.Xml
                 if (this.m_library.Status == CdssObjectState.DontUse ||
                     (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
                 {
-                    return new DetectedIssue[0];
+                    return new ICdssResult[0];
                 }
 
 
@@ -242,7 +243,7 @@ namespace SanteDB.Cdss.Xml
                         .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
                         .ToArray();
 
-                    return context.Issues;
+                    return context.Issues.Select(o=>new CdssDetectedIssueResult(o)).OfType<ICdssResult>().Union(context.Proposals.Select(o=> new CdssProposeResult(o, analysisTarget.Key)));
                 }
             }
             finally
@@ -267,7 +268,7 @@ namespace SanteDB.Cdss.Xml
         }
 
         /// <inheritdoc/>
-        public IEnumerable<object> Execute(IdentifiedData target, IDictionary<String, object> parameters = null)
+        public IEnumerable<ICdssResult> Execute(IdentifiedData target, IDictionary<String, object> parameters = null)
         {
 
 #if DEBUG
@@ -288,7 +289,7 @@ namespace SanteDB.Cdss.Xml
                 }
                 else if (this.m_library.Status == CdssObjectState.TrialUse && !(debugMode || ignoreStatus))
                 {
-                    return new object[0];
+                    return new ICdssResult[0];
                 }
 
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
@@ -332,11 +333,12 @@ namespace SanteDB.Cdss.Xml
                         .Select(r => new { result = r.Compute(), rule = r.Name })
                         .ToArray();
 
-                    var retVal = context.Proposals.OfType<Object>().Union(context.Issues).ToList();
+                    var retVal = context.Proposals.Select(o=>new CdssProposeResult(o)).OfType<ICdssResult>().Union(context.Issues.Select(o=>new CdssDetectedIssueResult(o))).ToList();
                     if (context.DebugSession != null)
                     {
                         retVal.Add(context.DebugSession);
                     }
+
                     return retVal;
                 }
 
