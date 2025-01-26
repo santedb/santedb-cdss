@@ -445,6 +445,55 @@ namespace SanteDB.Cdss.Xml.Test
         }
 
         /// <summary>
+        /// Tests the periodic hull where there is overlap between a late/delayed action and original timing
+        /// </summary>
+        [Test]
+        public void TestShouldGroupPeriodicHull1Yo()
+        {
+            var scp = ApplicationServiceContext.Current.GetService<IDecisionSupportService>();
+            // Patient that is just born = Schedule OPV
+            Patient patient = new Patient()
+            {
+                Key = Guid.NewGuid(),
+                DateOfBirth = DateTime.Now.AddYears(-1),
+                GenderConceptKey = AdministrativeGenderConceptKeys.Female,
+                GenderConcept = new Core.Model.DataTypes.Concept() { Mnemonic = "FEMALE" }
+            };
+
+            // Now apply the protocol
+            var acts = scp.CreateCarePlan(patient, true, new Dictionary<String, Object>()
+            {
+                { CdssParameterNames.PERSISTENT_OUTPUT, true },
+                { CdssParameterNames.NON_INTERACTIVE, false },
+                {CdssParameterNames.EXCLUDE_OBSERVATIONS, true },
+                {CdssParameterNames.ENCOUNTER_SCOPE, "org.santedb.ims.pediatric.routineVacc" }
+            });
+
+            // Emit the care plan
+            foreach (var enc in
+                acts.Relationships
+                    .Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent)
+                    .Select(r => r.TargetAct))
+            {
+                Debug.WriteLine("{0} : {1:yyyy-MM-dd} - {2:yyyy-MM-dd}", enc.Type, enc.StartTime, enc.StopTime);
+                foreach (var rl in enc.Relationships.Where(r => r.RelationshipTypeKey == ActRelationshipTypeKeys.HasComponent).Select(e => e.TargetAct))
+                {
+                    if (rl is SubstanceAdministration adm)
+                    {
+                        Debug.WriteLine("\t{0} #{1} : R:{2:yyyy-MM-dd}, RG: {3:yyyy-MM-dd} - {4:yyyy-MM-dd}", rl.Protocols.First().Protocol.Name, adm.SequenceId, rl.ActTime, rl.StartTime, rl.StopTime);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("\t{0} : R:{1:yyyy-MM-dd}, RG: {2:yyyy-MM-dd} - {3:yyyy-MM-dd}", rl.TypeConcept.ToDisplay(), rl.ActTime, rl.StartTime, rl.StopTime);
+                    }
+                }
+            }
+
+            Assert.AreEqual(9, acts.Relationships.Count());
+
+        }
+
+        /// <summary>
         /// Should group into appointments
         /// </summary>
         [Test]
