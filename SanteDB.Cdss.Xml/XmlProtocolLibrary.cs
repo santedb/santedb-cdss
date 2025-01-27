@@ -230,7 +230,7 @@ namespace SanteDB.Cdss.Xml
                 using (CdssExecutionStackFrame.Enter(context))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
-                    context.SetValue("mode", "analyze");
+                    context.SetValue(CdssParameterNames.EXECUTION_MODE, "analyze");
                     this.InitializeContextVariables(context);
                     
                     context.ThrowIfNotValid();
@@ -240,7 +240,17 @@ namespace SanteDB.Cdss.Xml
                         .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
                         .OfType<CdssRuleAssetDefinition>()
-                        .Select(r => new { result = (bool?)r.Compute(), rule = r.Name })
+                        .Select(r => {
+                            try
+                            {
+                                return r.Compute();
+                            }
+                            catch(Exception e)
+                            {
+                                context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Error, "error.cdss.exception", $"Could not apply {r.Name} - {e.Message}", Guid.Empty));
+                                return false;
+                            }
+                        })
                         .ToArray();
 
                     return context.Issues.Select(o=>new CdssDetectedIssueResult(o)).OfType<ICdssResult>().Union(context.Proposals.Select(o=> new CdssProposeResult(o, analysisTarget.Key)));
@@ -314,7 +324,7 @@ namespace SanteDB.Cdss.Xml
                 using (CdssExecutionStackFrame.Enter(context, this.m_library))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
-                    context.SetValue("mode", "execute");
+                    context.SetValue(CdssParameterNames.EXECUTION_MODE, "execute");
                     this.InitializeContextVariables(context);
                     context.ThrowIfNotValid();
 

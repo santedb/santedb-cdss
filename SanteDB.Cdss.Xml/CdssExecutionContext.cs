@@ -567,7 +567,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get data from the context as a int
         /// </summary>
-        public int Int(string name) => this[name] is int i ? i : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(int), this[name].GetType()));
+        public int Int(string name) => this[name] is int i ? i: this[name] is long l ? (int)l : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(int), this[name].GetType()));
         /// <summary>
         /// Get data from the context as a real
         /// </summary>

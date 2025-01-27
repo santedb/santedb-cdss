@@ -19,6 +19,7 @@
 using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Cdss;
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -42,6 +43,11 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         internal override void Execute()
         {
             base.ThrowIfInvalidState();
+
+            if (Boolean.TryParse(CdssExecutionStackFrame.Current.GetValue(CdssParameterNames.EXCLUDE_ISSUES)?.ToString(), out var exclude) && exclude)
+            {
+                return;
+            }
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {

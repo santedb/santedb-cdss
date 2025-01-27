@@ -165,7 +165,7 @@ propose_action_statement:
 
 raise_action_statement:
     RAISE (HAVING PRIORITY ISSUE_PRIORITY_VAL)?
-        (HAVING TYPE (STRING|UUIDV4))?
+        (HAVING TYPE (ISSUE_TYPE|UUIDV4))?
         (having_id)?
         (metadata_statement)?
       (STRING|MULTILINE_STRING)
@@ -253,6 +253,7 @@ HAVING: 'having';
 WHEN: 'when';
 WITH: 'with';
 AS: 'as';
+ISSUE_TYPE: 'safety-concern'|'security'|'constraint'|'codification'|'other'|'already-done'|'invalid-data'|'privacy';
 AGG_SELECTOR: 'first'|'last'|'single';
 MULTILINE_STRING: '$$' .*? '$$';
 OID_DOTTED: '"' ([0-9]+ '.')([0-9]+ '.'?)+? '"';
