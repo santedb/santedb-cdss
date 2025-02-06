@@ -21,6 +21,7 @@ using SanteDB.Cdss.Xml.Model.Diagnostics;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model;
+using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 
@@ -30,7 +31,7 @@ namespace SanteDB.Cdss.Xml.Diagnostics
     /// <summary>
     /// Represents a diagnostic session
     /// </summary>
-    public sealed class CdssDebugSessionData
+    public sealed class CdssDebugSessionData : ICdssResult
     {
 
 

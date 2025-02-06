@@ -65,7 +65,7 @@ namespace SanteDB.Cdss.Xml
         /// Get the value for <paramref name="variableName"/> from the context
         /// </summary>
         public object GetValue(String variableName) => this.m_context?.GetValue(variableName) ??
-            this.m_parent.GetValue(variableName);
+            this.m_parent?.GetValue(variableName);
 
         /// <summary>
         /// Get the current wrapper context

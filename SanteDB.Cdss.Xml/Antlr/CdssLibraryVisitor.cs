@@ -25,6 +25,7 @@ using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Actions;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Cdss.Xml.Model.Expressions;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
@@ -35,6 +36,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
+using ZstdSharp.Unsafe;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
@@ -899,7 +901,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             var raiseAlert = this.CreateCdssObject<CdssIssueActionDefinition>(context);
             raiseAlert.IssueToRaise = new Core.BusinessRules.DetectedIssue();
             actionCollection.Actions.Add(raiseAlert);
-            if (context.STRING().Length > 0 && this.TryExtractString(context.STRING()[0], out var issueText) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out issueText))
+            if (this.TryExtractString(context.STRING(), out var issueText) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out issueText))
             {
                 raiseAlert.IssueToRaise.Text = issueText;
             }
@@ -928,6 +930,36 @@ namespace SanteDB.Cdss.Xml.Antlr
             if (this.TryExtractString(context.UUIDV4(), out var uuidString) && Guid.TryParse(uuidString, out var uuid))
             {
                 raiseAlert.IssueToRaise.TypeKey = uuid;
+            }
+            else if(context.ISSUE_TYPE() != null)
+            {
+                switch(context.ISSUE_TYPE().GetText().ToLowerInvariant() ?? "other")
+                {
+                    case "safety-concern":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.SafetyConcernIssue;
+                        break;
+                    case "security":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.SecurityIssue;
+                        break;
+                    case "constraint":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.FormalConstraintIssue;
+                        break;
+                    case "codification":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.CodificationIssue;
+                        break;
+                    case "other":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.OtherIssue;
+                        break;
+                    case "already-done":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.AlreadyDoneIssue;
+                        break;
+                    case "invalid-data":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.AlreadyDoneIssue;
+                        break;
+                    case "privacy":
+                        raiseAlert.IssueToRaise.TypeKey = DetectedIssueKeys.PrivacyIssue;
+                        break;
+            }
             }
 
             this.m_currentObject.Push(raiseAlert);

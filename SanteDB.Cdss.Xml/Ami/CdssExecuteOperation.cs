@@ -139,14 +139,32 @@ namespace SanteDB.Cdss.Xml.Ami
 
             // Force the load of participations
             var startTime = DateTimeOffset.Now;
-            var results = cdssLibrary.Execute(targetForExecution, parameters.Parameters.Where(o => o.Name != "target" && o.Name != "definition").ToDictionaryIgnoringDuplicates(o => o.Name, o => o.Value));
+
+            if(!parameters.TryGet("_mode", out string executeMode))
+            {
+                executeMode = "execute";
+            }
+
+            IEnumerable<ICdssResult> results = null;
+            switch(executeMode)
+            {
+                case "execute":
+                    results = cdssLibrary.Execute(targetForExecution, parameters.Parameters.Where(o => o.Name != "target" && o.Name != "definition").ToDictionaryIgnoringDuplicates(o => o.Name, o => o.Value)); ;
+                    break;
+                case "analyze":
+                    results = cdssLibrary.Analyze(targetForExecution, parameters.Parameters.Where(o => o.Name != "target" && o.Name != "definition").ToDictionaryIgnoringDuplicates(o => o.Name, o => o.Value));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("mode");
+            }
+
             var debugData = results.OfType<CdssDebugSessionData>().FirstOrDefault();
             return new CdssExecutionResult()
             {
                 StartTime = startTime,
                 StopTime = DateTimeOffset.Now,
-                Issues = results.OfType<DetectedIssue>().ToList(),
-                Proposals = results.OfType<IdentifiedData>().ToList(),
+                Issues = results.OfType<CdssDetectedIssueResult>().Select(o=>o.Issue).ToList(),
+                Proposals = results.OfType<CdssProposeResult>().Select(o=>o.ProposedAction).ToList(),
                 ResultingTarget = targetForExecution,
                 Debug = debugData?.GetDiagnosticReport()
             };

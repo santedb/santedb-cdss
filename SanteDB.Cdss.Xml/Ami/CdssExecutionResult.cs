@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Model.Diagnostics;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace SanteDB.Cdss.Xml.Ami
         /// Gets or sets the proposed actions
         /// </summary>
         [XmlElement("propose"), JsonProperty("propose")]
-        public List<IdentifiedData> Proposals { get; set; }
+        public List<Act> Proposals { get; set; }
 
         /// <inheritdoc/>
         [XmlIgnore, JsonIgnore]

@@ -17,9 +17,11 @@
  * 
  */
 using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Ami;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Assets;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
 using System;
@@ -75,6 +77,10 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             if (this.Model == null)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(Model)));
+            }
+            else if(Boolean.TryParse(CdssExecutionStackFrame.Current.GetValue(CdssParameterNames.EXCLUDE_PROPOSALS)?.ToString(), out var exclude) && exclude)
+            {
+                return;
             }
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
