@@ -123,12 +123,12 @@ namespace SanteDB.Cdss.Xml
             {
                 using (CdssExecutionStackFrame.Enter(contextToApply))
                 {
-                    return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && true.Equals(o.When?.Compute() ?? true) && (isForValidationOnly || o.Status != CdssObjectState.DontUse)).ToList();
+                    return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && (isForValidationOnly || true.Equals(o.When?.Compute() ?? true) && o.Status != CdssObjectState.DontUse)).ToList();
                 }
             }
             else
             {
-                return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && true.Equals(o.When?.Compute() ?? true) && (isForValidationOnly || o.Status != CdssObjectState.DontUse)).ToList();
+                return decisionBlockDefinitions.Where(o => o.Context.Type.IsAssignableFrom(contextToApply.Target.GetType()) && (isForValidationOnly || true.Equals(o.When?.Compute() ?? true) && o.Status != CdssObjectState.DontUse)).ToList();
             }
         }
 
