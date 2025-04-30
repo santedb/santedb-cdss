@@ -147,6 +147,13 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, IDictionary<String, Object> parameters, params String[] forScope)
         {
+
+            // If this library is marked as dont use then don't use any protocols
+            if (this.m_library.Status == CdssObjectState.DontUse && (!parameters.TryGetValue(CdssParameterNames.DEBUG_MODE, out var dbg) || !XmlConvert.ToBoolean(dbg.ToString())))
+            {
+                return new ICdssProtocol[0];
+            }
+
             this.InitializeLibrary();
             var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
             parameters?.ForEach(o => context.SetValue(o.Key, o.Value));

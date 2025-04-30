@@ -132,8 +132,7 @@ namespace SanteDB.Cdss.Xml
             {
                 parameters = parameters ?? new Dictionary<String, Object>();
 
-                if (this.m_protocol.Status == CdssObjectState.DontUse ||
-                    (this.m_protocol.Status == CdssObjectState.TrialUse && (!parameters.TryGetValue(CdssParameterNames.DEBUG_MODE, out var dbg) || !XmlConvert.ToBoolean(dbg.ToString()))))
+                if (this.m_protocol.Status == CdssObjectState.DontUse && (!parameters.TryGetValue(CdssParameterNames.DEBUG_MODE, out var dbg) || !XmlConvert.ToBoolean(dbg.ToString())))
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.FORBIDDEN_ON_OBJECT_IN_STATE));
                 }

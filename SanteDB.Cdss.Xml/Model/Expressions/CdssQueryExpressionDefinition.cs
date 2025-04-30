@@ -163,6 +163,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
 
             whereExpressionInvokation = Expression.Call(null, aggregateMethod, whereExpressionInvokation);
 
+            
             return whereExpressionInvokation;
 
         }
