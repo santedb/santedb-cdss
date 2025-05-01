@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2025, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -15,6 +15,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
+ * User: fyfej
+ * Date: 2023-11-27
  */
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
@@ -145,6 +147,13 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public IEnumerable<ICdssProtocol> GetProtocols(Patient forPatient, IDictionary<String, Object> parameters, params String[] forScope)
         {
+
+            // If this library is marked as dont use then don't use any protocols
+            if (this.m_library.Status == CdssObjectState.DontUse && (!parameters.TryGetValue(CdssParameterNames.DEBUG_MODE, out var dbg) || !XmlConvert.ToBoolean(dbg.ToString())))
+            {
+                return new ICdssProtocol[0];
+            }
+
             this.InitializeLibrary();
             var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
             parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
