@@ -439,6 +439,8 @@ namespace SanteDB.Cdss.Xml
             Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
             Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
             Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
+            Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
+            Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
             expressionInterpreter.SetFunction("intf", intFunc);
             expressionInterpreter.SetFunction("realf", realFunc);
             expressionInterpreter.SetFunction("boolf", boolFunc);
@@ -447,6 +449,8 @@ namespace SanteDB.Cdss.Xml
             expressionInterpreter.SetFunction("actf", actFunc);
             expressionInterpreter.SetFunction("entf", entityFunc);
             expressionInterpreter.SetFunction("data", datasetFunc);
+            expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
+            expressionInterpreter.SetFunction("lesserOf", greaterOfFunc);
             
             return expressionInterpreter;
         }
