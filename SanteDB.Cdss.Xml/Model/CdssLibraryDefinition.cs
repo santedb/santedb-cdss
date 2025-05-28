@@ -52,7 +52,6 @@ namespace SanteDB.Cdss.Xml.Model
         [XmlElement("logic", typeof(CdssDecisionLogicBlockDefinition)), XmlElement("data", typeof(CdssDatasetDefinition)), JsonProperty("definitions")]
         public List<CdssBaseObjectDefinition> Definitions { get; set; }
 
-
         /// <summary>
         /// Loads the <see cref="CdssLibraryDefinition"/> from <paramref name="fromStream"/>
         /// </summary>
@@ -60,7 +59,10 @@ namespace SanteDB.Cdss.Xml.Model
         /// <returns>The loaded library definition</returns>
         public static CdssLibraryDefinition Load(Stream fromStream)
         {
-            return (CdssLibraryDefinition)s_serializer.Deserialize(fromStream);
+            using (CdssLibraryLoadContext.Current)
+            {
+                return (CdssLibraryDefinition)s_serializer.Deserialize(fromStream);
+            }
         }
 
         /// <summary>

@@ -154,6 +154,23 @@ namespace SanteDB.Cdss.Xml
                 this.m_context.DebugSession?.End();
             }
         }
+
+        /// <summary>
+        /// Find parent having matching attributes
+        /// </summary>
+        internal CdssExecutionStackFrame FindParent(Predicate<CdssExecutionStackFrame> value)
+        {
+            var cFrame = this;
+            while(cFrame != null)
+            {
+                if(value(cFrame))
+                {
+                    return cFrame;
+                }
+                cFrame = cFrame.Parent;
+            }
+            return null;
+        }
     }
 }
 

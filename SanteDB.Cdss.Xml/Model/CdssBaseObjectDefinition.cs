@@ -34,6 +34,14 @@ namespace SanteDB.Cdss.Xml.Model
     {
 
         /// <summary>
+        /// Register a loaded object
+        /// </summary>
+        protected CdssBaseObjectDefinition()
+        {
+            CdssLibraryLoadContext.Current?.RegisterLoaded(this);
+        }
+
+        /// <summary>
         /// A unique name which is used to reference the object in the base
         /// </summary>
         [XmlAttribute("id"), JsonProperty("id")]

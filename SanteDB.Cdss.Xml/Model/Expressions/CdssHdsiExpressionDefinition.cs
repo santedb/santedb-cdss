@@ -86,6 +86,9 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         internal override Expression GenerateComputableExpression(CdssExecutionContext cdssContext, params ParameterExpression[] parameters)
         {
 
+            var cdssParameter = parameters.First(o => o.Name == CdssConstants.ContextVariableName);
+            var scopedObjectParameter = parameters.First(o => o.Name == CdssConstants.ScopedObjectVariableName);
+
             var variableDictionary = new Dictionary<String, Func<Object>>();
             foreach (var varRef in cdssContext.Variables.Union(cdssContext.FactNames ?? new String[0]))
             {
@@ -96,11 +99,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             switch (this.Scope)
             {
                 case CdssHdsiExpressionScopeType.Context:
-                    scopedObjectExpression = Expression.MakeMemberAccess(parameters.First(o => o.Name == CdssConstants.ContextVariableName), (MemberInfo)cdssContext.GetType().GetProperty(nameof(ICdssExecutionContext.Target)));
+                    scopedObjectExpression = Expression.MakeMemberAccess(cdssParameter, (MemberInfo)cdssParameter.Type.GetProperty(nameof(ICdssExecutionContext.Target)));
                     break;
                 default:
                     var scopedObjectType = CdssExecutionStackFrame.Current.ScopedObject.GetType();
-                    scopedObjectExpression = Expression.Convert(parameters.First(o => o.Name == CdssConstants.ScopedObjectVariableName), scopedObjectType);
+                    scopedObjectExpression = Expression.Convert(scopedObjectParameter, scopedObjectType);
                     break;
 
             }

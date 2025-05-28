@@ -100,14 +100,13 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                         case CdssExpressionDefinition exe:
                             if (this.m_compiledExpression == null)
                             {
-                                var uncompiledExpression = exe.GenerateComputableExpression();
+                                var uncompiledExpression = exe.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
                                 this.DebugView = uncompiledExpression.ToString();
                                 this.m_compiledExpression = uncompiledExpression.Compile();
                             }
                             var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
                             CdssExecutionStackFrame.Current.Context.DebugSession?.CurrentFrame.AddAssignment(this.Path, value);
                             CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, value, this.OverwriteValue);
-
                             break;
                         case String str:
                             CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);

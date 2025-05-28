@@ -104,8 +104,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
 
             if (this.m_compiledExpression == null)
             {
-
-                var uncompiledExpression = this.FactComputation.GenerateComputableExpression();
+                var uncompiledExpression = this.FactComputation.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
 
                 if (this.IsNegated)
                 {

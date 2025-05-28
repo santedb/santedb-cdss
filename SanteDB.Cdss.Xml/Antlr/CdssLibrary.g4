@@ -151,7 +151,7 @@ then_action_statements: (
 repeat_action_statement:
     REPEAT 
     (UNTIL fact_reference_or_computation |
-    FOR INTEGER (ITERATIONS)? (TRACKBY LITERAL)?)
+    FOR INTEGER (ITERATIONS)? (TRACKBY (LITERAL|HDSI_EXPR))?)
         (then_action_statements)*
     END (REPEAT)?;
 
@@ -172,7 +172,7 @@ raise_action_statement:
     ;
 
 assign_action_statement:
-    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO LITERAL (OVERWRITE)?;
+    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO HDSI_EXPR (OVERWRITE)?;
 
 apply_action_statement: APPLY STRING;
 
@@ -278,12 +278,15 @@ UUIDV4:
     '{' HEX_4 HEX_4 '-' HEX_4 '-' HEX_4 '-' HEX_4 '-' HEX_4 HEX_4 HEX_4 '}'
     ;
 
-LITERAL
-    : [a-z]([a-z.0-9_] | '[' | ']' )*
+HDSI_EXPR
+    : [$a-z]+('['(~']')*']')?('.'HDSI_EXPR)*
     ;
 
+LITERAL
+    : [a-z]([a-z0-9._])*;
+
 NAMED_ID
-    : '<'LITERAL'>'
+    : '<'[a-z][a-z.0-9_]*'>'
     ;
 
 STRING
@@ -300,9 +303,9 @@ FLOAT
     ;
 
 VERSION_VAL
-    : [0-9]+'.'[0-9]+'.'[0-9]+'.'[0-9]+('-'LITERAL*)?
-    | [0-9]+'.'[0-9]+'.'[0-9]+('-'LITERAL*)?
-    | [0-9]+'.'[0-9]+('-'LITERAL*)?
+    : [0-9]+'.'[0-9]+'.'[0-9]+'.'[0-9]+('-'[a-z.0-9_]+)?
+    | [0-9]+'.'[0-9]+'.'[0-9]+('-'[a-z.0-9_]+)?
+    | [0-9]+'.'[0-9]+('-'[a-z.0-9_]+)?
     ;
 
 COMMENT

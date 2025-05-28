@@ -35,6 +35,20 @@ namespace SanteDB.Cdss.Xml.Model.Assets
     {
 
         /// <summary>
+        /// When definition ctor
+        /// </summary>
+        public CdssComputableAssetDefinition()
+        {
+            this.LogicBlock = CdssLibraryLoadContext.Current.FindLastLoaded<CdssDecisionLogicBlockDefinition>();
+        }
+
+        /// <summary>
+        /// Gets the logic block that owns this 
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public CdssDecisionLogicBlockDefinition LogicBlock { get; }
+
+        /// <summary>
         /// Gets or sets the priority for overridding default
         /// </summary>
         [XmlAttribute("priority"), JsonProperty("priority")]

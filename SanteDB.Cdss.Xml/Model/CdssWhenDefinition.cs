@@ -35,6 +35,19 @@ namespace SanteDB.Cdss.Xml.Model
     public class CdssWhenDefinition : CdssBaseObjectDefinition
     {
 
+        /// <summary>
+        /// When definition ctor
+        /// </summary>
+        public CdssWhenDefinition()
+        {
+            this.LogicBlock = CdssLibraryLoadContext.Current.FindLastLoaded<CdssDecisionLogicBlockDefinition>();
+        }
+
+        /// <summary>
+        /// Gets the logic block that owns this 
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public CdssDecisionLogicBlockDefinition LogicBlock { get; }
 
         // The expression which has been calculated
         private Func<object, object, object> m_compiledExpression;
@@ -81,7 +94,7 @@ namespace SanteDB.Cdss.Xml.Model
         {
             if (this.m_compiledExpression == null)
             {
-                var uncompiledExpression = this.WhenComputation.GenerateComputableExpression();
+                var uncompiledExpression = this.WhenComputation.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
 
                 this.DebugView = uncompiledExpression.ToString();
                 this.m_compiledExpression = uncompiledExpression.Compile();

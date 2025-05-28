@@ -52,7 +52,6 @@ namespace SanteDB.Cdss.Xml
 
         // definition loaded from XML
         private CdssLibraryDefinition m_library;
-        private IList<CdssLibraryDefinition> m_scopedLibraries;
         private ICdssLibraryRepositoryMetadata m_storageMetadata;
 
         /// <summary>
@@ -154,15 +153,14 @@ namespace SanteDB.Cdss.Xml
                 return new ICdssProtocol[0];
             }
 
-            this.InitializeLibrary();
-            var context = CdssExecutionContext.CreateContext(forPatient, this.m_scopedLibraries);
+            var context = CdssExecutionContext.CreateContext(forPatient, this.GetScopedLibraries());
             parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
             var retVal = this.m_library.Definitions.OfType<CdssDecisionLogicBlockDefinition>()
                     .AppliesTo(context)
                     .SelectMany(o => o.Definitions)
                     .OfType<CdssProtocolAssetDefinition>()
                     .Where(o => o.Status != CdssObjectState.DontUse)
-                    .Select(p => new XmlClinicalProtocol(p, this.m_scopedLibraries));
+                    .Select(p => new XmlClinicalProtocol(p, this.GetScopedLibraries()));
             forScope = forScope.Where(o=>!String.IsNullOrEmpty(o)).ToArray();
             if (forScope.Any())
             {
@@ -196,14 +194,13 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Initialize the library for use
         /// </summary>
-        private void InitializeLibrary()
+        private IEnumerable<CdssLibraryDefinition> GetScopedLibraries()
         {
-            if (this.m_scopedLibraries == null)
+            var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
+            yield return this.m_library;
+            foreach(var itm in this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o => o.Library) ?? new CdssLibraryDefinition[0])
             {
-                var cdssLibraryService = ApplicationServiceContext.Current.GetService<ICdssLibraryRepository>();
-                this.m_scopedLibraries = new List<CdssLibraryDefinition>() { this.m_library };
-                this.m_scopedLibraries.AddRange(this.m_library.Include?.Select(o => cdssLibraryService?.ResolveReference(o)).OfType<XmlProtocolLibrary>().Select(o => o.Library) ?? new CdssLibraryDefinition[0]);
-
+                yield return itm;
             }
         }
 
@@ -218,9 +215,19 @@ namespace SanteDB.Cdss.Xml
             try
             {
                 // Is the library not active?
-                object debugParameterValue = null;
-                if (this.m_library.Status == CdssObjectState.DontUse ||
-                    (this.m_library.Status == CdssObjectState.TrialUse && (parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue) != true || !XmlConvert.ToBoolean(debugParameterValue.ToString()))))
+                // Is the library not active?
+                object debugParameterValue = null, testingParmValue = null;
+                _ = parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue);
+                _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
+                var ignoreStatus = parameters?.TryGetValue(CdssParameterNames.TESTING, out testingParmValue) == true && Boolean.Parse(testingParmValue?.ToString());
+
+
+                if (!ignoreStatus && this.m_library.Status == CdssObjectState.DontUse)
+                {
+                    this.m_tracer.TraceWarning("Library {0} is set to DontUse - will not analyze rules in library", this.m_library.Id);
+                    return new ICdssResult[0];
+                }
+                else if (this.m_library.Status == CdssObjectState.TrialUse && !(debugMode || ignoreStatus))
                 {
                     return new ICdssResult[0];
                 }
@@ -228,14 +235,22 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
-                this.InitializeLibrary();
-
                 if (analysisTarget is Entity ent) // HACK: Participations need to be reverse loaded
                 {
                     ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
                 }
 
-                var context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.m_scopedLibraries);
+
+                CdssExecutionContext context = null;
+                if (debugMode)
+                {
+                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)analysisTarget, this.GetScopedLibraries());
+                }
+                else
+                {
+                    context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.GetScopedLibraries());
+                }
+
                 using (CdssExecutionStackFrame.Enter(context))
                 {
                     parameters?.ForEach(o => context.SetValue(o.Key, o.Value));
@@ -248,7 +263,7 @@ namespace SanteDB.Cdss.Xml
                         .OfType<CdssDecisionLogicBlockDefinition>()
                         .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
-                        .OfType<CdssRuleAssetDefinition>()
+                        .OfType<CdssComputableAssetDefinition>()
                         .Select(r => {
                             try
                             {
@@ -256,13 +271,20 @@ namespace SanteDB.Cdss.Xml
                             }
                             catch(Exception e)
                             {
-                                context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Error, "error.cdss.exception", $"Could not apply {r.Name} - {e.Message}", Guid.Empty));
+                                this.m_tracer.TraceWarning($"Error applying {r.Name} - {e.ToHumanReadableString()}");
+                                context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Error, "error.cdss.exception", $"Could not apply {r.Name} - {e.ToHumanReadableString()}", Guid.Empty));
                                 return false;
                             }
                         })
                         .ToArray();
 
-                    return context.Issues.Select(o=>new CdssDetectedIssueResult(o)).OfType<ICdssResult>().Union(context.Proposals.Select(o=> new CdssProposeResult(o, analysisTarget.Key)));
+                    var retVal = context.Issues.Select(o => new CdssDetectedIssueResult(o)).OfType<ICdssResult>().Union(context.Proposals.Select(o => new CdssProposeResult(o, analysisTarget.Key))).ToList();
+                    if (context.DebugSession != null)
+                    {
+                        retVal.Add(context.DebugSession);
+                    }
+
+                    return retVal;
                 }
             }
             finally
@@ -313,16 +335,14 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", target, this.Name);
 
-                this.InitializeLibrary();
-
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.GetScopedLibraries());
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.GetScopedLibraries());
                 }
 
                 if (target is Entity ent) // HACK: Participations need to be reverse loaded
@@ -347,6 +367,7 @@ namespace SanteDB.Cdss.Xml
                     {
                         toExecute = toExecute.OfType<CdssProtocolAssetDefinition>();
                     }
+
 
                     var definitions = toExecute
                         .Select(r => new { result = r.Compute(), rule = r.Name })

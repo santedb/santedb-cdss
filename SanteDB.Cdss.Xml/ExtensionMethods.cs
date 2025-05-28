@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace SanteDB.Cdss.Xml
 {
@@ -84,10 +85,12 @@ namespace SanteDB.Cdss.Xml
         }
 
 
-        internal static Expression<Func<Object, Object, Object>> GenerateComputableExpression(this CdssExpressionDefinition me)
+        internal static Expression<Func<Object, Object, Object>> GenerateComputableExpression(this CdssExpressionDefinition me, Type contextTargetObjectType)
         {
 
-            var contextParameter = Expression.Parameter(CdssExecutionStackFrame.Current.Context.GetType(), CdssConstants.ContextVariableName);
+            contextTargetObjectType = contextTargetObjectType ?? CdssExecutionStackFrame.Current.Context.TargetType;
+
+            var contextParameter = Expression.Parameter(typeof(CdssExecutionContext<>).MakeGenericType(contextTargetObjectType), CdssConstants.ContextVariableName);
             var scopeParameter = Expression.Parameter(typeof(IdentifiedData), CdssConstants.ScopedObjectVariableName);
 
             var expressionForValue = me.GenerateComputableExpression(CdssExecutionStackFrame.Current.Context, contextParameter, scopeParameter);
@@ -101,7 +104,10 @@ namespace SanteDB.Cdss.Xml
             var scopeObjParameter = Expression.Parameter(typeof(Object));
             expressionForValue = Expression.Convert(Expression.Invoke(
                     expressionForValue,
-                    Expression.Convert(contextObjParameter, contextParameter.Type),
+                    Expression.Call(
+                        Expression.Convert(contextObjParameter, typeof(CdssExecutionContext)),
+                        (MethodInfo)typeof(CdssExecutionContext).GetGenericMethod(nameof(CdssExecutionContext.Wrap), new Type[] { contextTargetObjectType }, Type.EmptyTypes)
+                    ),
                     Expression.Convert(scopeObjParameter, scopeParameter.Type)
                 ), typeof(Object));
 

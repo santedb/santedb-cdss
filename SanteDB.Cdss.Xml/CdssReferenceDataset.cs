@@ -86,22 +86,22 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Select values of a particular type
         /// </summary>
-        public IEnumerable<double> SelectReal(string columnName) => this.Select(columnName).OfType<double>();
+        public IEnumerable<double> SelectReal(string columnName) => this.Select(columnName).Select(o=>Convert.ToDouble(o));
 
         /// <summary>
         /// Select values of a particular type
         /// </summary>
-        public IEnumerable<int> SelectInt(string columnName) => this.Select(columnName).OfType<int>();
+        public IEnumerable<int> SelectInt(string columnName) => this.Select(columnName).Select(o => Convert.ToInt32(o));
 
         /// <summary>
         /// Select values of a particular type
         /// </summary>
-        public IEnumerable<long> SelectLong(string columnName) => this.Select(columnName).OfType<long>();
+        public IEnumerable<long> SelectLong(string columnName) => this.Select(columnName).Select(o => Convert.ToInt64(o));
 
         /// <summary>
         /// Select as a date time
         /// </summary>
-        public IEnumerable<DateTime> SelectDate(string columnName) => this.Select(columnName).OfType<DateTime>();
+        public IEnumerable<DateTime> SelectDate(string columnName) => this.Select(columnName).Select(o => Convert.ToDateTime(o));
 
         /// <inheritdoc/>
         public IEnumerator<IForeignDataRecord> GetEnumerator()
