@@ -89,7 +89,7 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             }
             else if (!context.TryGetRuleDefinition(this.RuleName, out _))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToReferenceString());
+                yield return new DetectedIssue(context.IsForValidation ? DetectedIssuePriorityType.Error : DetectedIssuePriorityType.Warning, "cdss.rule.referenceNotFound", $"Reference to {this.RuleName} not found", Guid.Empty, this.ToReferenceString());
             }
             foreach (var itm in base.Validate(context))
             {
