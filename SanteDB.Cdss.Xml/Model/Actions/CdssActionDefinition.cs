@@ -18,6 +18,7 @@
  * User: fyfej
  * Date: 2024-6-21
  */
+using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
@@ -32,6 +33,20 @@ namespace SanteDB.Cdss.Xml.Model.Actions
     [XmlType(nameof(CdssActionDefinition), Namespace = "http://santedb.org/cdss")]
     public abstract class CdssActionDefinition : CdssBaseObjectDefinition
     {
+
+        /// <summary>
+        /// definition ctor
+        /// </summary>
+        public CdssActionDefinition()
+        {
+            this.LogicBlock = CdssLibraryLoadContext.Current.FindLastLoaded<CdssDecisionLogicBlockDefinition>();
+        }
+
+        /// <summary>
+        /// Gets the logic block that owns this 
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public CdssDecisionLogicBlockDefinition LogicBlock { get; }
 
         /// <summary>
         /// Throw an appropriate exception if the CDSS engine is in an invalid state

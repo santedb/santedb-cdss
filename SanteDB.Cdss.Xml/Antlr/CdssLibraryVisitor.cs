@@ -709,7 +709,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
             if (context.TRACKBY() != null)
             {
-                repeatDefinition.IterationVariable = context.LITERAL().GetText();
+                repeatDefinition.IterationVariable = context.LITERAL()?.GetText() ?? context.HDSI_EXPR()?.GetText();
             }
 
             this.m_currentObject.Push(repeatDefinition);
@@ -755,7 +755,7 @@ namespace SanteDB.Cdss.Xml.Antlr
         {
 
             var assignAction = this.CreateCdssObject<CdssPropertyAssignActionDefinition>(context);
-            assignAction.Path = context.LITERAL()?.GetText();
+            assignAction.Path = context.HDSI_EXPR()?.GetText();
             assignAction.OverwriteValue = true;
             if (String.IsNullOrEmpty(assignAction.Path))
             {

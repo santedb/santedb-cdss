@@ -81,11 +81,30 @@ namespace SanteDB.Cdss.Xml
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
         private readonly IDictionary<String, CdssComputableAssetDefinition> m_computableAssetsInScope;
+        private readonly IEnumerable<CdssLibraryDefinition> m_scopedLibraries;
         private readonly IDictionary<String, CdssReferenceDataset> m_datasets;
         private readonly CdssComputableAssetDefinition[] m_scopedLogicBlocks;
         private readonly List<Act> m_proposedActions = new List<Act>();
         private readonly List<DetectedIssue> m_detectedIssues = new List<DetectedIssue>();
         private readonly object m_lock = new object();
+
+
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        protected CdssExecutionContext(CdssExecutionContext copyFrom)
+        {
+            this.m_computableAssetsInScope = copyFrom.m_computableAssetsInScope;
+            this.m_datasets = copyFrom.m_datasets;
+            this.m_detectedIssues = copyFrom.m_detectedIssues;
+            this.m_factCache = copyFrom.m_factCache;
+            this.m_proposedActions = copyFrom.m_proposedActions;
+            this.m_scopedLibraries = copyFrom.m_scopedLibraries;
+            this.m_scopedLogicBlocks = copyFrom.m_scopedLogicBlocks;
+            this.m_serializationBinder =  copyFrom.m_serializationBinder;
+            this.m_target = copyFrom.m_target;
+            this.m_variables =  copyFrom.m_variables;
+        }
 
         /// <summary>
         /// Create a new context with specified target
@@ -121,6 +140,8 @@ namespace SanteDB.Cdss.Xml
             this.m_computableAssetsInScope = this.m_scopedLogicBlocks?
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
+
+            this.m_scopedLibraries = scopedLibraries;
 
         }
 
@@ -195,6 +216,10 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public IEnumerable<string> FactNames => this.m_computableAssetsInScope?.Where(o => o.Value is CdssComputableAssetDefinition).Select(o => o.Key);
 
+        /// <summary>
+        /// Get the target type
+        /// </summary>
+        public virtual Type TargetType => this.m_target?.GetType();
 
         /// <summary>
         /// Property indexer for variable name
@@ -439,6 +464,8 @@ namespace SanteDB.Cdss.Xml
             Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
             Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
             Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
+            Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
+            Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
             expressionInterpreter.SetFunction("intf", intFunc);
             expressionInterpreter.SetFunction("realf", realFunc);
             expressionInterpreter.SetFunction("boolf", boolFunc);
@@ -447,6 +474,8 @@ namespace SanteDB.Cdss.Xml
             expressionInterpreter.SetFunction("actf", actFunc);
             expressionInterpreter.SetFunction("entf", entityFunc);
             expressionInterpreter.SetFunction("data", datasetFunc);
+            expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
+            expressionInterpreter.SetFunction("lesserOf", greaterOfFunc);
             
             return expressionInterpreter;
         }
@@ -578,7 +607,19 @@ namespace SanteDB.Cdss.Xml
         /// Get data from the context as a bool
         /// </summary>
         public bool Bool(string name) => this[name] is bool b ? b : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(bool), this[name].GetType()));
+
+        /// <summary>
+        /// Wrap this execution context such that it is a <see cref="CdssExecutionContext{TTarget}"/> 
+        /// </summary>
+        /// <typeparam name="TTarget">The type of target which is being wrapped</typeparam>
+        /// <remarks>
+        /// This method exists to allow sharing common functions and facts between related object types. For example, a logic block with <see cref="CdssExecutionContext{Act}"/> with a 
+        /// <see cref="CdssExecutionContext{QuantityObservation}"/>
+        /// </remarks>
+        public CdssExecutionContext<TTarget> Wrap<TTarget>() where TTarget : IdentifiedData => this is CdssExecutionContext<TTarget> retVal ? retVal : new CdssExecutionContext<TTarget>(this);
+
     }
+
     /// <summary>
     /// Parameter manager for the CDSS
     /// </summary>
@@ -586,6 +627,13 @@ namespace SanteDB.Cdss.Xml
         where TTarget : IdentifiedData
     {
 
+        /// <summary>
+        /// Copy this context from another context
+        /// </summary>
+        public CdssExecutionContext(CdssExecutionContext copyFrom) : base(copyFrom)
+        {
+            
+        }
 
         /// <inheritdoc/>
         public CdssExecutionContext(TTarget target, IEnumerable<CdssLibraryDefinition> scopedLibraries = null, bool validationContext = false) : base(target, scopedLibraries, validationContext)
@@ -597,6 +645,10 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public TTarget Target => (TTarget)base.m_target;
 
+        /// <summary>
+        /// Get the target type
+        /// </summary>
+        public override Type TargetType => typeof(TTarget);
 
     }
 }

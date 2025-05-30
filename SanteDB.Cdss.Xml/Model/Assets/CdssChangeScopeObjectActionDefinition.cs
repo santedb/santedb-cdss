@@ -79,7 +79,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             if (this.m_compiledExpression == null)
             {
 
-                var uncompiledExpression = this.ScopeComputation.GenerateComputableExpression();
+                var uncompiledExpression = this.ScopeComputation.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
                 this.DebugView = uncompiledExpression.ToString();
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }

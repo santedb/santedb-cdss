@@ -64,5 +64,14 @@ namespace SanteDB.Cdss.Xml.Exceptions
             sb.AppendFormat("at: \r\n", this.StackTrace);
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Represent as a string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{base.ToString()} - {this.ToCdssStackTrace()}";
+        }
     }
 }
