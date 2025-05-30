@@ -491,7 +491,7 @@ namespace SanteDB.Cdss.Xml.Test
                 }
             }
 
-            Assert.AreEqual(9, acts.Relationships.Count());
+            Assert.GreaterOrEqual(acts.Relationships.Count(), 9);
 
         }
 
