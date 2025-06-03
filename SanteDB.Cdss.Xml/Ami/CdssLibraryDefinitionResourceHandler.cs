@@ -23,6 +23,7 @@ using RestSrvr.Attributes;
 using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model;
+using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.Http;
@@ -161,7 +162,9 @@ namespace SanteDB.Cdss.Xml.Ami
                             }
                             catch (CdssTranspilationException e)
                             {
-                                throw new DetectedIssueException(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty, e);
+                                var issues = e.Errors.Select(o => new DetectedIssue(DetectedIssuePriorityType.Error, "error.cdss.transpile", $"{o.Message} @{o.Line}:{o.Column}", Guid.Empty)).ToList();
+                                issues.Insert(0, new DetectedIssue(Core.BusinessRules.DetectedIssuePriorityType.Error, "error.cdss.transpile", e.Message, Guid.Empty));
+                                throw new DetectedIssueException(issues);
                             }
                         }
                     }
