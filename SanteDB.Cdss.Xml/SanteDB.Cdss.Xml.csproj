@@ -52,7 +52,7 @@
       <Listener>false</Listener>
       <GAtn>true</GAtn>
       <Package>SanteDB.Cdss.Xml.Antlr</Package>
-      <Error>true</Error>
+      <Error>false</Error>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Antlr4>
   </ItemGroup>
