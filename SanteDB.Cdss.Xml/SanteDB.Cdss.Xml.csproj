@@ -54,6 +54,7 @@
       <Package>SanteDB.Cdss.Xml.Antlr</Package>
       <Error>false</Error>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <JavaExec>JAVA_HOME</JavaExec>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
