@@ -22,7 +22,7 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	    <Product>SanteDB</Product>
-    <Copyright>Copyright (C) 2015-2023 SanteSuite Contributors (See: NOTICES)</Copyright>
+    <Copyright>Copyright (C) 2015-2025 SanteSuite Contributors (See: NOTICES)</Copyright>
     <Company>SanteSuite Contributors</Company>
     <PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
     <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
@@ -54,6 +54,7 @@
       <Package>SanteDB.Cdss.Xml.Antlr</Package>
       <Error>false</Error>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <JavaExec>PATH</JavaExec>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +62,7 @@
   </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" PrivateAssets="all" />
     <PackageReference Include="DynamicExpresso.Core" Version="2.17.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>    
