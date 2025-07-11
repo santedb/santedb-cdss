@@ -110,7 +110,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 {
                     uncompiledExpression = Expression.Lambda<Func<object, object, object>>(Expression.Convert(Expression.Not(Expression.Convert(uncompiledExpression.Body, typeof(bool))), typeof(object)), uncompiledExpression.Parameters);
                 }
+#if DEBUG
                 this.DebugView = uncompiledExpression.ToString();
+#endif
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
 
