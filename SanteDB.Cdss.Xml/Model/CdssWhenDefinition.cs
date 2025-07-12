@@ -96,7 +96,9 @@ namespace SanteDB.Cdss.Xml.Model
             {
                 var uncompiledExpression = this.WhenComputation.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
 
+#if DEBUG
                 this.DebugView = uncompiledExpression.ToString();
+#endif 
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
 
