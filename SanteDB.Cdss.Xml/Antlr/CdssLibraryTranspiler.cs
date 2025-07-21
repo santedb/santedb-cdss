@@ -30,6 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using SanteDB;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
