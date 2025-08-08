@@ -132,7 +132,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                                 scopeObjParameter,
                                 valueObjParameter
                             );
+#if DEBUG
                             this.DebugView = uncompiledExpression.ToString();
+#endif
                             this.m_compiledExpression = uncompiledExpression.Compile();
                         }
 

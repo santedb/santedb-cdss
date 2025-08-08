@@ -101,7 +101,9 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             if (this.m_compiledExpression == null)
                             {
                                 var uncompiledExpression = exe.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
+#if DEBUG
                                 this.DebugView = uncompiledExpression.ToString();
+#endif
                                 this.m_compiledExpression = uncompiledExpression.Compile();
                             }
                             var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);

@@ -80,7 +80,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             {
 
                 var uncompiledExpression = this.ScopeComputation.GenerateComputableExpression(this.LogicBlock?.Context?.Type);
+#if DEBUG
                 this.DebugView = uncompiledExpression.ToString();
+#endif
                 this.m_compiledExpression = uncompiledExpression.Compile();
             }
 
