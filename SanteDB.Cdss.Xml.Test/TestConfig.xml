@@ -87,6 +87,7 @@
   </section>
   <section xsi:type="ApplicationServiceContextConfigurationSection" allowUnsignedAssemblies="true" threadPoolSize="4">
     <serviceProviders>
+		<add type="SanteDB.Core.Applets.Services.Impl.AppletDataReferenceResolver, SanteDB.Core.Applets" />
       <add type="SanteDB.Cdss.Xml.Test.TestCdssLibraryPersistenceService, SanteDB.Cdss.Xml.Test" />
       <add type="SanteDB.Core.Security.SHA256PasswordHashingService,SanteDB.Core.Api" />
       <add type="SanteDB.Core.Security.DefaultPolicyDecisionService, SanteDB.Core.Api" />
