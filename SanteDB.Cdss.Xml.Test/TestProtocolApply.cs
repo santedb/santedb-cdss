@@ -22,7 +22,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Core;
-using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.ViewModel.Json;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Constants;
