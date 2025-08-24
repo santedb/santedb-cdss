@@ -21,7 +21,7 @@
 using SanteDB.Cdss.Xml.Antlr;
 using SanteDB.Cdss.Xml.Diagnostics;
 using SanteDB.Core;
-using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;

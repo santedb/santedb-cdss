@@ -20,7 +20,7 @@
  */
 using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
-using SanteDB.Core.Applets.ViewModel.Json;
+using SanteDB.Core.ViewModel.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
