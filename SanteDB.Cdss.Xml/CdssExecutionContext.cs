@@ -475,7 +475,7 @@ namespace SanteDB.Cdss.Xml
             expressionInterpreter.SetFunction("entf", entityFunc);
             expressionInterpreter.SetFunction("data", datasetFunc);
             expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
-            expressionInterpreter.SetFunction("lesserOf", greaterOfFunc);
+            expressionInterpreter.SetFunction("lesserOf", lesserOfFunc);
             
             return expressionInterpreter;
         }
