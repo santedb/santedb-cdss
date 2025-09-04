@@ -473,7 +473,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
 
             CdssCollectionSelectorType collectionType = CdssCollectionSelectorType.First;
-            switch (context.AGG_SELECTOR().GetText().ToLowerInvariant())
+            switch (context.AGG_SELECTOR()?.GetText().ToLowerInvariant())
             {
                 case "last":
                     collectionType = CdssCollectionSelectorType.Last;
