@@ -23,6 +23,7 @@ using SanteDB.Cdss.Xml.Model.Diagnostics;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
 using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace SanteDB.Cdss.Xml.Ami
     /// <summary>
     /// CDSS execution result
     /// </summary>
+    [AddDependentSerializers]
     [XmlType(nameof(CdssExecutionResult), Namespace = "http://santedb.org/cdss")]
     public class CdssExecutionResult : IResourceCollection
     {
