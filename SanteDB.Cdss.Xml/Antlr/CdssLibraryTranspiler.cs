@@ -404,7 +404,14 @@ namespace SanteDB.Cdss.Xml.Antlr
                     break;
             }
 
-            writer.Write(" to {0}", cdssAssign.Path);
+            if (!String.IsNullOrEmpty(cdssAssign.TargetFact))
+            {
+                writer.Write(" to fact \"{0}\" {1}", cdssAssign.TargetFact, cdssAssign.Path);
+            }
+            else
+            {
+                writer.Write(" to {0}", cdssAssign.Path);
+            }
             if (cdssAssign.OverwriteValue)
             {
                 writer.Write(" overwrite");
@@ -493,10 +500,16 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 case CdssHdsiExpressionDefinition hdsi:
                     writer.Write("hdsi($${0}$$", hdsi.ExpressionValue);
-                    if (hdsi.Scope != CdssHdsiExpressionScopeType.Context)
+                    switch(hdsi.Scope)
                     {
-                        writer.Write(" scoped-to proposal");
+                        case CdssHdsiExpressionScopeType.Fact:
+                            writer.Write(" scoped-to fact \"{0}\"", hdsi.ScopedFact);
+                            break;
+                        case CdssHdsiExpressionScopeType.CurrentObject:
+                            writer.Write(" scoped-to proposal");
+                            break;
                     }
+                    
                     if (hdsi.IsNegated)
                     {
                         writer.Write(" negated");
