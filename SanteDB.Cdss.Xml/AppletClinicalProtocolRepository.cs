@@ -125,7 +125,7 @@ namespace SanteDB.Cdss.Xml
             {
 
                 // Get protocols from the applet
-                var protocols = appletCollection.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/"));
+                var protocols = appletCollection.SelectMany(o => o.Assets).Where(o => o.Name.StartsWith("protocols/")).ToArray();
 
                 foreach (var f in protocols)
                 {
