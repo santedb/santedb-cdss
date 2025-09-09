@@ -76,7 +76,6 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <inheritdoc/>
         public override object Compute()
         {
-
             if (this.m_parsedModel == null)
             {
                 if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel))
@@ -88,7 +87,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     var templateManager = ApplicationServiceContext.Current.GetService<IDataTemplateManagementService>();
                     var resolver = ApplicationServiceContext.Current.GetService<IReferenceResolver>();
                     var dt = templateManager.GetByMnemonic(this.ExternalModel) ?? throw new KeyNotFoundException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.ExternalModel));
-                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString).DeepCopy() as Act;
+                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act;
                     // Fill out sub-templates in relationships
                     if (this.m_parsedModel.Relationships != null)
                     {
@@ -109,7 +108,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                             this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
                             break;
                         case Act act:
-                            this.m_parsedModel = act.DeepCopy() as Act;
+                            this.m_parsedModel = act as Act;
                             break;
                         default:
                             throw new CdssEvaluationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(this.Model)));
@@ -118,7 +117,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             }
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                return this.m_parsedModel.DeepCopy() as Act;
+                var retVal = this.m_parsedModel.DeepCopy() as Act;
+                retVal.Key = Guid.NewGuid();
+                return retVal;
             }
         }
 

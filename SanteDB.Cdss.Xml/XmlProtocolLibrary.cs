@@ -263,7 +263,7 @@ namespace SanteDB.Cdss.Xml
                         .OfType<CdssDecisionLogicBlockDefinition>()
                         .AppliesTo(context)
                         .SelectMany(o => o.Definitions)
-                        .OfType<CdssComputableAssetDefinition>()
+                        .OfType<CdssRuleAssetDefinition>()
                         .Select(r => {
                             try
                             {

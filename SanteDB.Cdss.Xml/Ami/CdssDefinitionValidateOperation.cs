@@ -108,7 +108,7 @@ namespace SanteDB.Cdss.Xml.Ami
                         {
                             retVal.Add(new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.missing", "Logic block requires a context", Guid.Empty));
                         }
-                        else
+                        else if (!itm.Context.Type.IsAbstract)
                         {
                             var context = CdssExecutionContext.CreateValidationContext(Activator.CreateInstance(itm.Context.Type) as IdentifiedData, scopedLibraries);
                             retVal.AddRange(itm.Validate(context));

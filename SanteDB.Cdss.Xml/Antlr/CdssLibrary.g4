@@ -272,7 +272,7 @@ BOOL_VAL: ('true'|'false');
 STATUS_VAL: ('active'|'trial-use'|'dont-use'|'retired');
 
 PRIMITIVE_TYPE: (BOOL_TYPE|STRING_TYPE|DATE_TYPE|LONG_TYPE|REAL_TYPE|INTEGER_TYPE);
-CLASS_TYPE: ('Patient'|'Person'|'Material'|'Place'|'ManufacturedMaterial'|'Entity'|'Act'|'QuantityObservation'|'TextObservation'|'CodedObservation'|'Procedure'|'SubstanceAdministration'|'DateObservation');
+CLASS_TYPE: ('Patient'|'Person'|'Material'|'Place'|'ManufacturedMaterial'|'Entity'|'Act'|'QuantityObservation'|'TextObservation'|'CodedObservation'|'Procedure'|'SubstanceAdministration'|'DateObservation'|'IdentifiedData');
 TYPE_REF: (PRIMITIVE_TYPE|CLASS_TYPE);
 FORMAT_REF: ('json'|'xml');
 BOOL_TYPE: 'bool';
