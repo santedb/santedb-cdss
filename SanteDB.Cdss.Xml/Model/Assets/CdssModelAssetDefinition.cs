@@ -88,7 +88,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     var templateManager = ApplicationServiceContext.Current.GetService<IDataTemplateManagementService>();
                     var resolver = ApplicationServiceContext.Current.GetService<IReferenceResolver>();
                     var dt = templateManager.GetByMnemonic(this.ExternalModel) ?? throw new KeyNotFoundException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.ExternalModel));
-                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act;
+                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString).DeepCopy() as Act;
                     // Fill out sub-templates in relationships
                     if (this.m_parsedModel.Relationships != null)
                     {
