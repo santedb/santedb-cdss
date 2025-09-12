@@ -460,6 +460,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             else if (this.TryExtractMultilineString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
             {
                 var hdsiExpr = this.CreateCdssExpression<CdssHdsiExpressionDefinition>(context);
+
                 hdsiExpr.ExpressionValue = hdsi;
                 hdsiExpr.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : context.fact_ref() != null ? CdssHdsiExpressionScopeType.Fact : CdssHdsiExpressionScopeType.Context;
                 if(this.TryExtractString(context.fact_ref()?.STRING(), out var factRef))

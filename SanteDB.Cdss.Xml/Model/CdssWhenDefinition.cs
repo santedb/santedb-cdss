@@ -105,7 +105,14 @@ namespace SanteDB.Cdss.Xml.Model
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
                 var result = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
-                return (bool)result;
+                if (result is bool b)
+                {
+                    return b;
+                }
+                else
+                {
+                    return result != null;
+                }
             }
         }
     }

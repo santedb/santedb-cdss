@@ -152,7 +152,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                             }
                             else
                             {
-                                throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
+                                retVal = retVal != CdssConstants.GetDefaultValue(netType);
                             }
                         }
                         retVal = converted;

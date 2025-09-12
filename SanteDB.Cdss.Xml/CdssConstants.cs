@@ -18,6 +18,9 @@
  * User: fyfej
  * Date: 2023-11-27
  */
+using System;
+using System.Runtime.CompilerServices;
+
 namespace SanteDB.Cdss.Xml
 {
     internal class CdssConstants
@@ -26,5 +29,17 @@ namespace SanteDB.Cdss.Xml
         public const string ContextVariableName = "context";
         public const string ScopedObjectVariableName = "scopedObject";
         public const string ValueVariableName = "value";
+
+        /// <summary>
+        /// Get the default value for LINQ
+        /// </summary>
+        public static TType GetDefaultValue<TType>() => default(TType);
+
+
+        /// <summary>
+        /// Get default value for reflection
+        /// </summary>
+        public static object GetDefaultValue(Type tType) => typeof(CdssConstants).GetGenericMethod(nameof(GetDefaultValue), new Type[] { tType }, Type.EmptyTypes);
+
     }
 }
