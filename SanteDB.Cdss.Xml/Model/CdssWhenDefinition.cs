@@ -104,7 +104,16 @@ namespace SanteDB.Cdss.Xml.Model
 
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                var result = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                object result = null;
+                try
+                {
+                    result = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                }
+                catch (NullReferenceException)
+                {
+                    CdssExecutionStackFrame.Current.Context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Warning, "warn.null", $"Fact {this.Name} could not be evaluated", Guid.Empty));
+                }
+
                 if (result is bool b)
                 {
                     return b;

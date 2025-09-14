@@ -120,7 +120,15 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             {
                 try
                 {
-                    var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                    object retVal = null;
+                    try
+                    {
+                        retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                    }
+                    catch(NullReferenceException)
+                    {
+                        CdssExecutionStackFrame.Current.Context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Warning, "warn.null", $"Fact {this.Name} could not be evaluated", Guid.Empty));
+                    }
                     // Convert the value?
                     if (ValueTypeSpecified == true)
                     {

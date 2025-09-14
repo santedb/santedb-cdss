@@ -134,7 +134,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             LambdaExpression bodyExpression = null;
             if (this.ExpressionValue.Contains("="))
             {
-                bodyExpression = QueryExpressionParser.BuildLinqExpression(scopedObjectExpression.Type, this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, alwaysCoalesce: true, forceLoad: true, lazyExpandVariables: true);
+                bodyExpression = QueryExpressionParser.BuildLinqExpression(scopedObjectExpression.Type, this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, alwaysCoalesce: true, forceLoad: true, lazyExpandVariables: true, coalesceOutput: true);
                 if (this.IsNegated)
                 {
                     bodyExpression = Expression.Lambda(Expression.Not(bodyExpression.Body), bodyExpression.Parameters);
