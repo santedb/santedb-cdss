@@ -235,11 +235,6 @@ namespace SanteDB.Cdss.Xml
 
                 this.m_tracer.TraceInfo("Starting analysis of {0} using {1}...", analysisTarget, this.Name);
 
-                if (analysisTarget is Entity ent) // HACK: Participations need to be reverse loaded
-                {
-                    ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
-                }
-
 
                 CdssExecutionContext context = null;
                 if (debugMode)
@@ -338,17 +333,13 @@ namespace SanteDB.Cdss.Xml
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)target, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateDebugContext(target, this.GetScopedLibraries());
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext((IdentifiedData)target, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateContext(target, this.GetScopedLibraries());
                 }
 
-                if (target is Entity ent) // HACK: Participations need to be reverse loaded
-                {
-                    ent.Participations = ent.Participations?.ToList() ?? ent.GetParticipations().ToList();
-                }
 
                 using (CdssExecutionStackFrame.Enter(context, this.m_library))
                 {

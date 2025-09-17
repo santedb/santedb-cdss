@@ -505,7 +505,7 @@ namespace SanteDB.Cdss.Xml
                 throw new ArgumentNullException(nameof(forObject));
             }
             var cdssType = typeof(CdssExecutionContext<>).MakeGenericType(forObject.GetType());
-            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject, scopedLibraries, false);
+            return (CdssExecutionContext)Activator.CreateInstance(cdssType, forObject.PrepareForCdssExecution(), scopedLibraries, false);
         }
 
         /// <summary>
