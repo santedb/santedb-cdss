@@ -333,11 +333,11 @@ namespace SanteDB.Cdss.Xml
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext(target, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateDebugContext(target.PrepareForCdssExecution(), this.GetScopedLibraries());
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext(target, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateContext(target.PrepareForCdssExecution(), this.GetScopedLibraries());
                 }
 
 

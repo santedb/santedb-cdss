@@ -111,7 +111,6 @@ namespace SanteDB.Cdss.Xml.Model
                 }
                 catch (NullReferenceException)
                 {
-                    CdssExecutionStackFrame.Current.Context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Warning, "warn.null", $"Fact {this.Name} could not be evaluated", Guid.Empty));
                 }
 
                 if (result is bool b)

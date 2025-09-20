@@ -127,7 +127,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                     }
                     catch(NullReferenceException)
                     {
-                        CdssExecutionStackFrame.Current.Context.PushIssue(new DetectedIssue(DetectedIssuePriorityType.Warning, "warn.null", $"Fact {this.Name} could not be evaluated", Guid.Empty));
+                        
                     }
                     // Convert the value?
                     if (ValueTypeSpecified == true)
