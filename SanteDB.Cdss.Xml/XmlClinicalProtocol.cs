@@ -20,6 +20,7 @@
  */
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
@@ -146,11 +147,11 @@ namespace SanteDB.Cdss.Xml
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext(target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateDebugContext(target.PrepareForCdssExecution(), this.m_scopedLibraries);
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext(target, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateContext(target.PrepareForCdssExecution(), this.m_scopedLibraries);
                 }
 
                 using (CdssExecutionStackFrame.Enter(context))

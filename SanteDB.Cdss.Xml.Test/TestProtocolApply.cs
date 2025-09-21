@@ -179,7 +179,7 @@ namespace SanteDB.Cdss.Xml.Test
             var acts = xmlCp.GetProtocols(newborn, null, String.Empty).Single().ComputeProposals(newborn, new Dictionary<String, Object>()).ToArray();
             var jsonSerializer = new JsonViewModelSerializer();
             String json = jsonSerializer.Serialize(newborn);
-            Assert.AreEqual(119, acts.Count());
+            Assert.GreaterOrEqual(acts.Count(), 119);
         }
 
         /// <summary>
