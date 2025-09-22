@@ -141,6 +141,8 @@ namespace SanteDB.Cdss.Xml.Antlr
             }
             cdssDecisionLogic.Metadata?.EmitMetadata(writer, indentation + 1);
 
+            // Imports 
+            cdssDecisionLogic.Definitions.OfType<CdssModelAssetDefinition>().Where(m => !String.IsNullOrEmpty(m.ExternalModel)).ForEach(m => writer.WriteLine("{0}\timport model \"{1}\" from <{2}>", indentationStr, m.Name, m.ExternalModel));
 
             writer.WriteLine("{0}\tas", indentationStr);
 
@@ -216,42 +218,45 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         private static void EmitCdssText(this CdssModelAssetDefinition cdssModel, StringWriter writer, int indentation = 0)
         {
-            var indentationStr = new String('\t', indentation);
-            writer.WriteLine("{0}define model \"{1}\"", indentationStr, cdssModel.Name);
-            cdssModel.EmitHavingStatements(writer, indentation);
-            if (cdssModel.Model is string str)
+            if (String.IsNullOrEmpty(cdssModel.ExternalModel))
             {
-                writer.WriteLine("{0}\thaving format json", indentationStr);
-            }
-            else
-            {
-                writer.WriteLine("{0}\thaving format xml", indentationStr);
-            }
-            cdssModel.Metadata?.EmitMetadata(writer, indentation + 1);
 
-            writer.WriteLine("{0}as\r\n\t{0}$$", indentationStr);
-
-            if (cdssModel.Model is string str1)
-            {
-                writer.Write(str1);
-            }
-            else
-            {
-                using (var xw = XmlWriter.Create(writer, new XmlWriterSettings()
+                var indentationStr = new String('\t', indentation);
+                writer.WriteLine("{0}define model \"{1}\"", indentationStr, cdssModel.Name);
+                cdssModel.EmitHavingStatements(writer, indentation);
+                if (cdssModel.Model is string str)
                 {
-                    Indent = true,
-                    CloseOutput = false,
-                    Encoding = Encoding.UTF8
-                }))
-                {
-                    var xsz = XmlModelSerializerFactory.Current.CreateSerializer(cdssModel.Model.GetType());
-                    xsz.Serialize(xw, cdssModel.Model);
+                    writer.WriteLine("{0}\thaving format json", indentationStr);
                 }
+                else
+                {
+                    writer.WriteLine("{0}\thaving format xml", indentationStr);
+                }
+
+
+                writer.WriteLine("{0}as\r\n\t{0}$$", indentationStr);
+
+                if (cdssModel.Model is string str1)
+                {
+                    writer.Write(str1);
+                }
+                else
+                {
+                    using (var xw = XmlWriter.Create(writer, new XmlWriterSettings()
+                    {
+                        Indent = true,
+                        CloseOutput = false,
+                        Encoding = Encoding.UTF8
+                    }))
+                    {
+                        var xsz = XmlModelSerializerFactory.Current.CreateSerializer(cdssModel.Model.GetType());
+                        xsz.Serialize(xw, cdssModel.Model);
+                    }
+                }
+
+
+                writer.WriteLine("\r\n\t{0}$$\r\n{0}end model", indentationStr);
             }
-
-
-            writer.WriteLine("\r\n\t{0}$$\r\n{0}end model", indentationStr);
-
         }
 
         private static void EmitCdssText(this CdssRuleAssetDefinition cdssRule, StringWriter writer, int indentation = 0)
@@ -399,7 +404,14 @@ namespace SanteDB.Cdss.Xml.Antlr
                     break;
             }
 
-            writer.Write(" to {0}", cdssAssign.Path);
+            if (!String.IsNullOrEmpty(cdssAssign.TargetFact))
+            {
+                writer.Write(" to fact \"{0}\" {1}", cdssAssign.TargetFact, cdssAssign.Path);
+            }
+            else
+            {
+                writer.Write(" to {0}", cdssAssign.Path);
+            }
             if (cdssAssign.OverwriteValue)
             {
                 writer.Write(" overwrite");
@@ -488,10 +500,16 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 case CdssHdsiExpressionDefinition hdsi:
                     writer.Write("hdsi($${0}$$", hdsi.ExpressionValue);
-                    if (hdsi.Scope != CdssHdsiExpressionScopeType.Context)
+                    switch(hdsi.Scope)
                     {
-                        writer.Write(" scoped-to proposal");
+                        case CdssHdsiExpressionScopeType.Fact:
+                            writer.Write(" scoped-to fact \"{0}\"", hdsi.ScopedFact);
+                            break;
+                        case CdssHdsiExpressionScopeType.CurrentObject:
+                            writer.Write(" scoped-to proposal");
+                            break;
                     }
+                    
                     if (hdsi.IsNegated)
                     {
                         writer.Write(" negated");

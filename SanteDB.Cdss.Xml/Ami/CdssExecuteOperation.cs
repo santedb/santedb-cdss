@@ -36,6 +36,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SanteDB.Core.Model.Entities;
+using SanteDB.Core.Model.Acts;
 
 namespace SanteDB.Cdss.Xml.Ami
 {
@@ -133,6 +135,7 @@ namespace SanteDB.Cdss.Xml.Ami
                 var repoTyp = typeof(IRepositoryService<>).MakeGenericType(type);
                 var repo = ApplicationServiceContext.Current.GetService(repoTyp) as IRepositoryService;
                 targetForExecution = repo?.Get(targetUuid);
+
             }
             else
             {

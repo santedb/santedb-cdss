@@ -63,6 +63,7 @@ library_definitions:
     
 logic_block: (DEFINE)?LOGIC STRING
     (logic_having_statements)*
+    (using_model)*
     (metadata_statement)?
     AS
     (logic_definitions)*
@@ -105,8 +106,11 @@ fact_reference_or_computation:
     NAMED_ID |
     STRING;
 
+using_model: 
+    IMPORT MODEL STRING FROM NAMED_ID;
+
 csharp_logic: 'csharp(' (STRING|MULTILINE_STRING) ')';
-hdsi_logic: 'hdsi(' (STRING|MULTILINE_STRING) ('scoped-to' (CONTEXT|PROPOSAL))? (NEGATED)? ')';
+hdsi_logic: 'hdsi(' (STRING|MULTILINE_STRING) ('scoped-to' (CONTEXT|PROPOSAL|fact_ref))? (NEGATED)? ')';
 query_logic: 'query('
     'from' hdsi_logic 
     'where' hdsi_logic 
@@ -130,6 +134,7 @@ define_model: (DEFINE)?MODEL STRING
     AS
     MULTILINE_STRING
     END (MODEL)?;
+
 
 define_rule: (DEFINE)?RULE STRING
     (having_statements)*
@@ -172,7 +177,9 @@ raise_action_statement:
     ;
 
 assign_action_statement:
-    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO HDSI_EXPR (OVERWRITE)?;
+    ASSIGN (csharp_logic|hdsi_logic|STRING|CONST (INTEGER|FLOAT|STRING|UUIDV4|BOOL_VAL)) TO (fact_ref)? HDSI_EXPR (OVERWRITE)?;
+
+fact_ref: FACT STRING;
 
 apply_action_statement: APPLY STRING;
 
@@ -233,8 +240,10 @@ SCOPE: 'scope';
 PRIORITY: 'priority';
 ASSIGN: 'assign';
 TO: 'to';
+FROM: 'from';
 CONST: 'const';
 MODEL: 'model';
+IMPORT: 'import';
 DATA: 'data';
 END: 'end';
 THEN: 'then';
@@ -263,7 +272,7 @@ BOOL_VAL: ('true'|'false');
 STATUS_VAL: ('active'|'trial-use'|'dont-use'|'retired');
 
 PRIMITIVE_TYPE: (BOOL_TYPE|STRING_TYPE|DATE_TYPE|LONG_TYPE|REAL_TYPE|INTEGER_TYPE);
-CLASS_TYPE: ('Patient'|'Person'|'Material'|'Place'|'ManufacturedMaterial'|'Entity'|'Act'|'QuantityObservation'|'TextObservation'|'CodedObservation'|'Procedure'|'SubstanceAdministration');
+CLASS_TYPE: ('Patient'|'Person'|'Material'|'Place'|'ManufacturedMaterial'|'Entity'|'Act'|'QuantityObservation'|'TextObservation'|'CodedObservation'|'Procedure'|'SubstanceAdministration'|'DateObservation'|'IdentifiedData');
 TYPE_REF: (PRIMITIVE_TYPE|CLASS_TYPE);
 FORMAT_REF: ('json'|'xml');
 BOOL_TYPE: 'bool';
@@ -292,6 +301,7 @@ NAMED_ID
 STRING
     : '"'(~["\r\n] | '""')*'"'
     ;
+
 
 INTEGER
     : [0-9]+

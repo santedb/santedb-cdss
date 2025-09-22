@@ -22,6 +22,8 @@ using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,6 +69,12 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             XmlElement("fixed", typeof(String)), JsonProperty("expression")]
         public Object ContainedExpression { get; set; }
 
+        /// <summary>
+        /// Gets or sets the target fact where this assignment should occur
+        /// </summary>
+        [XmlAttribute("target"), JsonProperty("target")]
+        public string TargetFact { get; set; }
+
 
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
@@ -95,6 +103,16 @@ namespace SanteDB.Cdss.Xml.Model.Actions
             {
                 try
                 {
+                    var targetObject = CdssExecutionStackFrame.Current.ScopedObject;
+                    if(!String.IsNullOrEmpty(this.TargetFact))
+                    {
+                        if(!CdssExecutionStackFrame.Current.Context.TryGetFact(this.TargetFact, out var factValueRaw))
+                        {
+                            throw new KeyNotFoundException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.TargetFact));
+                        }
+                        targetObject = (IdentifiedData)factValueRaw;
+                    }
+
                     switch (this.ContainedExpression)
                     {
                         case CdssExpressionDefinition exe:
@@ -108,10 +126,10 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                             }
                             var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
                             CdssExecutionStackFrame.Current.Context.DebugSession?.CurrentFrame.AddAssignment(this.Path, value);
-                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, value, this.OverwriteValue);
+                            targetObject.GetOrSetValueAtPath(this.Path, value, this.OverwriteValue);
                             break;
                         case String str:
-                            CdssExecutionStackFrame.Current.ScopedObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);
+                            targetObject.GetOrSetValueAtPath(this.Path, str, this.OverwriteValue);
                             break;
                         default:
                             throw new InvalidOperationException();

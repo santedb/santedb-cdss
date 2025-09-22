@@ -19,8 +19,12 @@
  * Date: 2024-6-21
  */
 using Newtonsoft.Json;
+using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
+using SanteDB.Core.i18n;
+using SanteDB.Core.Model;
+using SanteDB.Core.Model.Acts;
 using SanteDB.Core.Model.Query;
 using System;
 using System.Collections.Generic;
@@ -61,6 +65,12 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         public CdssHdsiExpressionScopeType Scope { get; set; }
 
         /// <summary>
+        /// Gets or sets the fact reference
+        /// </summary>
+        [XmlAttribute("fact"), JsonProperty("fact")]
+        public String ScopedFact { get; set; }
+
+        /// <summary>
         /// Negate the HDSI expression
         /// </summary>
         [XmlAttribute("negate"), JsonProperty("negate")]
@@ -78,6 +88,10 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             if (String.IsNullOrEmpty(this.ExpressionValue))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.hdsi.missingExpression", "HDSI expression require a property selector or binary expression", Guid.Empty, this.ToReferenceString());
+            }
+            if(this.Scope == CdssHdsiExpressionScopeType.Fact && String.IsNullOrEmpty(this.ScopedFact))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.hdsi.factRef", "HDSI scoped to fact must a fact reference", Guid.Empty, this.ToReferenceString());
             }
 
         }
@@ -98,6 +112,15 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             Expression scopedObjectExpression = null;
             switch (this.Scope)
             {
+                case CdssHdsiExpressionScopeType.Fact:
+                    if(!cdssContext.TryGetFact(this.ScopedFact, out var data))
+                    {
+                        throw new CdssEvaluationException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.ScopedFact));
+                    }
+
+                    var factType = data?.GetType() ?? typeof(IdentifiedData);
+                    scopedObjectExpression = Expression.Convert(Expression.Call(cdssParameter, typeof(CdssExecutionContext).GetMethod(nameof(CdssExecutionContext.GetFact)), Expression.Constant(this.ScopedFact)), factType);
+                    break;
                 case CdssHdsiExpressionScopeType.Context:
                     scopedObjectExpression = Expression.MakeMemberAccess(cdssParameter, (MemberInfo)cdssParameter.Type.GetProperty(nameof(ICdssExecutionContext.Target)));
                     break;
@@ -111,7 +134,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             LambdaExpression bodyExpression = null;
             if (this.ExpressionValue.Contains("="))
             {
-                bodyExpression = QueryExpressionParser.BuildLinqExpression(scopedObjectExpression.Type, this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, alwaysCoalesce: true, forceLoad: true, lazyExpandVariables: true);
+                bodyExpression = QueryExpressionParser.BuildLinqExpression(scopedObjectExpression.Type, this.ExpressionValue.ParseQueryString(), "s", variableDictionary, safeNullable: true, alwaysCoalesce: true, forceLoad: true, lazyExpandVariables: true, coalesceOutput: true);
                 if (this.IsNegated)
                 {
                     bodyExpression = Expression.Lambda(Expression.Not(bodyExpression.Body), bodyExpression.Parameters);
@@ -133,6 +156,11 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     [XmlType(nameof(CdssHdsiExpressionScopeType), Namespace = "http://santedb.org/cdss")]
     public enum CdssHdsiExpressionScopeType
     {
+        /// <summary>
+        /// Scoped to a specific fact
+        /// </summary>
+        [XmlEnum("fact")]
+        Fact = 2,
         /// <summary>
         /// Get the value from the proposed object
         /// </summary>

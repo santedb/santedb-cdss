@@ -27,6 +27,10 @@ using SanteDB.Core.Model.Acts;
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using SanteDB.Core;
+using SanteDB.Core.Templates;
+using SanteDB.Core.Services;
+using System.Linq;
 
 namespace SanteDB.Cdss.Xml.Model.Assets
 {
@@ -49,6 +53,12 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         public String ReferencedModel { get; set; }
 
         /// <summary>
+        /// External model / template definition
+        /// </summary>
+        [XmlAttribute("extern"), JsonProperty("extern")]
+        public string ExternalModel { get; set; }
+
+        /// <summary>
         /// Gets or sets the model
         /// </summary>
         [XmlElement("json", typeof(String)),
@@ -66,12 +76,29 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <inheritdoc/>
         public override object Compute()
         {
-
             if (this.m_parsedModel == null)
             {
                 if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel))
                 {
                     this.m_parsedModel = refModel as Act;
+                }
+                else if (!String.IsNullOrEmpty(this.ExternalModel))
+                {
+                    var templateManager = ApplicationServiceContext.Current.GetService<IDataTemplateManagementService>();
+                    var resolver = ApplicationServiceContext.Current.GetService<IReferenceResolver>();
+                    var dt = templateManager.GetByMnemonic(this.ExternalModel) ?? throw new KeyNotFoundException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.ExternalModel));
+                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act;
+                    // Fill out sub-templates in relationships
+                    if (this.m_parsedModel.Relationships != null)
+                    {
+                        foreach (var rel in this.m_parsedModel.Relationships.Where(r => r.TargetAct?.Template?.Mnemonic != null))
+                        {
+                            // Get the sub-template (if avail)
+                            dt = templateManager.GetByMnemonic(rel.TargetAct.Template.Mnemonic);
+                            rel.TargetAct = (dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act).CopyObjectData(rel.TargetAct);
+                        }
+                    }
+                    this.m_parsedModel.Participations?.RemoveAll(p => p.PlayerEntityKey == null);
                 }
                 else
                 {
@@ -81,7 +108,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                             this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
                             break;
                         case Act act:
-                            this.m_parsedModel = act.DeepCopy() as Act;
+                            this.m_parsedModel = act as Act;
                             break;
                         default:
                             throw new CdssEvaluationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(this.Model)));
@@ -90,7 +117,9 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             }
             using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
-                return this.m_parsedModel.DeepCopy() as Act;
+                var retVal = this.m_parsedModel.DeepCopy() as Act;
+                retVal.Key = Guid.NewGuid();
+                return retVal;
             }
         }
 
@@ -99,7 +128,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// </summary>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
         {
-            if (String.IsNullOrEmpty(this.ReferencedModel) && this.Model == null)
+            if (String.IsNullOrEmpty(this.ReferencedModel) && String.IsNullOrEmpty(this.ExternalModel) && this.Model == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.missing", "Model element must either reference a shared model or must provide a model", Guid.Empty, this.ToReferenceString());
             }
@@ -118,6 +147,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.invalid", $"JSON model does not appear to be valid JSON {je.Message}", Guid.Empty, this.ToReferenceString());
                 }
+            }
+            else if (!string.IsNullOrEmpty(this.ExternalModel) && ApplicationServiceContext.Current?.GetService<IDataTemplateManagementService>().GetByMnemonic(this.ExternalModel) == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.model.invalid", $"Could not locate external model/template {this.ExternalModel}", Guid.Empty, this.ToReferenceString());
+
             }
         }
 

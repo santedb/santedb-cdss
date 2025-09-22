@@ -20,6 +20,7 @@
  */
 using SanteDB.Cdss.Xml.Model;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Core;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
@@ -141,21 +142,16 @@ namespace SanteDB.Cdss.Xml
                 _ = parameters?.TryGetValue(CdssParameterNames.DEBUG_MODE, out debugParameterValue);
                 _ = debugParameterValue is bool debugMode || Boolean.TryParse(debugParameterValue?.ToString() ?? "false", out debugMode);
 
-                // Get a clone to make decisions on
-                var targetClone = target.Clone() as Patient;
-                // Safe guard all the properties
-                targetClone.Participations = targetClone.Participations?.ToList() ?? target.GetParticipations().ToList();
-                targetClone.Participations.ForEach(o => o.Act = o.Act?.Clone() as Act);
-                this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, targetClone);
+                this.m_tracer.TraceInfo("Calculate ({0}) for {1}...", this.Name, target);
 
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)targetClone, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateDebugContext(target.PrepareForCdssExecution(), this.m_scopedLibraries);
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext((IdentifiedData)targetClone, this.m_scopedLibraries);
+                    context = CdssExecutionContext.CreateContext(target.PrepareForCdssExecution(), this.m_scopedLibraries);
                 }
 
                 using (CdssExecutionStackFrame.Enter(context))

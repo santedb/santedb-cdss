@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Xml.Serialization;
 
 namespace SanteDB.Cdss.Xml.Model.Expressions
@@ -97,7 +98,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                 // Is the clause not returning bool? If so then not null is the conversion
                 if (clause.Type != typeof(bool))
                 {
-                    clause = Expression.MakeBinary(ExpressionType.NotEqual, clause, Expression.Constant(null));
+                    var mi = (MethodInfo)typeof(CdssConstants).GetGenericMethod(nameof(CdssConstants.GetDefaultValue), new Type[] { clause.Type }, Type.EmptyTypes);
+                    clause = Expression.MakeBinary(ExpressionType.NotEqual, clause, Expression.Call(null, mi));
                 }
                 clause = this.ModifyContainedExpression(clause);
 

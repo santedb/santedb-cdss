@@ -120,7 +120,15 @@ namespace SanteDB.Cdss.Xml.Model.Assets
             {
                 try
                 {
-                    var retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                    object retVal = null;
+                    try
+                    {
+                        retVal = m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+                    }
+                    catch(NullReferenceException)
+                    {
+                        
+                    }
                     // Convert the value?
                     if (ValueTypeSpecified == true)
                     {
@@ -152,7 +160,7 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                             }
                             else
                             {
-                                throw new CdssEvaluationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, retVal.GetType(), netType));
+                                retVal = retVal != CdssConstants.GetDefaultValue(netType);
                             }
                         }
                         retVal = converted;

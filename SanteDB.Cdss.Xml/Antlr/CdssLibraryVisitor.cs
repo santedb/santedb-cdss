@@ -31,6 +31,7 @@ using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Http;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Acts;
+using SanteDB.Core.Security.Tfa;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -95,6 +96,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             return this.m_cdssLibrary;
         }
 
+        
         public override CdssLibraryDefinition VisitInclude_definition([NotNull] CdssLibraryParser.Include_definitionContext context)
         {
             // Named ID include?
@@ -221,6 +223,39 @@ namespace SanteDB.Cdss.Xml.Antlr
             return base.VisitHaving_uuid(context);
         }
 
+        public override CdssLibraryDefinition VisitUsing_model([NotNull] CdssLibraryParser.Using_modelContext context)
+        {
+            if (this.m_currentObject == null)
+            {
+                throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(m_currentObject)));
+            }
+
+            var logicBlock = this.m_currentObject.Peek() as CdssDecisionLogicBlockDefinition;
+            if(logicBlock == null)
+            {
+                throw new CdssTranspilationException(context.Start, String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, "model import"));
+            }
+            if(!this.TryExtractString(context.STRING(), out var name))
+            {
+                throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_NAME_TOKEN);
+            }
+            if(!this.TryExtractIdentifier(context.NAMED_ID(), out var refModel))
+            {
+                throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_ID_TOKEN);
+            }
+
+            var cdssDef = new CdssModelAssetDefinition()
+            {
+                Name = name,
+                ExternalModel = refModel,
+                TranspileSourceReference = new CdssTranspileMapMetaData(context.Start.Line, context.Start.Column, context.Stop.Line, context.Stop.Column)
+            };
+            logicBlock.Definitions = logicBlock.Definitions ?? new List<CdssComputableAssetDefinition>();
+            logicBlock.Definitions.Add(cdssDef);
+
+            return base.VisitUsing_model(context);
+        }
+
         public override CdssLibraryDefinition VisitLogic_block([NotNull] CdssLibraryParser.Logic_blockContext context)
         {
 
@@ -237,6 +272,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_NAME_TOKEN);
             }
+
             this.m_currentObject.Push(logicBlock);
             var retVal = base.VisitLogic_block(context);
             this.m_currentObject.Pop();
@@ -421,11 +457,16 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 ;
             }
-            else if (this.TryExtractString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
+            else if (this.TryExtractMultilineString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
             {
                 var hdsiExpr = this.CreateCdssExpression<CdssHdsiExpressionDefinition>(context);
+
                 hdsiExpr.ExpressionValue = hdsi;
-                hdsiExpr.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : CdssHdsiExpressionScopeType.Context;
+                hdsiExpr.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : context.fact_ref() != null ? CdssHdsiExpressionScopeType.Fact : CdssHdsiExpressionScopeType.Context;
+                if(this.TryExtractString(context.fact_ref()?.STRING(), out var factRef))
+                {
+                    hdsiExpr.ScopedFact = factRef;
+                }
                 hdsiExpr.IsNegated = context.NEGATED() != null;
                 this.AddComputation(hdsiExpr);
             }
@@ -438,7 +479,7 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         public override CdssLibraryDefinition VisitCsharp_logic([NotNull] CdssLibraryParser.Csharp_logicContext context)
         {
-            if (this.TryExtractString(context.STRING(), out var csharp) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out csharp))
+            if (this.TryExtractMultilineString(context.STRING(), out var csharp) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out csharp))
             {
                 var cshrp = this.CreateCdssExpression<CdssCsharpExpressionDefinition>(context);
                 cshrp.ExpressionValue = csharp;
@@ -458,7 +499,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             // Get the HDSI expressions
             var hdsiChildren = context.children.OfType<CdssLibraryParser.Hdsi_logicContext>().Select(o =>
             {
-                if (this.TryExtractString(o.STRING(), out var hdsi) || this.TryExtractMultilineString(o.MULTILINE_STRING(), out hdsi))
+                if (this.TryExtractMultilineString(o.MULTILINE_STRING(), out var hdsi))
                 {
                     return hdsi;
                 }
@@ -467,13 +508,13 @@ namespace SanteDB.Cdss.Xml.Antlr
                     throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_HDSI_EXPRESSION);
                 }
             }).ToArray();
-            if (hdsiChildren.Length <= 3)
+            if (hdsiChildren.Length < 3)
             {
                 throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_QUERY_PARAMETERS);
             }
 
             CdssCollectionSelectorType collectionType = CdssCollectionSelectorType.First;
-            switch (context.AGG_SELECTOR().GetText().ToLowerInvariant())
+            switch (context.AGG_SELECTOR()?.GetText().ToLowerInvariant())
             {
                 case "last":
                     collectionType = CdssCollectionSelectorType.Last;
@@ -784,6 +825,10 @@ namespace SanteDB.Cdss.Xml.Antlr
                 assignAction.ContainedExpression = fr;
             }
 
+            if(this.TryExtractString(context.fact_ref()?.STRING(), out var targetFact))
+            {
+                assignAction.TargetFact = targetFact;
+            }
 
             this.m_currentObject.Push(assignAction);
             var retVal = base.VisitAssign_action_statement(context);
