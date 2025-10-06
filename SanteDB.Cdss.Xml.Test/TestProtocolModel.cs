@@ -154,7 +154,7 @@ namespace SanteDB.Cdss.Xml.Test
         public void TestGuardNotImmunoSuppressed()
         {
 
-            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated.GetValueOrDefault() && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
+            Expression<Func<Patient, bool>> filterCondition = (data) => data.Participations.Where(o => o.ParticipationRoleKey == ActParticipationKeys.RecordTarget).Any(o => o.SourceEntity is Observation && !o.SourceEntity.IsNegated && o.SourceEntity.TypeConcept.Mnemonic == "Diagnosis" && (o.SourceEntity as CodedObservation).Value.ConceptSets.Any(s => s.Mnemonic == "ImmunoSuppressionDiseases"));
             XmlExpression xmlExpr = XmlExpression.FromExpression(filterCondition);
             Assert.IsInstanceOf<XmlLambdaExpression>(xmlExpr);
 
