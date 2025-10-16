@@ -288,7 +288,7 @@ UUIDV4:
     ;
 
 HDSI_EXPR
-    : [$a-z]+('['(~']')*']')?('.'HDSI_EXPR)*
+    : [$a-z]+('['(~']')*']')?('@'CLASS_TYPE)?('.'HDSI_EXPR)*
     ;
 
 LITERAL

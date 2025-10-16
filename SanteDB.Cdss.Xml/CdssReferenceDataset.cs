@@ -73,6 +73,11 @@ namespace SanteDB.Cdss.Xml
         public CdssReferenceDataset Between(String columnName, object lowerValue, object upperValue) => new CdssReferenceDataset(this, p => MapUtil.TryConvert(p[columnName], lowerValue.GetType(), out var comparitor) && ((IComparable)comparitor).CompareTo(lowerValue) >= 0 && ((IComparable)comparitor).CompareTo(upperValue) <= 0);
 
         /// <summary>
+        /// Value between two columns
+        /// </summary>
+        public CdssReferenceDataset Between(object value, String columnNameLow, String columnNameHigh) => new CdssReferenceDataset(this, p => MapUtil.TryConvert(p[columnNameLow], value.GetType(), out var compLow) && MapUtil.TryConvert(p[columnNameHigh], value.GetType(), out var compHigh) && ((IComparable)value).CompareTo(compLow) >= 0 && ((IComparable)value).CompareTo(compHigh) <= 0);
+
+        /// <summary>
         /// Select the value in the specified column
         /// </summary>
         public IEnumerable<Object> Select(String columnName)
