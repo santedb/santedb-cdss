@@ -31,6 +31,8 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using SanteDB;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
@@ -213,7 +215,25 @@ namespace SanteDB.Cdss.Xml.Antlr
             writer.Write("{0}\t", indentationStr);
             cdssFact.FactComputation.EmitCdssText(writer, indentation + 1);
 
+            cdssFact.Normalize.EmitCdssText(writer, indentation + 1);
             writer.WriteLine("\r\n{0}end fact", indentationStr);
+        }
+
+        private static void EmitCdssText(this IEnumerable<CdssFactNormalizationDefinition> cdssNormalized, StringWriter writer, int indentation = 0)
+        {
+            var indentationStr = new String('\t', indentation);
+
+            foreach (var normalize in cdssNormalized)
+            {
+                writer.Write("{0}\tnormalize ", indentationStr);
+                if(normalize.When != null)
+                {
+                    writer.WriteLine(" when ");
+                    normalize.When.WhenComputation.EmitCdssText(writer, indentation + 1);
+                }
+                writer.WriteLine("{0}\t computed as ", indentationStr);
+                normalize.EmitExpression.EmitCdssText(writer, indentation + 1);
+            }
         }
 
         private static void EmitCdssText(this CdssModelAssetDefinition cdssModel, StringWriter writer, int indentation = 0)
