@@ -457,17 +457,8 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 ;
             }
-            else if (this.TryExtractMultilineString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
+            else if (this.TryParseHdsiClause(context, out var hdsiExpr))
             {
-                var hdsiExpr = this.CreateCdssExpression<CdssHdsiExpressionDefinition>(context);
-
-                hdsiExpr.ExpressionValue = hdsi;
-                hdsiExpr.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : context.fact_ref() != null ? CdssHdsiExpressionScopeType.Fact : CdssHdsiExpressionScopeType.Context;
-                if(this.TryExtractString(context.fact_ref()?.STRING(), out var factRef))
-                {
-                    hdsiExpr.ScopedFact = factRef;
-                }
-                hdsiExpr.IsNegated = context.NEGATED() != null;
                 this.AddComputation(hdsiExpr);
             }
             else
@@ -492,6 +483,26 @@ namespace SanteDB.Cdss.Xml.Antlr
             return base.VisitCsharp_logic(context);
         }
 
+        /// <summary>
+        /// Attempt to parse HDSI context
+        /// </summary>
+        private bool TryParseHdsiClause(CdssLibraryParser.Hdsi_logicContext context, out CdssHdsiExpressionDefinition parsedExpression)
+        {
+            if (this.TryExtractMultilineString(context.STRING(), out var hdsi) || this.TryExtractMultilineString(context.MULTILINE_STRING(), out hdsi))
+            {
+                parsedExpression = this.CreateCdssExpression<CdssHdsiExpressionDefinition>(context);
+                parsedExpression.ExpressionValue = hdsi;
+                parsedExpression.Scope = context.PROPOSAL() != null ? CdssHdsiExpressionScopeType.CurrentObject : context.fact_ref() != null ? CdssHdsiExpressionScopeType.Fact : CdssHdsiExpressionScopeType.Context;
+                if (this.TryExtractString(context.fact_ref()?.STRING(), out var factRef))
+                {
+                    parsedExpression.ScopedFact = factRef;
+                }
+                parsedExpression.IsNegated = context.NEGATED() != null;
+                return true;
+            }
+            parsedExpression = null;
+            return false;
+        }
 
         public override CdssLibraryDefinition VisitQuery_logic([NotNull] CdssLibraryParser.Query_logicContext context)
         {
@@ -499,9 +510,9 @@ namespace SanteDB.Cdss.Xml.Antlr
             // Get the HDSI expressions
             var hdsiChildren = context.children.OfType<CdssLibraryParser.Hdsi_logicContext>().Select(o =>
             {
-                if (this.TryExtractMultilineString(o.MULTILINE_STRING(), out var hdsi))
+                if (this.TryParseHdsiClause(o, out var rv))
                 {
-                    return hdsi;
+                    return rv;
                 }
                 else
                 {
@@ -526,11 +537,13 @@ namespace SanteDB.Cdss.Xml.Antlr
 
             this.AddComputation(new CdssQueryExpressionDefinition()
             {
-                SourceCollectionHdsi = hdsiChildren[0],
-                FilterHdsi = hdsiChildren[1],
+                SourceCollectionHdsi = hdsiChildren[0].ExpressionValue,
+                Scope = hdsiChildren[0].Scope,
+                ScopedFact = hdsiChildren[0].ScopedFact,
+                FilterHdsi = hdsiChildren[1].ExpressionValue,
                 SelectorFunction = collectionType,
-                SelectHdsi = hdsiChildren[2],
-                OrderByHdsi = hdsiChildren.Length > 3 ? hdsiChildren[3] : null
+                SelectHdsi = hdsiChildren[2].ExpressionValue,
+                OrderByHdsi = hdsiChildren.Length > 3 ? hdsiChildren[3].ExpressionValue : null
             });
             return base.VisitQuery_logic(context);
         }

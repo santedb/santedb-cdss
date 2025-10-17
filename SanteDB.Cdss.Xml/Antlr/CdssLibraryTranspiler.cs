@@ -221,18 +221,24 @@ namespace SanteDB.Cdss.Xml.Antlr
 
         private static void EmitCdssText(this IEnumerable<CdssFactNormalizationDefinition> cdssNormalized, StringWriter writer, int indentation = 0)
         {
-            var indentationStr = new String('\t', indentation);
+            if(cdssNormalized?.Any() != true)
+            {
+                return;
+            }
 
+            var indentationStr = new String('\t', indentation);
+            writer.WriteLine();
             foreach (var normalize in cdssNormalized)
             {
-                writer.Write("{0}\tnormalize ", indentationStr);
+                writer.Write("\n{0}normalize ", indentationStr);
                 if(normalize.When != null)
                 {
-                    writer.WriteLine(" when ");
+                    writer.Write(" when ");
                     normalize.When.WhenComputation.EmitCdssText(writer, indentation + 1);
                 }
-                writer.WriteLine("{0}\t computed as ", indentationStr);
+                writer.Write(" computed as ");
                 normalize.EmitExpression.EmitCdssText(writer, indentation + 1);
+                
             }
         }
 
