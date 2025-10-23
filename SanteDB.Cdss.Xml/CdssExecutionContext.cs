@@ -456,7 +456,7 @@ namespace SanteDB.Cdss.Xml
             typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
 
             // Add delegates 
-            Func<String, Int64> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
+            Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
             Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
             Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
             Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
@@ -590,7 +590,7 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get data from the context as a date
         /// </summary>
-        public DateTime Date(string name) => MapUtil.TryConvert(this[name], typeof(DateTime), out var res) ? (DateTime)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(DateTime), this[name].GetType()));
+        public DateTime Date(string name) => this[name] is DateTime dt ? dt : MapUtil.TryConvert(this[name], typeof(DateTime), out var res) ? (DateTime)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(DateTime), this[name].GetType()));
         /// <summary>
         /// Get data from the context as a <see langword="string"/>
         /// </summary>
@@ -598,15 +598,15 @@ namespace SanteDB.Cdss.Xml
         /// <summary>
         /// Get data from the context as a int
         /// </summary>
-        public long Int(string name) => MapUtil.TryConvert(this[name], typeof(long), out var res) ? (long)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(int), this[name].GetType()));
+        public int Int(string name) => this[name] is int i ? i : MapUtil.TryConvert(this[name], typeof(int), out var res) ? (int)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(int), this[name].GetType()));
         /// <summary>
         /// Get data from the context as a real
         /// </summary>
-        public double Real(string name) => MapUtil.TryConvert(this[name], typeof(double), out var res) ? (double)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(double), this[name].GetType()));
+        public double Real(string name) => this[name] is double d ? d : MapUtil.TryConvert(this[name], typeof(double), out var res) ? (double)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(double), this[name].GetType()));
         /// <summary>
         /// Get data from the context as a bool
         /// </summary>
-        public bool Bool(string name) => MapUtil.TryConvert(this[name], typeof(bool), out var res) ? (bool)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(bool), this[name].GetType()));
+        public bool Bool(string name) => this[name] is bool b ? b : MapUtil.TryConvert(this[name], typeof(bool), out var res) ? (bool)res : throw new CdssEvaluationException(string.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(bool), this[name].GetType()));
 
         /// <summary>
         /// Wrap this execution context such that it is a <see cref="CdssExecutionContext{TTarget}"/> 
