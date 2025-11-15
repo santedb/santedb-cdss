@@ -146,7 +146,7 @@ namespace SanteDB.Cdss.Xml
         public static T GreaterOf<T>(this CdssExecutionContext me, T firstValue, T secondValue)
             where T : IComparable
         {
-            if (firstValue.CompareTo(secondValue) > 0)
+            if (firstValue.CompareTo((T)secondValue) > 0)
             {
                 return firstValue;
             }
