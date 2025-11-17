@@ -77,6 +77,9 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public bool IsForValidation { get; }
 
+        // Expression interpreter cached
+        private Interpreter m_expressionInterpreter;
+
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
         private readonly IDictionary<String, Object> m_factCache = new ConcurrentDictionary<String, Object>();
@@ -446,38 +449,40 @@ namespace SanteDB.Cdss.Xml
         /// <returns></returns>
         internal Interpreter GetExpressionInterpreter()
         {
-            var expressionInterpreter = new Interpreter(InterpreterOptions.Default)
-                               .Reference(typeof(DateTimeOffset))
-                               .Reference(typeof(ExtensionMethods))
-                               .Reference(typeof(Trace))
-                               .EnableAssignment(AssignmentOperators.None);
+            if (this.m_expressionInterpreter == null)
+            {
+                this.m_expressionInterpreter = new Interpreter(InterpreterOptions.Default)
+                                   .Reference(typeof(DateTimeOffset))
+                                   .Reference(typeof(ExtensionMethods))
+                                   .Reference(typeof(Trace))
+                                   .EnableAssignment(AssignmentOperators.None);
 
-            // Add types
-            typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => expressionInterpreter.Reference(t));
+                // Add types
+                typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => this.m_expressionInterpreter.Reference(t));
 
-            // Add delegates 
-            Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
-            Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
-            Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
-            Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
-            Func<String, String> stringFunc = (s) => CdssExecutionStackFrame.Current.Context.String(s);
-            Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
-            Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
-            Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
-            Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
-            Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
-            expressionInterpreter.SetFunction("intf", intFunc);
-            expressionInterpreter.SetFunction("realf", realFunc);
-            expressionInterpreter.SetFunction("boolf", boolFunc);
-            expressionInterpreter.SetFunction("datef", dateFunc);
-            expressionInterpreter.SetFunction("stringf", stringFunc);
-            expressionInterpreter.SetFunction("actf", actFunc);
-            expressionInterpreter.SetFunction("entf", entityFunc);
-            expressionInterpreter.SetFunction("data", datasetFunc);
-            expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
-            expressionInterpreter.SetFunction("lesserOf", lesserOfFunc);
-            
-            return expressionInterpreter;
+                // Add delegates 
+                Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
+                Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
+                Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
+                Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
+                Func<String, String> stringFunc = (s) => CdssExecutionStackFrame.Current.Context.String(s);
+                Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
+                Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
+                Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
+                Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
+                Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
+                this.m_expressionInterpreter.SetFunction("intf", intFunc);
+                this.m_expressionInterpreter.SetFunction("realf", realFunc);
+                this.m_expressionInterpreter.SetFunction("boolf", boolFunc);
+                this.m_expressionInterpreter.SetFunction("datef", dateFunc);
+                this.m_expressionInterpreter.SetFunction("stringf", stringFunc);
+                this.m_expressionInterpreter.SetFunction("actf", actFunc);
+                this.m_expressionInterpreter.SetFunction("entf", entityFunc);
+                this.m_expressionInterpreter.SetFunction("data", datasetFunc);
+                this.m_expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
+                this.m_expressionInterpreter.SetFunction("lesserOf", lesserOfFunc);
+            }
+            return this.m_expressionInterpreter;
         }
 
         /// <summary>
