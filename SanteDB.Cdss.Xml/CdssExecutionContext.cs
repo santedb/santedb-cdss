@@ -97,6 +97,7 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         protected CdssExecutionContext(CdssExecutionContext copyFrom)
         {
+            this.m_expressionInterpreter = copyFrom.m_expressionInterpreter;
             this.m_computableAssetsInScope = copyFrom.m_computableAssetsInScope;
             this.m_datasets = copyFrom.m_datasets;
             this.m_detectedIssues = copyFrom.m_detectedIssues;
@@ -449,9 +450,9 @@ namespace SanteDB.Cdss.Xml
         /// <returns></returns>
         internal Interpreter GetExpressionInterpreter()
         {
-            if (this.m_expressionInterpreter == null)
+            if (this.m_expressionInterpreter == null || ApplicationServiceContext.Current.HostType == SanteDBHostType.Server)
             {
-                this.m_expressionInterpreter = new Interpreter(InterpreterOptions.Default)
+                this.m_expressionInterpreter = new Interpreter(InterpreterOptions.Default | InterpreterOptions.CaseInsensitive)
                                    .Reference(typeof(DateTimeOffset))
                                    .Reference(typeof(ExtensionMethods))
                                    .Reference(typeof(Trace))

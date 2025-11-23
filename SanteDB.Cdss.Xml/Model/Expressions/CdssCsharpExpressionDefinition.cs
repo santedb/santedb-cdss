@@ -67,7 +67,6 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
             try
             {
-
                 return cdssContext.GetExpressionInterpreter().Parse(this.ExpressionValue, parameters.Select(o => new Parameter(o)).ToArray()).Expression;
             }
             catch (Exception e)
