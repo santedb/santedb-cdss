@@ -77,8 +77,6 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public bool IsForValidation { get; }
 
-        // Expression interpreter cached
-        private Interpreter m_expressionInterpreter;
 
         // Parameter values
         private readonly IDictionary<String, ParameterRegistration> m_variables = new Dictionary<String, ParameterRegistration>();
@@ -97,7 +95,6 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         protected CdssExecutionContext(CdssExecutionContext copyFrom)
         {
-            this.m_expressionInterpreter = copyFrom.m_expressionInterpreter;
             this.m_computableAssetsInScope = copyFrom.m_computableAssetsInScope;
             this.m_datasets = copyFrom.m_datasets;
             this.m_detectedIssues = copyFrom.m_detectedIssues;
@@ -105,9 +102,9 @@ namespace SanteDB.Cdss.Xml
             this.m_proposedActions = copyFrom.m_proposedActions;
             this.m_scopedLibraries = copyFrom.m_scopedLibraries;
             this.m_scopedLogicBlocks = copyFrom.m_scopedLogicBlocks;
-            this.m_serializationBinder =  copyFrom.m_serializationBinder;
+            this.m_serializationBinder = copyFrom.m_serializationBinder;
             this.m_target = copyFrom.m_target;
-            this.m_variables =  copyFrom.m_variables;
+            this.m_variables = copyFrom.m_variables;
         }
 
         /// <summary>
@@ -129,7 +126,7 @@ namespace SanteDB.Cdss.Xml
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssDecisionLogicBlockDefinition>()
                 .Where(d => d.Context.Type.IsAssignableFrom(scopedObject.GetType()))
-                .Where(o=>o.Definitions != null)
+                .Where(o => o.Definitions != null)
                 .SelectMany(o => o.Definitions)
                 .OfType<CdssComputableAssetDefinition>()
                 .ToCdssReferenceDictionary(o => o);
@@ -158,7 +155,7 @@ namespace SanteDB.Cdss.Xml
         public IQueryResultSet Lookup(String resourceType, String filterExpression)
         {
             var tResource = this.m_serializationBinder.BindToType(null, resourceType);
-            if(tResource == null)
+            if (tResource == null)
             {
                 throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.TYPE_NOT_FOUND, resourceType));
             }
@@ -169,9 +166,9 @@ namespace SanteDB.Cdss.Xml
                 throw new InvalidOperationException(string.Format(ErrorMessages.SERVICE_NOT_FOUND, tRepository));
             }
 
-            
-            var vars = this.m_variables.Select(o=>o.Key)
-                .Union(this.m_computableAssetsInScope.Select(o=>o.Key))
+
+            var vars = this.m_variables.Select(o => o.Key)
+                .Union(this.m_computableAssetsInScope.Select(o => o.Key))
                 .ToDictionaryIgnoringDuplicates<String, String, Func<Object>>(o => o, v => () => this.GetValue(v));
             var linqExpression = QueryExpressionParser.BuildLinqExpression(tResource, filterExpression.ParseQueryString(), "filter", vars);
             return repository.Find(linqExpression);
@@ -239,7 +236,7 @@ namespace SanteDB.Cdss.Xml
         /// <inheritdoc/>
         public void SetValue(String parameterName, object value)
         {
-            
+
             var caseInsitiveName = parameterName.ToLowerInvariant(); // Case insensitive
             if (!this.m_variables.TryGetValue(caseInsitiveName, out ParameterRegistration registration))
             {
@@ -316,7 +313,7 @@ namespace SanteDB.Cdss.Xml
             {
                 return retVal;
             }
-            else if(parameterOrFactName.StartsWith("_") || parameterOrFactName.StartsWith("$")) // Control parameters are null when not presetn
+            else if (parameterOrFactName.StartsWith("_") || parameterOrFactName.StartsWith("$")) // Control parameters are null when not presetn
             {
                 return null;
             }
@@ -450,40 +447,37 @@ namespace SanteDB.Cdss.Xml
         /// <returns></returns>
         internal Interpreter GetExpressionInterpreter()
         {
-            if (this.m_expressionInterpreter == null || ApplicationServiceContext.Current.HostType == SanteDBHostType.Server)
-            {
-                this.m_expressionInterpreter = new Interpreter(InterpreterOptions.Default | InterpreterOptions.CaseInsensitive)
-                                   .Reference(typeof(DateTimeOffset))
-                                   .Reference(typeof(ExtensionMethods))
-                                   .Reference(typeof(Trace))
-                                   .EnableAssignment(AssignmentOperators.None);
+            var retVal = new Interpreter(InterpreterOptions.Default | InterpreterOptions.CaseInsensitive)
+                               .Reference(typeof(DateTimeOffset))
+                               .Reference(typeof(ExtensionMethods))
+                               .Reference(typeof(Trace))
+                               .EnableAssignment(AssignmentOperators.None);
 
-                // Add types
-                typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => this.m_expressionInterpreter.Reference(t));
+            // Add types
+            typeof(Patient).Assembly.GetTypes().Where(t => typeof(IdentifiedData).IsAssignableFrom(t)).ForEach(t => retVal.Reference(t));
 
-                // Add delegates 
-                Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
-                Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
-                Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
-                Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
-                Func<String, String> stringFunc = (s) => CdssExecutionStackFrame.Current.Context.String(s);
-                Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
-                Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
-                Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
-                Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
-                Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
-                this.m_expressionInterpreter.SetFunction("intf", intFunc);
-                this.m_expressionInterpreter.SetFunction("realf", realFunc);
-                this.m_expressionInterpreter.SetFunction("boolf", boolFunc);
-                this.m_expressionInterpreter.SetFunction("datef", dateFunc);
-                this.m_expressionInterpreter.SetFunction("stringf", stringFunc);
-                this.m_expressionInterpreter.SetFunction("actf", actFunc);
-                this.m_expressionInterpreter.SetFunction("entf", entityFunc);
-                this.m_expressionInterpreter.SetFunction("data", datasetFunc);
-                this.m_expressionInterpreter.SetFunction("greaterOf", greaterOfFunc);
-                this.m_expressionInterpreter.SetFunction("lesserOf", lesserOfFunc);
-            }
-            return this.m_expressionInterpreter;
+            // Add delegates 
+            Func<String, Int32> intFunc = (s) => CdssExecutionStackFrame.Current.Context.Int(s);
+            Func<String, Double> realFunc = (s) => CdssExecutionStackFrame.Current.Context.Real(s);
+            Func<String, Boolean> boolFunc = (s) => CdssExecutionStackFrame.Current.Context.Bool(s);
+            Func<String, DateTime> dateFunc = (s) => CdssExecutionStackFrame.Current.Context.Date(s);
+            Func<String, String> stringFunc = (s) => CdssExecutionStackFrame.Current.Context.String(s);
+            Func<String, Act> actFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Act;
+            Func<String, Entity> entityFunc = (s) => CdssExecutionStackFrame.Current.Context[s] as Entity;
+            Func<String, CdssReferenceDataset> datasetFunc = (s) => CdssExecutionStackFrame.Current.Context.GetDataSet(s);
+            Func<IComparable, IComparable, IComparable> greaterOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.GreaterOf(a, b);
+            Func<IComparable, IComparable, IComparable> lesserOfFunc = (a, b) => CdssExecutionStackFrame.Current.Context.LesserOf(a, b);
+            retVal.SetFunction("intf", intFunc);
+            retVal.SetFunction("realf", realFunc);
+            retVal.SetFunction("boolf", boolFunc);
+            retVal.SetFunction("datef", dateFunc);
+            retVal.SetFunction("stringf", stringFunc);
+            retVal.SetFunction("actf", actFunc);
+            retVal.SetFunction("entf", entityFunc);
+            retVal.SetFunction("data", datasetFunc);
+            retVal.SetFunction("greaterOf", greaterOfFunc);
+            retVal.SetFunction("lesserOf", lesserOfFunc);
+            return retVal;
         }
 
         /// <summary>
@@ -638,7 +632,7 @@ namespace SanteDB.Cdss.Xml
         /// </summary>
         public CdssExecutionContext(CdssExecutionContext copyFrom) : base(copyFrom)
         {
-            
+
         }
 
         /// <inheritdoc/>

@@ -21,6 +21,7 @@
 using DynamicExpresso;
 using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Exceptions;
+using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Model;
 using System;
@@ -82,7 +83,7 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.missingLogic", "C# expression logic missing", Guid.Empty);
             }
-            else
+            else if(ApplicationServiceContext.Current.HostType == SanteDBHostType.Server) // Only the server needs to validate the C# expressions - we assume that the dCDR does not need to have the expressions validated
             {
                 var identifiers = context.GetExpressionInterpreter()
                   .SetVariable("context", null, typeof(CdssExecutionContext))
