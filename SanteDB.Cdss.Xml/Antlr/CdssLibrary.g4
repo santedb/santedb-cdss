@@ -163,11 +163,15 @@ repeat_action_statement:
 propose_action_statement: 
     PROPOSE (STRING)?
         (having_model)
+        (with_effective)?
         (metadata_statement)?
     AS
         (assign_action_statement)*
     END (PROPOSE)?;
 
+with_effective:
+    VALID (FROM csharp_logic)? (UNTIL csharp_logic)?;
+        
 raise_action_statement:
     RAISE (HAVING PRIORITY ISSUE_PRIORITY_VAL)?
         (HAVING TYPE (ISSUE_TYPE|UUIDV4))?
@@ -218,6 +222,7 @@ when_guard_condition:
 OVERWRITE: 'overwrite';
 REPEAT: 'repeat';
 UNTIL: 'until';
+VALID: 'valid'; 
 TRACKBY: 'track-by';
 NORMALIZE: 'normalize';
 COMPUTEDBY: 'computed';

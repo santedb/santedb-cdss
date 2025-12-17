@@ -33,6 +33,7 @@ using System.Xml;
 using SanteDB;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
@@ -405,6 +406,22 @@ namespace SanteDB.Cdss.Xml.Antlr
                         xsz.Serialize(xw, cdssPropose.Model.Model);
                     }
                     writer.WriteLine("{0}$$\r\n{0}end model", indentationStr);
+                }
+            }
+
+            // Effective time
+            if(cdssPropose.NotBeforeComputation != null || cdssPropose.NotAfterComputation != null)
+            {
+                writer.Write("{0}valid ", indentationStr);
+                if(cdssPropose.NotBeforeComputation != null)
+                {
+                    writer.Write(" from ");
+                    cdssPropose.NotBeforeComputation.EmitCdssText(writer, indentation + 1);
+                }
+                if(cdssPropose.NotAfterComputation != null)
+                {
+                    writer.Write(" until ");
+                    cdssPropose.NotAfterComputation.EmitCdssText(writer, indentation + 1);
                 }
             }
             cdssPropose.Metadata?.EmitMetadata(writer, indentation + 1);
