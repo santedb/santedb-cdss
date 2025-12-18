@@ -586,7 +586,18 @@ namespace SanteDB.Cdss.Xml.Antlr
                     writer.WriteLine("query(");
                     if (!String.IsNullOrEmpty(query.SourceCollectionHdsi))
                     {
-                        writer.WriteLine("{0}\tfrom hdsi($${1}$$)", indentationStr, query.SourceCollectionHdsi);
+                        switch (query.Scope) 
+                        {
+                            case CdssHdsiExpressionScopeType.Fact:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$ scoped-to fact \"{2}\")", indentationStr, query.SourceCollectionHdsi, query.ScopedFact);
+                                break;
+                            case CdssHdsiExpressionScopeType.CurrentObject:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$ scoped-to proposal)", indentationStr, query.SourceCollectionHdsi);
+                                break;
+                            default:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$)", indentationStr, query.SourceCollectionHdsi);
+                                break;
+                        }
                     }
                     if (!string.IsNullOrEmpty(query.FilterHdsi))
                     {
