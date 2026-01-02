@@ -40,6 +40,8 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
     public class CdssCsharpExpressionDefinition : CdssExpressionDefinition
     {
 
+        private Func<object, object, object> m_compiledExpression;
+
         /// <summary>
         /// Defualt ctor
         /// </summary>
@@ -47,6 +49,13 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
         {
 
         }
+
+        /// <summary>
+        /// Debug view
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public string DebugView { get; private set; }
+
 
         /// <summary>
         /// Create a new CDSS C# expression based on <paramref name="expression"/>
@@ -104,6 +113,24 @@ namespace SanteDB.Cdss.Xml.Model.Expressions
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "cdss.expression.csharp.bracketMismatch", $"Missing parentheses close/open in {this.ExpressionValue}", Guid.Empty, this.ToReferenceString());
                 }
             }
+        }
+
+        /// <summary>
+        /// Compute the expression
+        /// </summary>
+        internal object Compute(Type logicType)
+        {
+            if (this.m_compiledExpression == null)
+            {
+                var uncompiledExpression = this.GenerateComputableExpression(logicType ?? typeof(IdentifiedData));
+#if DEBUG
+                this.DebugView = uncompiledExpression.ToString();
+#endif
+                this.m_compiledExpression = uncompiledExpression.Compile();
+            }
+            var value = this.m_compiledExpression(CdssExecutionStackFrame.Current.Context, CdssExecutionStackFrame.Current.ScopedObject);
+            CdssExecutionStackFrame.Current.Context.DebugSession?.CurrentFrame.AddSample(this.DebugView, value);
+            return value;
         }
     }
 }

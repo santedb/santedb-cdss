@@ -171,5 +171,15 @@ namespace SanteDB.Cdss.Xml
                 return secondValue;
             }
         }
+
+        /// <summary>
+        /// Between INCLUSIVE
+        /// </summary>
+        public static bool Between<T>(this T me, T firstValue, T secondValue)
+            where T : IComparable
+        {
+            return me.CompareTo(firstValue) >= 0 && me.CompareTo(secondValue) <= 0;
+        }
+
     }
 }

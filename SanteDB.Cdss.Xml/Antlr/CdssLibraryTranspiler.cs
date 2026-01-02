@@ -33,6 +33,7 @@ using System.Xml;
 using SanteDB;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
@@ -407,6 +408,22 @@ namespace SanteDB.Cdss.Xml.Antlr
                     writer.WriteLine("{0}$$\r\n{0}end model", indentationStr);
                 }
             }
+
+            // Effective time
+            if(cdssPropose.NotBeforeComputation != null || cdssPropose.NotAfterComputation != null)
+            {
+                writer.Write("{0}valid ", indentationStr);
+                if(cdssPropose.NotBeforeComputation != null)
+                {
+                    writer.Write(" from ");
+                    cdssPropose.NotBeforeComputation.EmitCdssText(writer, indentation + 1);
+                }
+                if(cdssPropose.NotAfterComputation != null)
+                {
+                    writer.Write(" until ");
+                    cdssPropose.NotAfterComputation.EmitCdssText(writer, indentation + 1);
+                }
+            }
             cdssPropose.Metadata?.EmitMetadata(writer, indentation + 1);
             writer.WriteLine("{0}as", indentationStr);
 
@@ -569,7 +586,18 @@ namespace SanteDB.Cdss.Xml.Antlr
                     writer.WriteLine("query(");
                     if (!String.IsNullOrEmpty(query.SourceCollectionHdsi))
                     {
-                        writer.WriteLine("{0}\tfrom hdsi($${1}$$)", indentationStr, query.SourceCollectionHdsi);
+                        switch (query.Scope) 
+                        {
+                            case CdssHdsiExpressionScopeType.Fact:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$ scoped-to fact \"{2}\")", indentationStr, query.SourceCollectionHdsi, query.ScopedFact);
+                                break;
+                            case CdssHdsiExpressionScopeType.CurrentObject:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$ scoped-to proposal)", indentationStr, query.SourceCollectionHdsi);
+                                break;
+                            default:
+                                writer.WriteLine("{0}\tfrom hdsi($${1}$$)", indentationStr, query.SourceCollectionHdsi);
+                                break;
+                        }
                     }
                     if (!string.IsNullOrEmpty(query.FilterHdsi))
                     {

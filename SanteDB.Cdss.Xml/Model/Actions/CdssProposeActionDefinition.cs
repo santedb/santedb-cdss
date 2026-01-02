@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 using SanteDB.Cdss.Xml.Ami;
 using SanteDB.Cdss.Xml.Exceptions;
 using SanteDB.Cdss.Xml.Model.Assets;
+using SanteDB.Cdss.Xml.Model.Expressions;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Cdss;
 using SanteDB.Core.i18n;
@@ -52,6 +53,17 @@ namespace SanteDB.Cdss.Xml.Model.Actions
         [XmlElement("assign"), JsonProperty("assign")]
         public List<CdssPropertyAssignActionDefinition> Assignment { get; set; }
 
+        /// <summary>
+        /// Not before
+        /// </summary>
+        [XmlElement("notBefore"), JsonProperty("notBefore")]
+        public CdssCsharpExpressionDefinition NotBeforeComputation { get; set; }
+
+        /// <summary>
+        /// Not after
+        /// </summary>
+        [XmlElement("notAfter"), JsonProperty("notAfter")]
+        public CdssCsharpExpressionDefinition NotAfterComputation { get; set; }
 
         /// <inheritdoc/>
         public override IEnumerable<DetectedIssue> Validate(CdssExecutionContext context)
@@ -123,6 +135,8 @@ namespace SanteDB.Cdss.Xml.Model.Actions
                                         Key = protocol.Uuid,
                                         Name = protocol.Name
                                     },
+                                    NotAfter = (DateTime?)this.NotAfterComputation?.Compute(this.LogicBlock?.Context?.Type),
+                                    NotBefore = (DateTime?)this.NotBeforeComputation?.Compute(this.LogicBlock?.Context?.Type),
                                     Version = protocol.Metadata?.Version ?? "1.0"
                                 });
                                 break;

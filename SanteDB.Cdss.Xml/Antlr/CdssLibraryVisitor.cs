@@ -796,6 +796,8 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new CdssTranspilationException(context.Start, String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
             }
 
+            // Is there a time bounds on the proposal?
+
             var proposeAction = this.CreateCdssObject<CdssProposeActionDefinition>(context);
             proposeAction.Assignment = new List<CdssPropertyAssignActionDefinition>();
             actionCollection.Actions.Add(proposeAction);
@@ -803,6 +805,37 @@ namespace SanteDB.Cdss.Xml.Antlr
             var retVal = base.VisitPropose_action_statement(context);
             this.m_currentObject.Pop();
             return retVal;
+        }
+
+        public override CdssLibraryDefinition VisitWith_effective([NotNull] CdssLibraryParser.With_effectiveContext context)
+        {
+            if (!(m_currentObject.Peek() is CdssProposeActionDefinition proposeDefinition))
+            {
+                throw new CdssTranspilationException(context.Start, String.Format(CdssTranspileErrors.EXPRESSION_CANNOT_BE_APPLIED_IN_CONTEXT, this.m_currentObject.Peek()));
+            }
+
+            // FROM / UNITL
+            if(context.FROM() != null)
+            {
+                var computation = context.csharp_logic().First();
+                if (!this.TryExtractString(computation.STRING(), out var fromLogic) && !this.TryExtractMultilineString(computation.MULTILINE_STRING(), out fromLogic))
+                {
+                    throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_HDSI_EXPRESSION);
+                }
+                proposeDefinition.NotBeforeComputation = this.CreateCdssExpression<CdssCsharpExpressionDefinition>(context);
+                proposeDefinition.NotBeforeComputation.ExpressionValue = fromLogic;
+            }
+            if (context.UNTIL() != null)
+            {
+                var computation = context.csharp_logic().Last();
+                if (!this.TryExtractString(computation.STRING(), out var toLogic) && !this.TryExtractMultilineString(computation.MULTILINE_STRING(), out toLogic))
+                {
+                    throw new CdssTranspilationException(context.Start, CdssTranspileErrors.MISSING_HDSI_EXPRESSION);
+                }
+                proposeDefinition.NotAfterComputation = this.CreateCdssExpression<CdssCsharpExpressionDefinition>(context);
+                proposeDefinition.NotAfterComputation.ExpressionValue = toLogic;
+            }
+            return this.m_cdssLibrary;
         }
 
         public override CdssLibraryDefinition VisitAssign_action_statement([NotNull] CdssLibraryParser.Assign_action_statementContext context)
