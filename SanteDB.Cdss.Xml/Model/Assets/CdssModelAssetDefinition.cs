@@ -43,8 +43,8 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         // JSON Serializer
         private static JsonViewModelSerializer s_serializer = new JsonViewModelSerializer();
 
-        // Parsed model
-        private Act m_parsedModel;
+        // Cached model
+        private Act m_cachedModel = null;
 
         /// <summary>
         /// Reference model 
@@ -76,48 +76,56 @@ namespace SanteDB.Cdss.Xml.Model.Assets
         /// <inheritdoc/>
         public override object Compute()
         {
-            if (this.m_parsedModel == null)
+            using (CdssExecutionStackFrame.EnterChildFrame(this))
             {
+                Act retVal = null;
                 if (!String.IsNullOrEmpty(this.ReferencedModel) && CdssExecutionStackFrame.Current.Context.TryGetModel(this.ReferencedModel, out var refModel))
                 {
-                    this.m_parsedModel = refModel as Act;
+                    retVal = refModel as Act;
                 }
                 else if (!String.IsNullOrEmpty(this.ExternalModel))
                 {
+                    var templateDictionary = new Dictionary<String, String>()
+                    {
+                        {
+                            "recordTargetId", CdssExecutionStackFrame.Current.ScopedObject.Key?.ToString()
+                        }
+                    };
                     var templateManager = ApplicationServiceContext.Current.GetService<IDataTemplateManagementService>();
                     var resolver = ApplicationServiceContext.Current.GetService<IReferenceResolver>();
                     var dt = templateManager.GetByMnemonic(this.ExternalModel) ?? throw new KeyNotFoundException(String.Format(ErrorMessages.OBJECT_NOT_FOUND, this.ExternalModel));
-                    this.m_parsedModel = dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act;
+                    retVal = dt.FillObject(templateDictionary, resolver.ResolveAsString) as Act;
                     // Fill out sub-templates in relationships
-                    if (this.m_parsedModel.Relationships != null)
+                    if (retVal.Relationships != null)
                     {
-                        foreach (var rel in this.m_parsedModel.Relationships.Where(r => r.TargetAct?.Template?.Mnemonic != null))
+                        foreach (var rel in retVal.Relationships.Where(r => r.TargetAct?.Template?.Mnemonic != null))
                         {
                             // Get the sub-template (if avail)
                             dt = templateManager.GetByMnemonic(rel.TargetAct.Template.Mnemonic);
-                            rel.TargetAct = (dt.FillObject(new Dictionary<String, String>(), resolver.ResolveAsString) as Act).CopyObjectData(rel.TargetAct);
+                            rel.TargetAct = (dt.FillObject(templateDictionary, resolver.ResolveAsString) as Act).CopyObjectData(rel.TargetAct);
                         }
                     }
-                    this.m_parsedModel.Participations?.RemoveAll(p => p.PlayerEntityKey == null);
+                    retVal.Participations?.RemoveAll(p => p.PlayerEntityKey == null);
                 }
-                else
+                else if(this.m_cachedModel == null)
                 {
                     switch (this.Model)
                     {
                         case String jsonString:
-                            this.m_parsedModel = s_serializer.DeSerialize<Act>(jsonString);
+                            m_cachedModel = retVal = m_cachedModel ?? s_serializer.DeSerialize<Act>(jsonString);
                             break;
                         case Act act:
-                            this.m_parsedModel = act as Act;
+                            m_cachedModel = retVal = m_cachedModel ?? act as Act;
                             break;
                         default:
                             throw new CdssEvaluationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(this.Model)));
                     }
                 }
-            }
-            using (CdssExecutionStackFrame.EnterChildFrame(this))
-            {
-                var retVal = this.m_parsedModel.DeepCopy() as Act;
+                else
+                {
+                    retVal = m_cachedModel;
+                }
+                retVal = retVal.DeepCopy() as Act;
                 retVal.Key = Guid.NewGuid();
                 return retVal;
             }
