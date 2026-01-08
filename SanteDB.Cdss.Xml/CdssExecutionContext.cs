@@ -409,6 +409,7 @@ namespace SanteDB.Cdss.Xml
                         }
 
                         // Add the entity as a record target to the model
+                        proposedAct.LoadProperty(o => o.Participations).RemoveAll(o => o.ParticipationRoleKey == ActParticipationKeys.RecordTarget);
                         proposedAct.LoadProperty(o => o.Participations).Add(new ActParticipation(ActParticipationKeys.RecordTarget, entity.Key));
                     }
                     break;
