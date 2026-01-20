@@ -239,11 +239,11 @@ namespace SanteDB.Cdss.Xml
                 CdssExecutionContext context = null;
                 if (debugMode)
                 {
-                    context = CdssExecutionContext.CreateDebugContext((IdentifiedData)analysisTarget, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateDebugContext(analysisTarget.PrepareForCdssAnalysis(), this.GetScopedLibraries());
                 }
                 else
                 {
-                    context = CdssExecutionContext.CreateContext((IdentifiedData)analysisTarget, this.GetScopedLibraries());
+                    context = CdssExecutionContext.CreateContext(analysisTarget.PrepareForCdssAnalysis(), this.GetScopedLibraries());
                 }
 
                 using (CdssExecutionStackFrame.Enter(context))
