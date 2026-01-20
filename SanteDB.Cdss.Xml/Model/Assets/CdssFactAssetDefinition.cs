@@ -156,11 +156,11 @@ namespace SanteDB.Cdss.Xml.Model.Assets
                         {
                             if (this.ValueType == CdssValueType.Boolean) // It is boolean but cannot be converted to boolean so we do a null check
                             {
-                                retVal = retVal != null;
+                                converted = retVal != null;
                             }
                             else
                             {
-                                retVal = retVal != CdssConstants.GetDefaultValue(netType);
+                                converted = retVal != CdssConstants.GetDefaultValue(netType);
                             }
                         }
                         retVal = converted;
