@@ -140,6 +140,28 @@ namespace SanteDB.Cdss.Xml
             }
         }
 
+
+        /// <summary>
+        /// Extends adding years to a date time to partial years
+        /// </summary>
+        public static DateTime AddYearsEx(this DateTime me, double years)
+        {
+            var nYears = (int)years;
+            var nMonths = (int)((years - nYears) * 12);
+            return me.AddYears(nYears).AddMonths(nMonths);
+        }
+
+        /// <summary>
+        /// Extends adding years to a date time to partial years
+        /// </summary>
+        public static DateTimeOffset AddYearsEx(this DateTimeOffset me, double years)
+        {
+            var nYears = (int)years;
+            var nMonths = (int)((years - nYears) * 12);
+            return me.AddYears(nYears).AddMonths(nMonths);
+        }
+
+
         /// <summary>
         /// Return the greater of <paramref name="firstValue"/> or <paramref name="secondValue"/>
         /// </summary>
