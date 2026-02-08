@@ -143,7 +143,7 @@ namespace SanteDB.Cdss.Xml
                                 library = CdssLibraryDefinition.Load(sourceReader);
                             }
 
-                            var existing = this.m_cdssRepositoryService.Find(o => o.Id == library.Id).FirstOrDefault();
+                            var existing = this.m_cdssRepositoryService.Get(library.Uuid, null) ?? this.m_cdssRepositoryService.Find(o => o.Id == library.Id).FirstOrDefault();
 
                             // Is the UUID different then don't install or if the version is older
                             if (existing == null || existing.Uuid == library.Uuid && library.Metadata?.Version.ParseVersion(out _) > existing.Version.ParseVersion(out _))
