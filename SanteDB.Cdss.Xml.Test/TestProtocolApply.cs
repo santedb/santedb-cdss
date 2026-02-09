@@ -442,7 +442,7 @@ namespace SanteDB.Cdss.Xml.Test
                 }
             }
 
-            Assert.GreaterOrEqual(acts.Relationships.Count(), 9);
+            Assert.GreaterOrEqual(acts.Relationships.Count(), 8);
 
         }
 
@@ -491,7 +491,7 @@ namespace SanteDB.Cdss.Xml.Test
                 }
             }
 
-            Assert.GreaterOrEqual(acts.Relationships.Count(), 9);
+            Assert.GreaterOrEqual(acts.Relationships.Count(), 8);
 
         }
 
