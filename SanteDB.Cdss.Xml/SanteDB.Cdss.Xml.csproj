@@ -1,191 +1,98 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup Condition="'$(VersionNumber)' == ''">
-    <VersionNumber>3.0-debug</VersionNumber>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-  </PropertyGroup>
-    
-  <PropertyGroup>
-    <PackageId>SanteDB.Cdss.Xml</PackageId>
-    <Title>SanteDB.Cdss.Xml</Title>
-    <Version>$(VersionNumber)</Version>
-    <Description>SanteDB Clinical Decision Support XML Protocoling Engine. Provides a descriptive way to express and execute clinical protocols</Description>
-    <Authors>SanteSuite Contributors</Authors>
-    <PackageTags>SanteDB</PackageTags>
-    <RepositoryUrl>https://github.com/santedb/santedb-cdss</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <IncludeSymbols>true</IncludeSymbols>
-        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-	    <Product>SanteDB</Product>
-    <Copyright>Copyright (C) 2015-2026 SanteSuite Contributors (See: NOTICES)</Copyright>
-    <Company>SanteSuite Contributors</Company>
-    <PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
-    <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
-  </PropertyGroup>
-    
-  <ItemGroup>
-    <Compile Remove="Model.old\DecisionSupportBaseElement.cs" />
-    <Compile Remove="Model.old\PropertyAssignAction.cs" />
-    <Compile Remove="Model.old\ProtocolCollection.cs" />
-    <Compile Remove="Model.old\ProtocolDefinition.cs" />
-    <Compile Remove="Model.old\ProtocolGroupDefinition.cs" />
-    <Compile Remove="Model.old\ProtocolProposeAction.cs" />
-    <Compile Remove="Model.old\ProtocolResourceTypeReference.cs" />
-    <Compile Remove="Model.old\ProtocolRuleDefinition.cs" />
-    <Compile Remove="Model.old\ProtocolRuleset.cs" />
-    <Compile Remove="Model.old\ProtocolThenClauseCollection.cs" />
-    <Compile Remove="Model.old\ProtocolTransformDefinition.cs" />
-    <Compile Remove="Model.old\ProtocolVariableDefinition.cs" />
-    <Compile Remove="Model.old\ProtocolWhenClauseCollection.cs" />
-    <Compile Remove="Model.old\RulesetLibrary.cs" />
-    <Compile Remove="Model.old\Types.cs" />
-  </ItemGroup>
-    
-  <ItemGroup>
-    <Antlr4 Include="Antlr\CdssLibrary.g4">
-      <Visitor>true</Visitor>
-      <Listener>false</Listener>
-      <GAtn>true</GAtn>
-      <Package>SanteDB.Cdss.Xml.Antlr</Package>
-      <Error>false</Error>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <JavaExec>PATH</JavaExec>
-    </Antlr4>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Antlr\CdssLibrary.g4" />
-  </ItemGroup>  
-  <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" PrivateAssets="all" />
-    <PackageReference Include="DynamicExpresso.Core" Version="2.17.2" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-  </ItemGroup>    
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>portable</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
-  <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\SanteDB.licenseheader">
-      <Link>SanteDB.licenseheader</Link>
-    </None>
-    <None Include="Doc\XmlDecisionSupport\index.md" />
-    <None Include="Model.old\DecisionSupportBaseElement.cs" />
-    <None Include="Model.old\PropertyAssignAction.cs" />
-    <None Include="Model.old\ProtocolCollection.cs" />
-    <None Include="Model.old\ProtocolDefinition.cs" />
-    <None Include="Model.old\ProtocolGroupDefinition.cs" />
-    <None Include="Model.old\ProtocolProposeAction.cs" />
-    <None Include="Model.old\ProtocolResourceTypeReference.cs" />
-    <None Include="Model.old\ProtocolRuleDefinition.cs" />
-    <None Include="Model.old\ProtocolRuleset.cs" />
-    <None Include="Model.old\ProtocolThenClauseCollection.cs" />
-    <None Include="Model.old\ProtocolTransformDefinition.cs" />
-    <None Include="Model.old\ProtocolVariableDefinition.cs" />
-    <None Include="Model.old\ProtocolWhenClauseCollection.cs" />
-    <None Include="Model.old\RulesetLibrary.cs" />
-    <None Include="Model.old\Types.cs" />
-  </ItemGroup>
-  <!-- <ItemGroup> -->
-    <!-- <Compile Include="AppletClinicalProtocolRepository.cs" /> -->
-    <!-- <Compile Include="Model\DecisionSupportBaseElement.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolCollection.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolDefinition.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolRuleDefinition.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolThenClauseCollection.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolVariableDefinition.cs" /> -->
-    <!-- <Compile Include="Model\ProtocolWhenClauseCollection.cs" /> -->
-    <!-- <Compile Include="Model\RuleSetDefinition.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlBinaryExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlBoundExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlMethodCallExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlConstantExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlExpressionList.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlLambdaExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlMemberExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlParameterExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlTypeBinaryExpression.cs" /> -->
-    <!-- <Compile Include="Model\XmlLinq\XmlUnaryExpression.cs" /> -->
-    <!-- <Compile Include="Properties\AssemblyInfo.cs" /> -->
-    <!-- <Compile Include="XmlClinicalProtocol.cs" /> -->
-  <!-- </ItemGroup> -->
-  <Choose>
-    <When Condition="$(SolutionName.Contains('-nuget'))">
-      <ItemGroup>
-        <PackageReference Include="SanteDB.Core.Api" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Core.Applets" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Core.Model" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Rest.Common" Version="$(VersionNumber)" />
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <ProjectReference Include="..\..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj">
-          <Project>{F1A82A4F-4A57-47D7-AE76-444C8A4FF54A}</Project>
-          <Name>SanteDB.Core.Model</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj">
-          <Project>{3A45F695-47A2-464C-ACE6-BDABBFA39FBC}</Project>
-          <Name>SanteDB.Core.Api</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-applets\SanteDB.Core.Applets\SanteDB.Core.Applets.csproj">
-          <Project>{39E61451-F4FE-493D-B754-5F06EB284AAC}</Project>
-          <Name>SanteDB.Core.Applets</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SharpCompress" Version="0.40.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="i18n\CdssTranspileErrors.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CdssTranspileErrors.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="i18n\CdssTranspileErrors.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CdssTranspileErrors.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Schema\Cdss.xsd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<PropertyGroup Condition="'$(VersionNumber)' == ''">
+		<VersionNumber>3.0-debug</VersionNumber>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net48;netstandard2.0</TargetFrameworks>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>SanteDB.Cdss.Xml</PackageId>
+		<Title>SanteDB.Cdss.Xml</Title>
+		<Version>$(VersionNumber)</Version>
+		<Description>SanteDB Clinical Decision Support XML Protocoling Engine. Provides a descriptive way to express and execute clinical protocols</Description>
+		<Authors>SanteSuite Contributors</Authors>
+		<PackageTags>SanteDB</PackageTags>
+		<RepositoryUrl>https://github.com/santedb/santedb-cdss</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IncludeSymbols>true</IncludeSymbols>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<Product>SanteDB</Product>
+		<Copyright>Copyright (C) 2015-2026 SanteSuite Contributors (See: NOTICES)</Copyright>
+		<Company>SanteSuite Contributors</Company>
+		<PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
+		<PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Model.old\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Antlr4 Include="Antlr\CdssLibrary.g4">
+			<Visitor>true</Visitor>
+			<Listener>false</Listener>
+			<GAtn>true</GAtn>
+			<Package>SanteDB.Cdss.Xml.Antlr</Package>
+			<Error>false</Error>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<JavaExec>PATH</JavaExec>
+		</Antlr4>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Antlr\CdssLibrary.g4" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+		<PackageReference Include="Antlr4BuildTasks" Version="12.14.0" PrivateAssets="all" />
+		<PackageReference Include="DynamicExpresso.Core" Version="2.17.2" />
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="[13.0.4,13.1)" />
+		<PackageReference Include="SharpCompress" Version="0.40.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\SanteDB.licenseheader">
+			<Link>SanteDB.licenseheader</Link>
+		</None>
+		<None Include="Doc\XmlDecisionSupport\index.md" />
+	</ItemGroup>
+	<Choose>
+		<When Condition="$(SolutionName.Contains('-nuget'))">
+			<ItemGroup>
+				<PackageReference Include="SanteDB.Core.Api" Version="$(VersionNumber)" />
+				<PackageReference Include="SanteDB.Core.Applets" Version="$(VersionNumber)" />
+				<PackageReference Include="SanteDB.Core.Model" Version="$(VersionNumber)" />
+				<PackageReference Include="SanteDB.Rest.Common" Version="$(VersionNumber)" />
+			</ItemGroup>
+		</When>
+		<Otherwise>
+			<ItemGroup>
+				<ProjectReference Include="..\..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj" />
+				<ProjectReference Include="..\..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj" />
+				<ProjectReference Include="..\..\santedb-applets\SanteDB.Core.Applets\SanteDB.Core.Applets.csproj" />
+				<ProjectReference Include="..\..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
+			</ItemGroup>
+		</Otherwise>
+	</Choose>
+	<ItemGroup>
+		<Compile Update="i18n\CdssTranspileErrors.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>CdssTranspileErrors.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="i18n\CdssTranspileErrors.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>CdssTranspileErrors.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Schema\Cdss.xsd">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
