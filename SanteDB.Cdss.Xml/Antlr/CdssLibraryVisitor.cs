@@ -39,7 +39,6 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
-using ZstdSharp.Unsafe;
 
 namespace SanteDB.Cdss.Xml.Antlr
 {
