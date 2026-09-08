@@ -40,6 +40,8 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Xsl;
 
 namespace SanteDB.Cdss.Xml.Ami
 {
@@ -50,7 +52,7 @@ namespace SanteDB.Cdss.Xml.Ami
     {
         private readonly ICdssLibraryRepository m_cdssLibraryRepository;
         private readonly IResourceCheckoutService m_checkService;
-
+        private readonly XslCompiledTransform m_compiledTransform;
         /// <summary>
         /// DI constructor
         /// </summary>
@@ -58,6 +60,15 @@ namespace SanteDB.Cdss.Xml.Ami
         {
             this.m_cdssLibraryRepository = cdssLibraryRepository;
             this.m_checkService = checkoutService;
+            using (var rs = typeof(CdssLibraryDefinitionResourceHandler).Assembly.GetManifestResourceStream("SanteDB.Cdss.Xml.Resources.CdssToSummary.xslt"))
+            {
+                this.m_compiledTransform = new XslCompiledTransform();
+                using (var xr = XmlReader.Create(rs))
+                {
+                    this.m_compiledTransform.Load(xr, new XsltSettings() { EnableScript = true }, null);
+                }
+
+            }
         }
 
         /// <inheritdoc/>
@@ -199,26 +210,85 @@ namespace SanteDB.Cdss.Xml.Ami
                 throw new ArgumentOutOfRangeException(nameof(id), String.Format(ErrorMessages.INVALID_FORMAT, id, Guid.Empty));
             }
 
-            var retVal = this.m_cdssLibraryRepository.Get(uuid, versionUuid) as XmlProtocolLibrary;
-            if (retVal == null)
-            {
-                throw new KeyNotFoundException(id.ToString());
-            }
+            // HACK: Download all 
+            var format = RestOperationContext.Current.IncomingRequest.QueryString["_format"];
 
-            switch (RestOperationContext.Current.IncomingRequest.QueryString["_format"])
+            if (format.Equals("html") && uuid == Guid.Empty)
             {
-                case "xml":
-                    var library = retVal.Library.Clone();
-                    library.TranspileSourceReference = null;
-                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.xml\"");
-                    RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
-                    return library;
-                case "txt":
-                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.cdss\"");
-                    RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
-                    return new MemoryStream(retVal.Library.TranspileSourceReference?.OriginalSource ?? Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
-                default:
-                    return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
+                RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"AllCdssLibraries.html\"");
+                RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
+
+                // Save library and apply transform
+
+                var collection = new CdssLibraryCollection()
+                {
+                    Libraries = this.m_cdssLibraryRepository.Find(o => true).OfType<XmlProtocolLibrary>().Select(o=>o.Library).OrderBy(o=>o.Metadata.Version).ToList()
+                };
+
+                using (var ms = new MemoryStream())
+                {
+                    collection.Save(ms);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    using (var xr = XmlReader.Create(ms))
+                    {
+                        using (var xw = XmlWriter.Create(RestOperationContext.Current.OutgoingResponse.OutputStream, new XmlWriterSettings()
+                        {
+                            OmitXmlDeclaration = true,
+                            NamespaceHandling = NamespaceHandling.OmitDuplicates
+                        }))
+                        {
+                            this.m_compiledTransform.Transform(xr, xw);
+                        }
+                    }
+                }
+                return null;
+            }
+            else
+            {
+                var retVal = this.m_cdssLibraryRepository.Get(uuid, versionUuid) as XmlProtocolLibrary;
+                if (retVal == null)
+                {
+                    throw new KeyNotFoundException(id.ToString());
+                }
+
+                switch (format)
+                {
+                    case "xml":
+                        var library = retVal.Library.Clone();
+                        library.TranspileSourceReference = null;
+                        RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.xml\"");
+                        RestOperationContext.Current.OutgoingResponse.ContentType = "application/xml";
+                        return library;
+                    case "html":
+
+                        RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.html\"");
+                        RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
+                        // Save library and apply transform
+                        using (var ms = new MemoryStream())
+                        {
+                            retVal.Library.Save(ms);
+                            ms.Seek(0, SeekOrigin.Begin);
+                            using (var xr = XmlReader.Create(ms))
+                            {
+                                using (var xw = XmlWriter.Create(RestOperationContext.Current.OutgoingResponse.OutputStream, new XmlWriterSettings()
+                                {
+                                    OmitXmlDeclaration = true,
+                                    NamespaceHandling = NamespaceHandling.OmitDuplicates
+                                }))
+                                {
+                                    this.m_compiledTransform.Transform(xr, xw);
+                                }
+                            }
+                        }
+                        return null;
+
+                    case "txt":
+                        RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"{retVal.Name}.cdss\"");
+                        RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
+                        return new MemoryStream(retVal.Library.TranspileSourceReference?.OriginalSource ?? Encoding.UTF8.GetBytes(CdssLibraryTranspiler.UnTranspile(retVal.Library)));
+                    default:
+                        return new CdssLibraryDefinitionInfo(retVal, versionIdSpecified);
+                }
             }
         }
 
