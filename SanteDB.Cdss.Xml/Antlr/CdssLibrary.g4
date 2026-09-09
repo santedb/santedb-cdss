@@ -201,11 +201,13 @@ inline_rule_definition: RULE (metadata_statement)? AS
     THEN (then_action_statements)*
     END RULE;
 
-metadata_statement: (WITH)?METADATA
+metadata_statement: (
+    (WITH)?METADATA
     (metadata_author_statement|
     metadata_version_statement|
     metadata_documentation_statement)*
-    END (METADATA)?;
+    END (METADATA)?)|
+    (metadata_documentation_statement*);
 
 metadata_author_statement:
     AUTHOR;
@@ -227,7 +229,7 @@ TRACKBY: 'track-by';
 NORMALIZE: 'normalize';
 COMPUTEDBY: 'computed';
 FOR: 'for';
-METADATA: 'metadata';
+METADATA: ('metadata'|'meta');
 DOCUMENTATION: 'doc' (~[\r\n\u2028\u2029])*;
 AUTHOR: 'author' (~[\r\n\u2028\u2029])*;
 VERSION: 'version';

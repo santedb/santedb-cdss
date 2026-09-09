@@ -213,7 +213,7 @@ namespace SanteDB.Cdss.Xml.Ami
             // HACK: Download all 
             var format = RestOperationContext.Current.IncomingRequest.QueryString["_format"];
 
-            if (format.Equals("html") && uuid == Guid.Empty)
+            if ("html".Equals(format) && uuid == Guid.Empty)
             {
                 RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment;filename=\"AllCdssLibraries.html\"");
                 RestOperationContext.Current.OutgoingResponse.ContentType = "text/plain";
@@ -222,9 +222,9 @@ namespace SanteDB.Cdss.Xml.Ami
 
                 var collection = new CdssLibraryCollection()
                 {
-                    Libraries = this.m_cdssLibraryRepository.Find(o => true).OfType<XmlProtocolLibrary>().Select(o=>o.Library).OrderBy(o=>o.Metadata.Version).ToList()
+                    Libraries = this.m_cdssLibraryRepository.Find(o => true).OfType<XmlProtocolLibrary>().Select(o=>o.Library).OrderBy(o=>o.Name).ToList()
                 };
-
+                
                 using (var ms = new MemoryStream())
                 {
                     collection.Save(ms);

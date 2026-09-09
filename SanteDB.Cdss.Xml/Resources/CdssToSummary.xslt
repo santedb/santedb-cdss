@@ -13,6 +13,43 @@
 	public string StripSpace(string from) {
 		return from.Replace(" ", "");
 	}
+	public string PrettyFix(string sourceCode) {
+		sourceCode = sourceCode.Trim();
+		if(sourceCode.Length < 80)
+			return sourceCode;
+		else {
+			return sourceCode.Replace("&","& ").Replace("@"," @");
+		}
+	}
+	public string CsvTable(string csvStr) {
+		var inRows = csvStr.Trim().Split('\n');
+		var retVal = new System.Text.StringBuilder();
+		retVal.Append("<table border=\"1\">");
+		var r = 0;
+		foreach(var row in inRows) {
+			var inCols = row.Split(',');
+			var tag = r++ == 0 ? "th" : "td";
+			retVal.Append("<tr>");
+			foreach(var col in inCols) {
+				retVal.AppendFormat("<{0}>{1}</{0}>", tag, col);
+			}
+			retVal.Append("</tr>");
+		}
+		retVal.Append("</table>");
+		return retVal.ToString();
+	}
+	public string Unzip(String zipString) {
+		using(var ms = new System.IO.MemoryStream(System.Convert.FromBase64String(zipString.Trim())))
+        {
+            using(var hr = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionMode.Decompress))
+            {
+                using(var sr = new System.IO.StreamReader(hr))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+        }
+	}
     ]]>
 	</msxsl:script>
 	<xsl:output method="html" indent="yes" omit-xml-declaration="yes" media-type="text/html"/>
@@ -45,6 +82,10 @@
 						margin-right: 1em;
 						color: #00F;
 						font-weight: bold
+					}
+					code {
+						display: inline;
+						overflow-wrap: anywhere;
 					}
 					]]>
 				</style>
@@ -119,6 +160,10 @@
 				<xsl:apply-templates select="c:logic" />
 			</table>
 		</xsl:if>
+		<xsl:if test="c:data">
+			<h3>Data</h3>
+			<xsl:apply-templates select="c:data" />
+		</xsl:if>
 	</xsl:template>
 	<xsl:template match="/c:CdssLibrary">
 		<html>
@@ -160,28 +205,51 @@
 					</small>
 				</h1>
 				<p>
-					Version: <xsl:value-of select="c:meta/c:version"/> (state: <xsl:value-of select="c:status"/>
+					Version: <xsl:value-of select="c:meta/c:version"/> (state: <xsl:value-of select="c:status"/>)
 				</p>
-
-				<h2>References</h2>
-				<ul>
-					<xsl:apply-templates select="c:include" />
-				</ul>
-				<h2>Definitions</h2>
-				<table border="1">
-					<tr>
-						<th>Id</th>
-						<th>Type</th>
-						<th>Name</th>
-						<th>Definition</th>
-					</tr>
-					<xsl:apply-templates select="c:logic" />
-				</table>
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation"/>
+					</p>
+				</xsl:if>
+				<xsl:if test="c:include">
+					<h3>References</h3>
+					<ul>
+						<xsl:apply-templates select="c:include" />
+					</ul>
+				</xsl:if>
+				<xsl:if test="c:logic">
+					<h3>Definitions</h3>
+					<table border="1">
+						<tr>
+							<th>Id</th>
+							<th>Type</th>
+							<th>Name</th>
+							<th>Definition</th>
+						</tr>
+						<xsl:apply-templates select="c:logic" />
+					</table>
+				</xsl:if>
+				<xsl:if test="c:data">
+					<h3>Data</h3>
+					<xsl:apply-templates select="c:data" />
+				</xsl:if>
 			</body>
 		</html>
 
 	</xsl:template>
 
+	<xsl:template match="c:data">
+		<h4>
+			<xsl:value-of select="@name"/>
+		</h4>
+		<xsl:if test="c:meta/c:documentation">
+			<p>
+				<xsl:value-of select="c:meta/c:documentation"/>
+			</p>
+		</xsl:if>
+		<xsl:value-of disable-output-escaping="yes" select="f:CsvTable(f:Unzip(text()[last()]))"/>
+	</xsl:template>
 	<xsl:template match="c:logic">
 		<tr class="tr-logic">
 			<td>
@@ -193,6 +261,11 @@
 			</td>
 			<td>
 				Logic Block
+				<xsl:if test="c:context/@type">
+					<em>
+						(<xsl:value-of select="c:context/@type"/>)
+					</em>
+				</xsl:if>
 			</td>
 			<td>
 				<xsl:if test="@name">
@@ -202,8 +275,16 @@
 				</xsl:if>
 			</td>
 			<td>
-				<strong>When:</strong>
-				<xsl:apply-templates select="c:when" />
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation/text()"/>
+					</p>
+				</xsl:if>
+
+				<xsl:if test="c:when">
+					<strong>When:</strong>
+					<xsl:apply-templates select="c:when" />
+				</xsl:if>
 			</td>
 		</tr>
 		<xsl:apply-templates select="c:define/*" mode="define"/>
@@ -227,13 +308,39 @@
 				</xsl:if>
 			</td>
 			<td>
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation/text()"/>
+					</p>
+				</xsl:if>
 				<ul>
 					<xsl:apply-templates select="c:all|c:any|c:none|c:csharp|c:hdsi|c:fact|c:query" mode="when" />
 				</ul>
+
+				<xsl:if test="c:normalize">
+					<table>
+						<caption>Normalize Value</caption>
+						<tr>
+							<th>When</th>
+							<th>Computed By</th>
+						</tr>
+						<xsl:apply-templates select="c:normalize" />
+					</table>
+				</xsl:if>
 			</td>
 		</tr>
 	</xsl:template>
 
+	<xsl:template match="c:normalize">
+		<tr>
+			<td>
+				<xsl:apply-templates select="c:when/c:csharp|c:when/c:fact|c:when/c:hdsi" mode="assign"/>
+			</td>
+			<td>
+				<xsl:apply-templates select="c:csharp|c:fact|c:hdsi" mode="assign"/>
+			</td>
+		</tr>
+	</xsl:template>
 	<xsl:template match="c:rule" mode="define">
 		<tr class="tr-rule">
 			<td>
@@ -252,6 +359,11 @@
 				</xsl:if>
 			</td>
 			<td>
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation/text()"/>
+					</p>
+				</xsl:if>
 				<strong>When:</strong>
 				<xsl:apply-templates select="c:when" />
 				<strong>Then:</strong>
@@ -273,11 +385,16 @@
 			<td>
 				<xsl:if test="@name">
 					<a name="{f:StripSpace(@name)}">
-				<xsl:value-of select="@name"/>
+						<xsl:value-of select="@name"/>
 					</a>
 				</xsl:if>
 			</td>
 			<td>
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation/text()"/>
+					</p>
+				</xsl:if>
 				<strong>When:</strong>
 				<xsl:apply-templates select="c:when" />
 				<strong>Then:</strong>
@@ -304,9 +421,20 @@
 				</xsl:if>
 			</td>
 			<td>
+				<xsl:if test="c:meta/c:documentation">
+					<p>
+						<xsl:value-of select="c:meta/c:documentation/text()"/>
+					</p>
+				</xsl:if>
+				<xsl:if test="c:json">
 				<pre>
-					<xsl:value-of select="."/>
+					<xsl:value-of select="c:json/text()"/>
 				</pre>
+				</xsl:if>
+				<xsl:if test="@extern">
+					<strong>External Template: </strong>
+					<xsl:value-of select="@extern"/>
+				</xsl:if>
 			</td>
 		</tr>
 	</xsl:template>
@@ -328,8 +456,8 @@
 		<li>
 			<strong>Assign </strong>
 			<xsl:value-of select="@path"/>
-			= 
-					<xsl:apply-templates select="c:csharp|c:hdsi|c:query|c:fact|c:fixed" mode="assign" />
+			=
+			<xsl:apply-templates select="c:csharp|c:hdsi|c:query|c:fact|c:fixed" mode="assign" />
 		</li>
 	</xsl:template>
 	<xsl:template match="c:apply" mode="then">
@@ -419,13 +547,13 @@
 	<xsl:template match="c:csharp" mode="assign">
 		<strong>C#:</strong>
 		<code>
-			<xsl:value-of select="."/>
+			<xsl:value-of select="f:PrettyFix(.)"/>
 		</code>
 	</xsl:template>
 	<xsl:template match="c:hdsi" mode="assign">
 		<strong>HDSI:</strong>
 		<code>
-			<xsl:value-of select="."/>
+			<xsl:value-of select="f:PrettyFix(.)"/>
 		</code>
 	</xsl:template>
 	<xsl:template match="c:fact" mode="assign">
@@ -436,7 +564,7 @@
 	<xsl:template match="c:fixed" mode="assign">
 		<strong>CONST:</strong>
 		<code>
-			<xsl:value-of select="."/>
+			<xsl:value-of select="f:PrettyFix(.)"/>
 		</code>
 	</xsl:template>
 
@@ -470,10 +598,12 @@
 	<xsl:template match="c:fact" mode="when">
 		<li>
 			<xsl:if test="@ref">
-				<xsl:value-of select="@ref"/>
+				<a href="#{f:StripSpace(@ref)}">
+					<xsl:value-of select="@ref"/>
+				</a>
 			</xsl:if>
 			<xsl:if test="not(@ref)">
-
+				TODO
 			</xsl:if>
 		</li>
 	</xsl:template>
@@ -482,7 +612,7 @@
 		<li>
 			<strong>HDSI:</strong>
 			<code>
-				<xsl:value-of select="."/>
+				<xsl:value-of select="f:PrettyFix(.)"/>
 			</code>
 
 		</li>
@@ -492,7 +622,7 @@
 		<li>
 			<strong>C#:</strong>
 			<code>
-				<xsl:value-of select="."/>
+				<xsl:value-of select="f:PrettyFix(.)"/>
 			</code>
 		</li>
 	</xsl:template>
@@ -508,14 +638,22 @@
 			<em class="cd-keyword">
 				Select <xsl:value-of select="@fn"/>
 			</em>
-			<xsl:value-of select="@select"/>
+			<code>
+				<xsl:value-of select="f:PrettyFix(@select)"/>
+			</code>
 			<em class="cd-keyword"> From </em>
-			<xsl:value-of select="@source"/>
+			<code>
+				<xsl:value-of select="f:PrettyFix(@source)"/>
+			</code>
 			<em class="cd-keyword"> Where </em>
-			<xsl:value-of select="."/>
+			<code>
+				<xsl:value-of select="f:PrettyFix(.)"/>
+			</code>
 			<xsl:if test="@order-by">
 				<em class="cd-keyword"> Order by </em>
-				<xsl:value-of select="@order-by"/>
+				<code>
+					<xsl:value-of select="@order-by"/>
+				</code>
 			</xsl:if>
 		</li>
 	</xsl:template>
