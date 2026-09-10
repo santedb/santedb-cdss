@@ -55,14 +55,26 @@
 	<xsl:output method="html" indent="yes" omit-xml-declaration="yes" media-type="text/html"/>
 	<xsl:template match="*" priority="-1"></xsl:template>
 
-	<xsl:template match="/c:CdssLibraryCollection">
-		<html>
-			<head>
-				<title>
-					CDSS Library (Complete)
-				</title>
-				<style>
-					<![CDATA[
+	<xsl:template name="legend">
+		<fieldset>
+			<legend>CDSS Terminology / Legend</legend>
+			<dl>
+				<dt class="tr-fact">Fact</dt>
+				<dd>An individual piece of data extracted from the CDR or computed</dd>
+				<dt class="tr-model">Model</dt>
+				<dd>A template used for the collection or expression of data in RIM</dd>
+				<dt class="tr-rule">Rule</dt>
+				<dd>
+					A single condition which indicates <em>when</em> a condition is true, <em>then</em> one or more actions are taken
+				</dd>
+				<dt class="tr-protocol">Protocol</dt>
+				<dd>A collection of rules which implement a single, continuious plan of care</dd>
+			</dl>
+		</fieldset>
+	</xsl:template>
+	<xsl:template name="styles">
+		<style>
+			<![CDATA[
 					.tr-logic {
 						background-color: #CCC;
 					}
@@ -70,10 +82,10 @@
 						background-color: #CCF;
 					}
 					.tr-rule { 
-						background-color: #CFC;
+						background-color: #FFC;
 					}
 					.tr-model {
-						background-color: #FFC;
+						background-color: #CFF;
 					}
 					.tr-protocol {
 						background-color: #CFC;
@@ -87,8 +99,21 @@
 						display: inline;
 						overflow-wrap: anywhere;
 					}
+					dt {
+						font-weight: bold;
+						padding: 0.1em 0.25em;
+					}
+					
 					]]>
-				</style>
+		</style>
+	</xsl:template>
+	<xsl:template match="/c:CdssLibraryCollection">
+		<html>
+			<head>
+				<title>
+					CDSS Library (Complete)
+				</title>
+				<xsl:call-template name="styles" />
 			</head>
 			<body>
 				<h1>CDSS Library Collection</h1>
@@ -101,6 +126,10 @@
 					</tr>
 					<xsl:apply-templates select="c:library" mode="summary" />
 				</table>
+
+				<xsl:call-template name="legend" />
+				<hr/>
+				
 				<xsl:apply-templates select="c:library" mode="detail" />
 			</body>
 		</html>
@@ -172,30 +201,7 @@
 					<xsl:value-of select="@name"/>
 				</title>
 				<meta name="id" content="{@id}"/>
-				<style>
-					<![CDATA[
-					.tr-logic {
-						background-color: #CCC;
-					}
-					.tr-fact {
-						background-color: #CCF;
-					}
-					.tr-rule { 
-						background-color: #CFC;
-					}
-					.tr-model {
-						background-color: #FFC;
-					}
-					.tr-protocol {
-						background-color: #CFC;
-					}
-					em.cd-keyword {
-						margin-right: 1em;
-						color: #00F;
-						font-weight: bold
-					}
-					]]>
-				</style>
+				<xsl:call-template name="styles" />
 			</head>
 			<body>
 				<h1>
@@ -234,6 +240,9 @@
 					<h3>Data</h3>
 					<xsl:apply-templates select="c:data" />
 				</xsl:if>
+
+				<xsl:call-template name="legend" />
+
 			</body>
 		</html>
 
@@ -395,6 +404,14 @@
 						<xsl:value-of select="c:meta/c:documentation/text()"/>
 					</p>
 				</xsl:if>
+				<xsl:if test="c:scopes/c:add">
+					<p>
+						<strong>Applicable Care Pathways/Visit Types</strong>
+					</p>
+					<ul>
+						<xsl:apply-templates select="c:scopes/*" mode="visit" />
+					</ul>
+				</xsl:if>
 				<strong>When:</strong>
 				<xsl:apply-templates select="c:when" />
 				<strong>Then:</strong>
@@ -403,8 +420,22 @@
 		</tr>
 	</xsl:template>
 
+	<xsl:template match="c:add" mode="visit">
+		<li>
+			<xsl:choose>
+				<xsl:when test="@id = 'org.santedb.emr.patient.registration'">Patient Registration</xsl:when>
+				<xsl:when test="@id = 'org.santedb.emr.visit.anc'">ANC Visit</xsl:when>
+				<xsl:when test="@id = 'org.santedb.emr.act.visit.general'">General/Primary Care</xsl:when>
+				<xsl:when test="@id = 'org.santedb.ims.pediatric.routineVacc'">Routine Vaccination</xsl:when>
+				<xsl:when test="@id = 'org.santedb.emr.act.registration.birth'">Birth Registration</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="@id"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</li>
+	</xsl:template>
 	<xsl:template match="c:model" mode="define">
-		<tr>
+		<tr class="tr-model">
 			<td>
 				<xsl:if test="@id">
 					<a name="{f:StripSpace(@id)}">
@@ -427,9 +458,9 @@
 					</p>
 				</xsl:if>
 				<xsl:if test="c:json">
-				<pre>
-					<xsl:value-of select="c:json/text()"/>
-				</pre>
+					<pre>
+						<xsl:value-of select="c:json/text()"/>
+					</pre>
 				</xsl:if>
 				<xsl:if test="@extern">
 					<strong>External Template: </strong>
