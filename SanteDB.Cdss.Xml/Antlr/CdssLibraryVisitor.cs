@@ -284,7 +284,7 @@ namespace SanteDB.Cdss.Xml.Antlr
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(m_currentObject)));
             }
-            this.m_currentObject.Peek().Metadata = new CdssObjectMetadata();
+            this.m_currentObject.Peek().Metadata = this.m_currentObject.Peek().Metadata ?? new CdssObjectMetadata();
             return base.VisitMetadata_statement(context);
         }
 
@@ -295,6 +295,7 @@ namespace SanteDB.Cdss.Xml.Antlr
                 throw new InvalidOperationException(String.Format(ErrorMessages.DEPENDENT_PROPERTY_NULL, nameof(m_currentObject)));
             }
 
+            
             var documentationText = context.GetToken(CdssLibraryLexer.DOCUMENTATION, 0);
 
             if (String.IsNullOrEmpty(this.m_currentObject.Peek().Metadata.Documentation))
@@ -361,7 +362,10 @@ namespace SanteDB.Cdss.Xml.Antlr
 
             }
 
-            return base.VisitData_block(context);
+            this.m_currentObject.Push(dataBlock);
+            var retVal = base.VisitData_block(context);
+            this.m_currentObject.Pop();
+            return retVal;
         }
 
         public override CdssLibraryDefinition VisitHaving_context([NotNull] CdssLibraryParser.Having_contextContext context)
