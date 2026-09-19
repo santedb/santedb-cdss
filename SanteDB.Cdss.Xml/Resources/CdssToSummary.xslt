@@ -178,7 +178,7 @@
 			</ul>
 		</xsl:if>
 		<xsl:if test="c:logic">
-			<h3>Definitions</h3>
+			<h3>Logic</h3>
 			<table border="1">
 				<tr>
 					<th>Id</th>
@@ -225,7 +225,7 @@
 					</ul>
 				</xsl:if>
 				<xsl:if test="c:logic">
-					<h3>Definitions</h3>
+					<h3>Logic</h3>
 					<table border="1">
 						<tr>
 							<th>Id</th>

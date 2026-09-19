@@ -211,7 +211,7 @@ namespace SanteDB.Cdss.Xml.Ami
             }
 
             // HACK: Download all 
-            var format = RestOperationContext.Current.IncomingRequest.QueryString["_format"];
+            var format = RestOperationContext.Current.IncomingRequest.QueryString["_format"] ?? String.Empty;
 
             if ("html".Equals(format) && uuid == Guid.Empty)
             {

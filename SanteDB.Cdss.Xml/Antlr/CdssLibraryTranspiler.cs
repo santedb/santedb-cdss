@@ -138,10 +138,12 @@ namespace SanteDB.Cdss.Xml.Antlr
                 cdssDecisionLogic.When.WhenComputation.EmitCdssText(writer, indentation + 2);
                 writer.WriteLine();
             }
-            cdssDecisionLogic.Metadata?.EmitMetadata(writer, indentation + 1);
 
             // Imports 
             cdssDecisionLogic.Definitions.OfType<CdssModelAssetDefinition>().Where(m => !String.IsNullOrEmpty(m.ExternalModel)).ForEach(m => writer.WriteLine("{0}\timport model \"{1}\" from <{2}>", indentationStr, m.Name, m.ExternalModel));
+
+            cdssDecisionLogic.Metadata?.EmitMetadata(writer, indentation + 1);
+
 
             writer.WriteLine("{0}\tas", indentationStr);
 
