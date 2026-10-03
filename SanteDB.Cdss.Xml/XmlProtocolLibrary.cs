@@ -297,7 +297,7 @@ namespace SanteDB.Cdss.Xml
                 // Retrieve clinician claims
                 context.SetValue("currentUserClinicalRole", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaUserRoleClaim).Select(o => o.Value)));
                 context.SetValue("currentUserOrganization", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaOrganizationNameClaim).Select(o => o.Value)));
-                context.SetValue("currentUserFacility", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaFacilityClaim).Select(o => o.Value)));
+                context.SetValue("currentUserFacility", String.Join(",", icp.FindAll(SanteDBClaimTypes.XspaOrganizationIdClaim).Select(o => o.Value)));
             }
         }
 
